@@ -1,0 +1,174 @@
+{
+  "report_title": "Property Rental Report",
+  "generated_at": "2026-07-02T09:30:00Z",
+  "property": {
+    "title": "Furnished 2-Room Apartment near Old Town",
+    "deal_type": "rent",
+    "property_type": "Apartment",
+    "layout": "2+kk",
+    "address": "Karlova 8",
+    "locality": "Staré Město",
+    "city": "Prague",
+    "postal_code": "110 00",
+    "country": "Czech Republic",
+    "floor_area": 58,
+    "rooms": 2,
+    "floor": "2nd",
+    "total_floors": 4,
+    "elevator": false,
+    "balcony": false,
+    "cellar": false,
+    "ownership_type": "Private landlord",
+    "energy_rating": "C",
+    "source": "Sreality",
+    "source_url": "https://example.com/listing/rent",
+    "first_seen_at": "2026-06-15",
+    "last_seen_at": "2026-07-01",
+    "days_on_market": 16,
+    "description": "Furnished 2-room apartment in the heart of Prague's Old Town, ideal for professionals or short-term relocation.",
+    "features": ["Furnished", "Fiber internet", "Washing machine"],
+    "images": []
+  },
+  "pricing": {
+    "currency": "CZK",
+    "list_price": 28000,
+    "price_per_sqm": 483
+  },
+  "valuation": {
+    "estimated_value": 26500,
+    "estimated_price_per_sqm": 457,
+    "confidence": 0.71,
+    "methodology": "Comparable active rental listings in the same locality, adjusted for furnishing and floor.",
+    "recommended_price_range": { "low": 25000, "mid": 26500, "high": 28500 },
+    "local_median_price": 27000,
+    "local_median_price_per_sqm": 466,
+    "sample_size": 5,
+    "why_this_estimate": [
+      "Locality: Staré Město commands a strong tourist/expat rental premium",
+      "Furnished units rent above unfurnished comparables",
+      "Floor area and layout match the closest comparables closely"
+    ]
+  },
+  "comparables": [
+    {
+      "label": "Subject property",
+      "locality": "Staré Město",
+      "layout": "2+kk",
+      "floor_area": 58,
+      "price": 28000,
+      "price_per_sqm": 483,
+      "is_subject": true
+    },
+    {
+      "label": "Local median",
+      "locality": "Staré Město",
+      "layout": "—",
+      "floor_area": 56,
+      "price": 27000,
+      "price_per_sqm": 466,
+      "is_median": true
+    },
+    {
+      "label": "Řetězová 4",
+      "locality": "Staré Město",
+      "layout": "2+kk",
+      "floor_area": 55,
+      "price": 26500,
+      "price_per_sqm": 482,
+      "similarity_score": 90,
+      "distance_km": 0.2,
+      "days_on_market": 9,
+      "source": "Sreality",
+      "source_url": "https://example.com/listing/r1"
+    },
+    {
+      "label": "Melantrichova 10",
+      "locality": "Staré Město",
+      "layout": "2+kk",
+      "floor_area": 60,
+      "price": 29500,
+      "price_per_sqm": 492,
+      "similarity_score": 84,
+      "distance_km": 0.3,
+      "days_on_market": 22,
+      "source": "Bezrealitky",
+      "source_url": "https://example.com/listing/r2"
+    },
+    {
+      "label": "Dlouhá 22",
+      "locality": "Staré Město",
+      "layout": "2+kk",
+      "floor_area": 54,
+      "price": 25000,
+      "price_per_sqm": 463,
+      "similarity_score": 79,
+      "distance_km": 0.5,
+      "days_on_market": 40,
+      "source": "Sreality",
+      "source_url": "https://example.com/listing/r3"
+    }
+  ],
+  "benchmarks": [
+    {
+      "name": "Deloitte Rent Index",
+      "benchmark_type": "rent_monthly",
+      "value_per_sqm": 470,
+      "source": "Deloitte Property Index Q2 2026"
+    }
+  ],
+  "rent_investment": null,
+  "location_facilities": {
+    "available": true,
+    "facilities": [
+      { "category": "Public transport", "count": 9, "nearest_distance_km": 0.15 },
+      { "category": "Groceries", "count": 3, "nearest_distance_km": 0.3 },
+      { "category": "Restaurants", "count": 34, "nearest_distance_km": 0.05 }
+    ],
+    "nearest_pois": [
+      { "name": "Staroměstská metro station", "category": "Transit", "distance_km": 0.2, "walking_time_min": 3 },
+      { "name": "Old Town Square", "category": "Landmark", "distance_km": 0.3, "walking_time_min": 4 }
+    ]
+  },
+  "vision_analysis": {
+    "available": true,
+    "summary": "Furnished interior in good condition with modern furnishings throughout.",
+    "overall_condition_score": 0.8,
+    "brightness": 0.7,
+    "photo_quality": 0.85,
+    "detected_features": ["Furnished living room", "Modern kitchen"],
+    "images": []
+  },
+  "risk": null,
+  "summary": {
+    "headline": "Competitively priced for a furnished Old Town rental",
+    "recommendation": "List at or slightly below the current asking price to minimize vacancy given strong seasonal demand.",
+    "action": "buy",
+    "strengths": [
+      "Prime Old Town location with high rental demand",
+      "Fully furnished, reducing tenant turnover friction",
+      "Below-median days-on-market for comparable units"
+    ],
+    "risks": [
+      "No elevator on a walk-up building",
+      "Ground-floor noise exposure from nearby restaurants"
+    ],
+    "next_steps": [
+      "Confirm furnishing inventory condition before signing",
+      "Verify energy performance certificate is current"
+    ]
+  },
+  "methodology": {
+    "valuation_date": "2026-07-01",
+    "data_freshness_note": "Comparable listings refreshed within the last 7 days"
+  },
+  "branding": {
+    "name": "Estima Realty",
+    "agent_name": "Petra Novotná",
+    "agent_email": "petra.novotna@estima-realty.example",
+    "agent_phone": "+420 601 234 567"
+  },
+  "options": {
+    "template": "default",
+    "language": "en"
+  }
+}

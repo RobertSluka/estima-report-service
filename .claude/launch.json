@@ -1,0 +1,42 @@
+{
+  "version": "0.0.1",
+  "autoPort": false,
+  "configurations": [
+    {
+      "name": "estima-report-service",
+      "runtimeExecutable": "sh",
+      "runtimeArgs": ["-c", ".venv/bin/uvicorn app.main:app --host 127.0.0.1 --port 8090"],
+      "port": 8090
+    },
+    {
+      "name": "estima-sk-dev",
+      "runtimeExecutable": "sh",
+      "runtimeArgs": ["-c", "cd /Users/robertsluka/Desktop/estima-sk && NEXT_DIST_DIR=.next-3014 npm run dev -- -p 3014"],
+      "port": 3014
+    },
+    {
+      "name": "byteval-dev",
+      "runtimeExecutable": "sh",
+      "runtimeArgs": ["-c", "cd /Users/robertsluka/Desktop/estima-frontend/byteval && npm run dev -- -p 3006"],
+      "port": 3006
+    },
+    {
+      "name": "estima-sk-dev-b",
+      "runtimeExecutable": "sh",
+      "runtimeArgs": ["-c", "cd /Users/robertsluka/Desktop/estima-sk && npm run dev -- -p 3012"],
+      "port": 3012
+    },
+    {
+      "name": "estima-sk-dev-c",
+      "runtimeExecutable": "sh",
+      "runtimeArgs": ["-c", "cd /Users/robertsluka/Desktop/estima-sk && npm run dev -- -p 3016"],
+      "port": 3016
+    },
+    {
+      "name": "estima-sk-dev-d",
+      "runtimeExecutable": "sh",
+      "runtimeArgs": ["-c", "cd /Users/robertsluka/Desktop/estima-sk && npm run dev -- -p 3018"],
+      "port": 3018
+    }
+  ]
+}

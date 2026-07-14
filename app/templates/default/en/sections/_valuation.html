@@ -1,0 +1,57 @@
+{# ----------------------------------------------------------- 3. Market Valuation #}
+<section class="section">
+    <div class="section-title"><span class="num">3</span><h2>Market Valuation</h2></div>
+
+    <div class="stat-cards">
+        <div class="stat-card">
+            <div class="label">Estimated fair value</div>
+            <div class="value accent">{{ valuation.estimated_value | money(currency) }}</div>
+        </div>
+        {% if valuation.recommended_price_range %}
+        {% set r = valuation.recommended_price_range %}
+        <div class="stat-card">
+            <div class="label">Fair value range</div>
+            <div class="value" style="font-size:12pt;">{{ r.low | money(currency) }} – {{ r.high | money(currency) }}</div>
+        </div>
+        {% endif %}
+        {% if valuation.local_median_price_per_sqm %}
+        <div class="stat-card">
+            <div class="label">Local median price / m²</div>
+            <div class="value">{{ valuation.local_median_price_per_sqm | per_sqm(currency) }}</div>
+        </div>
+        {% endif %}
+        {% if valuation.sample_size %}
+        <div class="stat-card">
+            <div class="label">Comparables used</div>
+            <div class="value">{{ valuation.sample_size }}</div>
+        </div>
+        {% endif %}
+    </div>
+
+    {% if pricing.list_price and valuation.estimated_value %}
+        {% set delta = valuation.estimated_value - pricing.list_price %}
+        {% set delta_pct = (delta / pricing.list_price * 100) %}
+        <div class="callout">
+            The estimated fair value is
+            <strong>{{ delta | abs | money(currency) }}
+            ({{ '%+.1f' | format(delta_pct) }}%)</strong>
+            {{ "above" if delta > 0 else "below" }} the current asking price.
+            {% if valuation.local_median_price %}
+                The local median for comparable listings is {{ valuation.local_median_price | money(currency) }}.
+            {% endif %}
+        </div>
+    {% endif %}
+
+    {% if valuation.methodology %}
+        <p class="small muted">{{ valuation.methodology }}</p>
+    {% endif %}
+
+    {% if valuation.why_this_estimate %}
+    <div class="callout" style="margin-top:10px;">
+        <div class="k small strong" style="margin-bottom:6px;">Why this estimate?</div>
+        <ul class="pill-list">
+            {% for w in valuation.why_this_estimate %}<li>{{ w }}</li>{% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+</section>

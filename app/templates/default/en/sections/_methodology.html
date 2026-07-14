@@ -1,0 +1,42 @@
+{# --------------------------------------------------------- 11. Methodology & Disclaimer #}
+<section class="section">
+    <div class="section-title"><span class="num">12</span><h2>Methodology &amp; Disclaimer</h2></div>
+
+    <p class="small muted">
+        This report combines listing data, comparable listings, the Estima valuation model,
+        external market benchmarks (where available), automated photo-quality measurements of
+        the listing gallery (where available), and location/points-of-interest data (where
+        available). Photo-quality metrics describe the photographs only — they are not an
+        assessment of the property's condition. Each section is shown only when supporting data
+        was available at generation time; sections without data are omitted rather than
+        displaying placeholder zeros.
+    </p>
+
+    <div class="spec-grid" style="margin-top:10px;">
+        {% set meta = [
+            ("Valuation date", methodology.valuation_date if methodology else None),
+            ("Model version", methodology.model_version if methodology else None),
+            ("Model run ID", methodology.model_run_id if methodology else None),
+            ("Comparables used", valuation.sample_size),
+            ("Data freshness", methodology.data_freshness_note if methodology else None),
+        ] %}
+        {% for k, v in meta %}
+            {% if v %}<div class="spec"><div class="k">{{ k }}</div><div class="v">{{ v }}</div></div>{% endif %}
+        {% endfor %}
+    </div>
+
+    {% if not vision_analysis.available %}
+    <p class="small muted" style="margin-top:8px;">Photo-quality analysis was not available for this report.</p>
+    {% endif %}
+    {% if not location_facilities.available %}
+    <p class="small muted">Location and nearby-facility data was not available for this report.</p>
+    {% endif %}
+
+    <p class="disclaimer">
+        This report is generated from an automated property evaluation and is provided for
+        informational purposes only. It does not constitute a certified appraisal, financial
+        advice, or an offer. Asking prices reflect current listing prices and may differ from
+        eventually realized transaction prices. Figures are estimates based on the data available
+        at the time of generation ({{ generated_at.strftime("%d %B %Y") }}).
+    </p>
+</section>

@@ -1,0 +1,172 @@
+{
+  "report_title": "Property Valuation Report",
+  "generated_at": "2026-07-10T10:00:00Z",
+  "property": {
+    "title": "3-Room Apartment near Štrkovec Lake",
+    "deal_type": "sale",
+    "property_type": "Apartment",
+    "layout": "3+1",
+    "address": "Herlianska 12",
+    "locality": "Ružinov",
+    "city": "Bratislava",
+    "postal_code": "821 02",
+    "country": "Slovakia",
+    "latitude": 48.1622,
+    "longitude": 17.1687,
+    "floor_area": 72,
+    "rooms": 3,
+    "bedrooms": 2,
+    "bathrooms": 1,
+    "floor": "5th",
+    "total_floors": 8,
+    "elevator": true,
+    "balcony": true,
+    "cellar": true,
+    "parking": "Public parking",
+    "ownership_type": "Personal ownership",
+    "building_type": "Panel, insulated",
+    "construction_year": 1978,
+    "reconstruction_year": 2019,
+    "energy_rating": "C",
+    "condition": "Good",
+    "source": "Nehnutelnosti.sk",
+    "source_url": "https://example.com/listing/sk-subject",
+    "days_on_market": 34,
+    "description": "Renovated 3-room apartment in a sought-after part of Ružinov, a short walk from Štrkovec lake. Insulated panel building with a new elevator, apartment renovated in 2019 with a walk-through loggia and fitted kitchen.",
+    "features": ["Loggia", "Fitted kitchen", "New elevator", "Cellar storage"],
+    "images": []
+  },
+  "pricing": {
+    "currency": "EUR",
+    "list_price": 268000,
+    "price_per_sqm": 3722
+  },
+  "valuation": {
+    "estimated_value": 275000,
+    "estimated_price_per_sqm": 3819,
+    "confidence": 0.81,
+    "methodology": "Comparable listings adjusted for condition, floor, and building type.",
+    "recommended_price_range": { "low": 262000, "mid": 274000, "high": 286000 },
+    "local_median_price": 271000,
+    "local_median_price_per_sqm": 3650,
+    "sample_size": 5,
+    "why_this_estimate": [
+      "Ružinov is a liquid, high-demand Bratislava district",
+      "Asking price per m² sits slightly above the local median",
+      "2019 renovation supports a condition premium over panel-era stock",
+      "Market prices in the Bratislava Region grew 10.3% year-on-year (NBS, 1Q 2026)"
+    ]
+  },
+  "comparables": [
+    {
+      "label": "Subject property",
+      "locality": "Ružinov",
+      "layout": "3+1",
+      "floor_area": 72,
+      "price": 268000,
+      "price_per_sqm": 3722,
+      "is_subject": true
+    },
+    {
+      "label": "Local median",
+      "locality": "Ružinov",
+      "layout": "—",
+      "floor_area": 70,
+      "price": 271000,
+      "price_per_sqm": 3650,
+      "is_median": true
+    },
+    {
+      "label": "Mierová 40",
+      "locality": "Ružinov",
+      "layout": "3+1",
+      "floor_area": 74,
+      "price": 279000,
+      "price_per_sqm": 3770,
+      "similarity_score": 90,
+      "distance_km": 0.8,
+      "days_on_market": 27,
+      "source": "Nehnutelnosti.sk",
+      "source_url": "https://example.com/listing/sk-1"
+    },
+    {
+      "label": "Ondavská 3",
+      "locality": "Ružinov",
+      "layout": "3+1",
+      "floor_area": 68,
+      "price": 252000,
+      "price_per_sqm": 3706,
+      "similarity_score": 84,
+      "distance_km": 1.2,
+      "days_on_market": 51,
+      "source": "Reality.sk",
+      "source_url": "https://example.com/listing/sk-2"
+    }
+  ],
+  "benchmarks": [
+    {
+      "name": "NBS Bratislava Region average",
+      "benchmark_type": "realized_sale",
+      "value_per_sqm": 3845,
+      "source": "NBS residential property prices, 1Q 2026"
+    },
+    {
+      "name": "Estima local listing median",
+      "benchmark_type": "listing_asking",
+      "value_per_sqm": 3650,
+      "source": "Estima listing index"
+    }
+  ],
+  "market_statistics": {
+    "region": "Bratislava Region",
+    "country": "Slovakia",
+    "scope_note": "All residential, average transaction prices",
+    "source": "National Bank of Slovakia (NBS), residential property price statistics, 1Q 2026",
+    "period": "1Q 2026",
+    "average_price_per_sqm": 3845.0,
+    "yoy_change": 10.3,
+    "series": [
+      { "period": "1Q 2024", "value": 3087.3 },
+      { "period": "2Q 2024", "value": 3127.0 },
+      { "period": "3Q 2024", "value": 3228.7 },
+      { "period": "4Q 2024", "value": 3316.4 },
+      { "period": "1Q 2025", "value": 3486.1 },
+      { "period": "2Q 2025", "value": 3548.7 },
+      { "period": "3Q 2025", "value": 3627.7 },
+      { "period": "4Q 2025", "value": 3730.7 },
+      { "period": "1Q 2026", "value": 3845.0 }
+    ],
+    "distribution": {
+      "scope": "3-room flats, Ružinov",
+      "min_price_per_sqm": 3050,
+      "p25_price_per_sqm": 3450,
+      "median_price_per_sqm": 3650,
+      "p75_price_per_sqm": 3980,
+      "max_price_per_sqm": 4450,
+      "sample_size": 42
+    }
+  },
+  "summary": {
+    "headline": "Fairly priced in a district outpacing the national market",
+    "recommendation": "The asking price sits between the local median and the NBS regional average. Given 10%+ regional year-on-year growth and the 2019 renovation, an offer near asking is defensible; negotiate using the panel-building discount.",
+    "action": "negotiate",
+    "strengths": [
+      "Below the NBS Bratislava Region average price per m²",
+      "Renovated in 2019, move-in ready",
+      "Ružinov demand supported by strong regional price growth"
+    ],
+    "risks": [
+      "Panel construction limits the ceiling price",
+      "Energy rating C means higher running costs than new builds"
+    ]
+  },
+  "methodology": {
+    "valuation_date": "2026-07-10",
+    "model_version": "estima-sk-comparables-2026.07",
+    "data_freshness_note": "NBS statistics as of 1Q 2026; comparable listings refreshed within the last 7 days"
+  },
+  "options": {
+    "template": "default",
+    "language": "en"
+  }
+}

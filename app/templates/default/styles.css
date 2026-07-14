@@ -1,0 +1,358 @@
+/* Default Estima report stylesheet (print-oriented, WeasyPrint compatible).
+   Colors are driven by CSS variables set inline in report.html so agency
+   branding can override them without editing this file. */
+
+@page {
+    size: A4;
+    margin: 22mm 16mm 20mm 16mm;
+
+    @bottom-center {
+        content: "Page " counter(page) " of " counter(pages);
+        font-size: 8pt;
+        color: #9aa3af;
+    }
+    @bottom-left {
+        content: var(--footer-text);
+        font-size: 8pt;
+        color: #9aa3af;
+    }
+}
+
+/* Cover page has no header/footer chrome. */
+@page cover {
+    margin: 0;
+    @bottom-center { content: none; }
+    @bottom-left { content: none; }
+}
+
+* { box-sizing: border-box; }
+
+html {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 10.5pt;
+    color: var(--ink);
+    line-height: 1.5;
+}
+
+body { margin: 0; padding: 0; }
+
+h1, h2, h3, h4 { color: var(--ink); margin: 0; font-weight: 600; }
+
+a { color: var(--primary); text-decoration: none; }
+
+.muted { color: var(--muted); }
+.small { font-size: 8.5pt; }
+.strong { font-weight: 600; }
+.right { text-align: right; }
+.center { text-align: center; }
+
+/* ---------- Cover ---------- */
+.cover {
+    page: cover;
+    height: 297mm;
+    padding: 32mm 22mm 24mm 22mm;
+    background: linear-gradient(160deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    page-break-after: always;
+}
+.cover .brand-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: auto;
+}
+.cover .brand-name { font-size: 13pt; font-weight: 600; letter-spacing: 0.04em; }
+.cover .brand-logo { max-height: 46px; max-width: 200px; }
+.cover .eyebrow {
+    text-transform: uppercase;
+    letter-spacing: 0.22em;
+    font-size: 9pt;
+    opacity: 0.85;
+    margin-bottom: 10px;
+}
+.cover h1 { color: #fff; font-size: 30pt; line-height: 1.12; font-weight: 700; }
+.cover .subtitle { font-size: 13pt; opacity: 0.92; margin-top: 12px; }
+.cover .cover-meta {
+    margin-top: auto;
+    border-top: 1px solid rgba(255, 255, 255, 0.35);
+    padding-top: 16px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 9.5pt;
+    opacity: 0.95;
+}
+.cover .headline-value {
+    margin-top: 28px;
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    border-radius: 10px;
+    padding: 18px 22px;
+    display: inline-block;
+}
+.cover .headline-value .label {
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    font-size: 8pt;
+    opacity: 0.85;
+}
+.cover .headline-value .value { font-size: 24pt; font-weight: 700; margin-top: 4px; }
+
+/* ---------- Sections ---------- */
+.section { page-break-inside: avoid; margin-bottom: 20px; }
+.section-lead { page-break-before: always; }
+
+.section-title {
+    display: flex;
+    align-items: center;
+    border-bottom: 2px solid var(--primary);
+    padding-bottom: 6px;
+    margin-bottom: 14px;
+}
+.section-title .num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    /* margin instead of flex `gap`: WeasyPrint does not apply gap here. */
+    margin-right: 10px;
+    flex: 0 0 auto;
+    border-radius: 50%;
+    background: var(--primary);
+    color: #fff;
+    font-size: 9pt;
+    font-weight: 700;
+}
+.section-title h2 { font-size: 14pt; }
+
+.lead { font-size: 10.5pt; color: var(--muted); margin-bottom: 12px; }
+
+/* ---------- Cards / grids ---------- */
+.grid { display: flex; flex-wrap: wrap; gap: 10px; }
+.grid > .col { flex: 1 1 0; min-width: 0; }
+
+.stat-cards { display: flex; gap: 10px; flex-wrap: wrap; }
+.stat-card {
+    flex: 1 1 0;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+}
+.stat-card .label {
+    font-size: 8pt;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+}
+.stat-card .value { font-size: 15pt; font-weight: 700; margin-top: 3px; }
+.stat-card .value.accent { color: var(--primary); }
+
+/* ---------- Definition / spec list ---------- */
+.spec-grid {
+    display: flex;
+    flex-wrap: wrap;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+}
+.spec-grid .spec {
+    flex: 1 1 33%;
+    min-width: 33%;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    border-right: 1px solid var(--border);
+}
+.spec .k { font-size: 8pt; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+.spec .v { font-size: 10.5pt; font-weight: 600; margin-top: 2px; }
+
+/* ---------- Tables ---------- */
+table { width: 100%; border-collapse: collapse; font-size: 9.5pt; }
+thead th {
+    text-align: left;
+    background: var(--surface);
+    color: var(--muted);
+    font-size: 8pt;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--border);
+}
+tbody td { padding: 8px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
+tbody tr:nth-child(even) td { background: var(--surface-soft); }
+td.num, th.num { text-align: right; }
+
+.tag {
+    display: inline-block;
+    font-size: 7.5pt;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 999px;
+    background: var(--surface);
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+.tag.active { background: #e6f4ea; color: #1e7d38; }
+.tag.sold { background: #fdecea; color: #b3261e; }
+
+tr.row-subject td { background: var(--surface) !important; font-weight: 600; }
+tr.row-median td { background: var(--surface-soft) !important; font-style: italic; }
+
+/* ---------- Verdict / action badges ---------- */
+.verdict-badge, .action-badge {
+    display: inline-block;
+    font-size: 9pt;
+    font-weight: 700;
+    padding: 5px 12px;
+    border-radius: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+.verdict-badge.underpriced { background: #e6f4ea; color: #1e7d38; }
+.verdict-badge.overpriced { background: #fdecea; color: #b3261e; }
+.verdict-badge.fairly-priced { background: #eef2f7; color: var(--primary); }
+.action-badge {
+    background: rgba(255, 255, 255, 0.18);
+    color: #fff;
+    margin-bottom: 8px;
+}
+
+/* ---------- Price range ---------- */
+.range-wrap { margin: 8px 0 4px; }
+.range-bar {
+    position: relative;
+    height: 12px;
+    border-radius: 999px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+}
+.range-fill {
+    position: absolute;
+    top: 0; bottom: 0;
+    background: var(--primary);
+    opacity: 0.25;
+    border-radius: 999px;
+}
+.range-mid {
+    position: absolute;
+    top: -4px;
+    width: 4px;
+    height: 20px;
+    background: var(--primary);
+    border-radius: 2px;
+    transform: translateX(-2px);
+}
+.range-labels { display: flex; justify-content: space-between; margin-top: 8px; }
+.range-labels .rl { text-align: center; }
+.range-labels .rl .k { font-size: 8pt; color: var(--muted); text-transform: uppercase; }
+.range-labels .rl .v { font-weight: 700; font-size: 12pt; }
+.range-labels .rl.mid .v { color: var(--primary); }
+
+/* ---------- Progress bars ---------- */
+.bar-row { display: flex; align-items: center; gap: 10px; margin: 7px 0; }
+.bar-row .bl { flex: 0 0 130px; font-size: 9.5pt; }
+.bar-track {
+    flex: 1 1 auto;
+    height: 9px;
+    background: var(--surface);
+    border-radius: 999px;
+    overflow: hidden;
+}
+.bar-fill { height: 100%; background: var(--primary); border-radius: 999px; }
+.bar-row .bv { flex: 0 0 42px; text-align: right; font-weight: 600; font-size: 9pt; }
+
+/* ---------- Market statistics chart ---------- */
+/* The subject marker is deliberately a fixed red — it must stand out from any
+   agency primary color, so it does not follow the branding variables. */
+.chart-wrap { margin: 14px 0 4px; }
+.chart-wrap svg { width: 100%; height: auto; }
+.chart-area { fill: var(--primary); opacity: 0.12; }
+.chart-line { fill: none; stroke: var(--primary); stroke-width: 2; }
+.chart-grid { stroke: var(--border); stroke-width: 1; }
+.chart-tick-label { fill: var(--muted); font-size: 9px; }
+.chart-market-dot { fill: var(--primary); }
+.chart-subject-dot { fill: #b3261e; stroke: #fff; stroke-width: 1.5; }
+.chart-subject-line { stroke: #b3261e; stroke-width: 1; stroke-dasharray: 4 3; opacity: 0.6; }
+.chart-subject-label { fill: #b3261e; font-size: 10px; font-weight: 600; }
+.chart-legend {
+    display: flex;
+    align-items: center;
+    margin-top: 6px;
+    font-size: 8.5pt;
+    color: var(--muted);
+}
+/* margin instead of flex `gap`: WeasyPrint does not apply gap here. */
+.chart-legend > span { margin-right: 16px; }
+.chart-legend .key {
+    display: inline-block;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    margin-right: 5px;
+    vertical-align: -1px;
+}
+.chart-legend .key.subject { background: #b3261e; }
+.chart-legend .key.market { background: var(--primary); }
+
+.dist-wrap { margin-top: 14px; }
+.range-subject-dot {
+    position: absolute;
+    top: 50%;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #b3261e;
+    border: 2px solid #fff;
+    box-shadow: 0 0 0 1px #b3261e;
+    transform: translate(-6px, -50%);
+}
+
+/* ---------- Callouts / lists ---------- */
+.callout {
+    border-left: 3px solid var(--primary);
+    background: var(--surface-soft);
+    padding: 12px 14px;
+    border-radius: 0 8px 8px 0;
+    margin: 10px 0;
+}
+.pill-list { list-style: none; padding: 0; margin: 6px 0; }
+.pill-list li { padding: 5px 0 5px 20px; position: relative; }
+.pill-list li::before {
+    content: "";
+    position: absolute;
+    left: 2px; top: 9px;
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--primary);
+}
+.pill-list.risk li::before { background: #e0902a; }
+
+.two-col { display: flex; gap: 18px; }
+.two-col > div { flex: 1 1 0; }
+
+.recommendation-box {
+    background: linear-gradient(160deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: #fff;
+    border-radius: 10px;
+    padding: 20px 22px;
+}
+.recommendation-box h3 { color: #fff; font-size: 13pt; margin-bottom: 6px; }
+.recommendation-box p { margin: 0; opacity: 0.95; }
+
+.agent-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin-top: 14px;
+}
+.agent-card .logo { max-height: 40px; max-width: 120px; }
+.agent-card .who { font-weight: 600; }
+
+.disclaimer { color: var(--muted); font-size: 8pt; margin-top: 18px; }
+img.photo { width: 100%; height: auto; border-radius: 6px; border: 1px solid var(--border); }

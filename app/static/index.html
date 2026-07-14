@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Estima Report Service</title>
+<style>
+  :root {
+    --primary: #1f4e5f;
+    --primary-dark: #12333d;
+    --ink: #1b2733;
+    --muted: #6b7684;
+    --border: #e3e8ee;
+    --surface: #f4f6f9;
+    --bg: #eef1f5;
+    --danger: #b3261e;
+    --ok: #1e7d38;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    color: var(--ink);
+    background: var(--bg);
+    line-height: 1.5;
+  }
+  header {
+    background: linear-gradient(160deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: #fff;
+    padding: 18px 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  header .brand { font-size: 18px; font-weight: 700; letter-spacing: .04em; }
+  header .brand span { opacity: .8; font-weight: 400; font-size: 13px; margin-left: 10px; }
+  header a { color: #fff; opacity: .85; font-size: 13px; text-decoration: none; }
+  header a:hover { opacity: 1; }
+
+  .wrap { max-width: 1200px; margin: 22px auto; padding: 0 20px; }
+  .grid { display: grid; grid-template-columns: 420px 1fr; gap: 20px; align-items: start; }
+  @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
+
+  .card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px;
+    box-shadow: 0 1px 2px rgba(16,33,45,.04);
+  }
+  .card h2 { margin: 0 0 12px; font-size: 15px; }
+  .hint { color: var(--muted); font-size: 12px; margin: 0 0 12px; }
+
+  textarea {
+    width: 100%;
+    height: 320px;
+    resize: vertical;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 12px;
+    line-height: 1.45;
+    color: var(--ink);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    background: var(--surface);
+  }
+  textarea:focus { outline: 2px solid var(--primary); outline-offset: -1px; }
+
+  .row { display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
+  button {
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    border: 1px solid var(--border);
+    background: #fff;
+    color: var(--ink);
+    padding: 9px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+  button:hover { border-color: var(--muted); }
+  button.primary { background: var(--primary); border-color: var(--primary); color: #fff; }
+  button.primary:hover { background: var(--primary-dark); }
+  button:disabled { opacity: .55; cursor: default; }
+
+  .status { font-size: 12px; margin-top: 10px; min-height: 16px; }
+  .status.err { color: var(--danger); }
+  .status.ok { color: var(--ok); }
+
+  .preview-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; gap: 10px; flex-wrap: wrap; }
+  .preview-head .links { display: flex; gap: 8px; }
+  .preview-head a.btn {
+    text-decoration: none; font-size: 13px; font-weight: 600;
+    padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border); color: var(--ink);
+  }
+  .preview-head a.btn.primary { background: var(--primary); border-color: var(--primary); color: #fff; }
+  iframe {
+    width: 100%;
+    height: 760px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: #fff;
+  }
+  .empty {
+    display: flex; align-items: center; justify-content: center;
+    height: 760px; color: var(--muted); font-size: 14px;
+    border: 1px dashed var(--border); border-radius: 8px; text-align: center; padding: 20px;
+  }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .05em; padding: 8px; border-bottom: 1px solid var(--border); }
+  td { padding: 8px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  td a { color: var(--primary); text-decoration: none; font-weight: 600; }
+  td a:hover { text-decoration: underline; }
+  .muted { color: var(--muted); }
+  .mono { font-family: ui-monospace, Menlo, monospace; font-size: 11px; }
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">ESTIMA <span>Report Service</span></div>
+  <div><a href="/docs" target="_blank">API docs ↗</a></div>
+</header>
+
+<div class="wrap">
+  <div class="grid">
+    <!-- Left: input -->
+    <div class="card">
+      <h2>Evaluation payload</h2>
+      <p class="hint">Paste a completed evaluation JSON, or load the bundled demo.</p>
+      <textarea id="payload" spellcheck="false" placeholder='{ "property": { … }, "pricing": { … }, … }'></textarea>
+      <div class="row">
+        <button class="primary" id="generate">Generate report</button>
+        <button id="loadSample">Load sample</button>
+        <button id="clear">Clear</button>
+      </div>
+      <div class="status" id="status"></div>
+    </div>
+
+    <!-- Right: preview -->
+    <div class="card">
+      <div class="preview-head">
+        <h2 style="margin:0;">Preview</h2>
+        <div class="links" id="previewLinks"></div>
+      </div>
+      <div id="previewArea">
+        <div class="empty">Generate a report to see the HTML preview here.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom: history -->
+  <div class="card" style="margin-top:20px;">
+    <div class="preview-head">
+      <h2 style="margin:0;">Generated reports</h2>
+      <button id="refresh">Refresh</button>
+    </div>
+    <div id="reportsList"><p class="muted" style="font-size:13px;">Loading…</p></div>
+  </div>
+</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const statusEl = $("status");
+
+function setStatus(msg, kind) {
+  statusEl.textContent = msg || "";
+  statusEl.className = "status" + (kind ? " " + kind : "");
+}
+
+async function loadSample() {
+  setStatus("Loading sample…");
+  try {
+    const res = await fetch("/sample");
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    const data = await res.json();
+    $("payload").value = JSON.stringify(data, null, 2);
+    setStatus("Sample loaded.", "ok");
+  } catch (e) {
+    setStatus("Could not load sample: " + e.message, "err");
+  }
+}
+
+function showPreview(report) {
+  $("previewArea").innerHTML =
+    '<iframe src="' + report.html_url + '" title="Report preview"></iframe>';
+  $("previewLinks").innerHTML =
+    '<a class="btn" href="' + report.html_url + '" target="_blank">Open HTML ↗</a>' +
+    '<a class="btn primary" href="' + report.pdf_url + '" target="_blank">Download PDF ↓</a>';
+}
+
+async function generate() {
+  const raw = $("payload").value.trim();
+  if (!raw) { setStatus("Paste a payload or load the sample first.", "err"); return; }
+  let parsed;
+  try { parsed = JSON.parse(raw); }
+  catch (e) { setStatus("Invalid JSON: " + e.message, "err"); return; }
+
+  const btn = $("generate");
+  btn.disabled = true;
+  setStatus("Generating report…");
+  try {
+    const res = await fetch("/reports/generate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(parsed),
+    });
+    const body = await res.json();
+    if (!res.ok) throw new Error(body.detail || ("HTTP " + res.status));
+    setStatus("Report generated: " + body.report_id, "ok");
+    showPreview(body);
+    loadReports();
+  } catch (e) {
+    setStatus("Generation failed: " + e.message, "err");
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+async function loadReports() {
+  try {
+    const res = await fetch("/reports");
+    const items = await res.json();
+    const el = $("reportsList");
+    if (!items.length) {
+      el.innerHTML = '<p class="muted" style="font-size:13px;">No reports yet.</p>';
+      return;
+    }
+    let rows = items.map((r) => (
+      "<tr>" +
+        "<td>" + (r.property_title ? escapeHtml(r.property_title) : "<span class='muted'>Untitled</span>") + "</td>" +
+        "<td class='mono muted'>" + r.report_id.slice(0, 12) + "…</td>" +
+        "<td class='muted'>" + r.template + " / " + r.language + "</td>" +
+        "<td class='muted'>" + new Date(r.created_at).toLocaleString() + "</td>" +
+        "<td><a href='" + r.html_url + "' target='_blank'>Preview</a></td>" +
+        "<td><a href='" + r.pdf_url + "' target='_blank'>PDF</a></td>" +
+      "</tr>"
+    )).join("");
+    el.innerHTML =
+      "<table><thead><tr>" +
+      "<th>Property</th><th>ID</th><th>Template</th><th>Created</th><th></th><th></th>" +
+      "</tr></thead><tbody>" + rows + "</tbody></table>";
+  } catch (e) {
+    $("reportsList").innerHTML =
+      "<p class='status err'>Could not load reports: " + e.message + "</p>";
+  }
+}
+
+function escapeHtml(s) {
+  return s.replace(/[&<>"']/g, (c) => (
+    { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]
+  ));
+}
+
+$("generate").addEventListener("click", generate);
+$("loadSample").addEventListener("click", loadSample);
+$("clear").addEventListener("click", () => { $("payload").value = ""; setStatus(""); });
+$("refresh").addEventListener("click", loadReports);
+
+loadReports();
+</script>
+</body>
+</html>

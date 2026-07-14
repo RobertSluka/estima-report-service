@@ -1,0 +1,95 @@
+{
+  "report_title": "Property Valuation Report",
+  "generated_at": "2026-07-02T09:30:00Z",
+  "property": {
+    "title": "2-Room Flat, Říčany",
+    "deal_type": "sale",
+    "property_type": "Apartment",
+    "layout": "2+kk",
+    "address": "Masarykova 12",
+    "locality": "Říčany",
+    "city": "Říčany",
+    "postal_code": "251 01",
+    "country": "Czech Republic",
+    "floor_area": 52,
+    "rooms": 2,
+    "floor": "1st",
+    "source": "Sreality",
+    "source_url": "https://example.com/listing/minimal",
+    "first_seen_at": "2026-06-20",
+    "last_seen_at": "2026-07-01",
+    "days_on_market": 11,
+    "features": [],
+    "images": []
+  },
+  "pricing": {
+    "currency": "CZK",
+    "list_price": 5200000,
+    "price_per_sqm": 100000
+  },
+  "valuation": {
+    "estimated_value": 5050000,
+    "estimated_price_per_sqm": 97115,
+    "confidence": 0.42,
+    "methodology": "Comparable sales, limited local sample.",
+    "sample_size": 2
+  },
+  "comparables": [
+    {
+      "label": "Subject property",
+      "locality": "Říčany",
+      "layout": "2+kk",
+      "floor_area": 52,
+      "price": 5200000,
+      "price_per_sqm": 100000,
+      "is_subject": true
+    },
+    {
+      "label": "Comparable A",
+      "locality": "Říčany",
+      "layout": "2+kk",
+      "floor_area": 50,
+      "price": 4950000,
+      "price_per_sqm": 99000,
+      "similarity_score": 68,
+      "source": "Sreality",
+      "source_url": "https://example.com/listing/a"
+    }
+  ],
+  "benchmarks": [],
+  "rent_investment": null,
+  "location_facilities": {
+    "available": false,
+    "facilities": [],
+    "nearest_pois": []
+  },
+  "vision_analysis": {
+    "available": false
+  },
+  "risk": null,
+  "summary": {
+    "headline": "Limited comparable data available in this locality",
+    "recommendation": "Treat the estimate as indicative only; the comparable sample size is small for this locality.",
+    "action": "inspect_further",
+    "strengths": [
+      "Recently listed, low days-on-market"
+    ],
+    "risks": [
+      "Very small comparable sample (n=2)",
+      "No visual condition or location data available"
+    ],
+    "next_steps": [
+      "Commission a physical inspection before making an offer",
+      "Widen the comparable search radius if possible"
+    ]
+  },
+  "methodology": {
+    "valuation_date": "2026-07-01",
+    "data_freshness_note": "Comparable listings refreshed within the last 7 days"
+  },
+  "branding": null,
+  "options": {
+    "template": "default",
+    "language": "en"
+  }
+}

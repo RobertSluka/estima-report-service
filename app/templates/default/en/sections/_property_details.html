@@ -1,0 +1,54 @@
+{# --------------------------------------------------------- 2. Property Details #}
+<section class="section">
+    <div class="section-title"><span class="num">2</span><h2>Property Details</h2></div>
+
+    {% if property.description %}
+        <p class="lead">{{ property.description }}</p>
+    {% endif %}
+
+    <div class="spec-grid">
+        {% set specs = [
+            ("Locality", property.locality | orblank(property.city)),
+            ("Address", property.address),
+            ("Source", property.source),
+            ("Deal type", property.deal_type | title if property.deal_type else None),
+            ("Property type", property.property_type),
+            ("Layout", property.layout),
+            ("Floor area", property.floor_area | area if property.floor_area else None),
+            ("Land area", property.land_area | area if property.land_area else None),
+            ("Floor", property.floor),
+            ("Total floors", property.total_floors),
+            ("Elevator", property.elevator | yesno),
+            ("Balcony", property.balcony | yesno),
+            ("Loggia", property.loggia | yesno),
+            ("Terrace", property.terrace | yesno),
+            ("Cellar", property.cellar | yesno),
+            ("Parking", property.parking),
+            ("Ownership type", property.ownership_type),
+            ("Energy label", property.energy_rating),
+            ("Building type", property.building_type),
+            ("Construction year", property.construction_year),
+            ("Reconstruction year", property.reconstruction_year),
+            ("First seen", property.first_seen_at),
+            ("Last seen", property.last_seen_at),
+        ] %}
+        {% for k, v in specs %}
+            <div class="spec"><div class="k">{{ k }}</div><div class="v">{{ v | orblank }}</div></div>
+        {% endfor %}
+    </div>
+
+    {% if property.source_url %}
+    <p class="small muted" style="margin-top:8px;">
+        Listing: <a href="{{ property.source_url }}">{{ property.source_url }}</a>
+    </p>
+    {% endif %}
+
+    {% if property.features %}
+    <div style="margin-top:12px;">
+        <div class="k small strong" style="margin-bottom:4px;">Key features</div>
+        <div class="grid" style="flex-wrap:wrap;gap:6px;">
+            {% for f in property.features %}<span class="tag">{{ f }}</span>{% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</section>

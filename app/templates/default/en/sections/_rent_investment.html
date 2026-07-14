@@ -1,0 +1,64 @@
+{# ---------------------------------------------------- 6. Rent & Investment Analysis #}
+{% if rent_investment and property.deal_type == "sale" %}
+<section class="section">
+    <div class="section-title"><span class="num">7</span><h2>Rent &amp; Investment Analysis</h2></div>
+
+    <div class="stat-cards">
+        <div class="stat-card">
+            <div class="label">Estimated rent / month</div>
+            <div class="value accent">{{ rent_investment.estimated_rent_month | money(currency) }}</div>
+        </div>
+        <div class="stat-card">
+            <div class="label">Rent / m² / month</div>
+            <div class="value">{{ rent_investment.rent_per_sqm_month | per_sqm(currency) }}</div>
+        </div>
+        <div class="stat-card">
+            <div class="label">Gross yield</div>
+            <div class="value">{{ rent_investment.gross_yield | percent }}</div>
+        </div>
+        {% if rent_investment.net_yield is not none %}
+        <div class="stat-card">
+            <div class="label">Net yield</div>
+            <div class="value">{{ rent_investment.net_yield | percent }}</div>
+        </div>
+        {% endif %}
+    </div>
+
+    {% set assumptions = [
+        ("Vacancy", rent_investment.vacancy_rate | percent if rent_investment.vacancy_rate is not none else None),
+        ("Maintenance", rent_investment.maintenance_cost | money(currency) if rent_investment.maintenance_cost is not none else None),
+        ("Service charges", rent_investment.service_charges | money(currency) if rent_investment.service_charges is not none else None),
+        ("Tax / fees", rent_investment.tax_fees | money(currency) if rent_investment.tax_fees is not none else None),
+    ] %}
+    {% if rent_investment.vacancy_rate is not none or rent_investment.maintenance_cost is not none
+          or rent_investment.service_charges is not none or rent_investment.tax_fees is not none %}
+    <div class="spec-grid" style="margin-top:12px;">
+        {% for k, v in assumptions %}
+            {% if v %}<div class="spec"><div class="k">{{ k }}</div><div class="v">{{ v }}</div></div>{% endif %}
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if rent_investment.mortgage_sensitivity %}
+    <table style="margin-top:12px;">
+        <thead><tr><th>Interest rate</th><th class="num">Monthly payment</th><th class="num">Rent coverage</th></tr></thead>
+        <tbody>
+            {% for m in rent_investment.mortgage_sensitivity %}
+            <tr>
+                <td>{{ m.rate | percent }}</td>
+                <td class="num">{{ m.monthly_payment | money(currency) }}</td>
+                <td class="num">{{ m.coverage_ratio | percent }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+
+    {% set attractiveness = rent_investment.gross_yield | investor_attractiveness %}
+    {% if attractiveness %}
+    <div class="callout" style="margin-top:12px;">
+        Investor attractiveness: <strong>{{ attractiveness }}</strong> based on the estimated gross yield.
+    </div>
+    {% endif %}
+</section>
+{% endif %}

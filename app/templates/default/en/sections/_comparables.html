@@ -1,0 +1,55 @@
+{# ------------------------------------------------------- 4. Comparable Listings #}
+{% if comparables %}
+{% set subject_rows = comparables | selectattr('is_subject') | list %}
+{% set median_rows = comparables | selectattr('is_median') | list %}
+{% set listing_rows = comparables | rejectattr('is_subject') | rejectattr('is_median') | list %}
+{% set has_adjusted = comparables | selectattr('adjusted_price_per_sqm') | list | length > 0 %}
+<section class="section">
+    <div class="section-title"><span class="num">4</span><h2>Comparable Listings</h2></div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Locality / address</th>
+                <th>Layout</th>
+                <th class="num">Area</th>
+                <th class="num">Price</th>
+                <th class="num">{{ currency }}/m²</th>
+                {% if has_adjusted %}<th class="num">Adj. {{ currency }}/m²</th>{% endif %}
+                <th class="num">Distance</th>
+                <th class="num">Days listed</th>
+                <th class="num">Price change</th>
+                <th class="num">Similarity</th>
+                <th>Source</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for c in subject_rows + median_rows + listing_rows %}
+            <tr{% if c.is_subject %} class="row-subject"{% elif c.is_median %} class="row-median"{% endif %}>
+                <td>
+                    {% if c.is_subject %}<span class="tag active">Subject</span>{% endif %}
+                    {% if c.is_median %}<span class="tag">Median</span>{% endif %}
+                    {{ c.locality | orblank(c.label) }}
+                </td>
+                <td>{{ c.layout | orblank }}</td>
+                <td class="num">{{ c.floor_area | area }}</td>
+                <td class="num">{{ c.price | money(currency) }}</td>
+                <td class="num">{{ c.price_per_sqm | per_sqm(currency) }}</td>
+                {% if has_adjusted %}<td class="num">{{ c.adjusted_price_per_sqm | per_sqm(currency) }}</td>{% endif %}
+                <td class="num">{{ c.distance_km | distance }}</td>
+                <td class="num">{{ c.days_on_market | orblank }}</td>
+                <td class="num">{% if c.price_change is not none %}{{ '%+.1f' | format(c.price_change) }}%{% else %}—{% endif %}</td>
+                <td class="num">{% if c.is_subject or c.is_median %}—{% else %}{{ c.similarity_score | similarity_band }}{% endif %}</td>
+                <td>{{ c.source | orblank }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <p class="small muted" style="margin-top:8px;">
+        Similarity reflects a weighted match on locality, layout, floor area, and price/m² against
+        the subject property, shown as a band (Very high / High / Medium / Low) rather than an
+        exact percentage.
+    </p>
+</section>
+{% endif %}

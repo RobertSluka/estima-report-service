@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+*.egg-info/
+
+# Generated report artifacts (keep the directory, ignore contents)
+reports/*
+!reports/.gitkeep
+
+# Local scratch output from curl_examples.sh
+preview.html
+report.pdf
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/

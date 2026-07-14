@@ -1,0 +1,310 @@
+{
+  "report_title": "Property Valuation Report",
+  "generated_at": "2026-07-02T09:30:00Z",
+  "property": {
+    "title": "Bright 3-Room Apartment with Balcony",
+    "deal_type": "sale",
+    "property_type": "Apartment",
+    "layout": "3+kk",
+    "address": "Lindenstraße 24",
+    "locality": "Kreuzberg",
+    "city": "Berlin",
+    "postal_code": "10969",
+    "country": "Germany",
+    "latitude": 52.5015,
+    "longitude": 13.4106,
+    "floor_area": 84,
+    "land_area": null,
+    "rooms": 3,
+    "bedrooms": 2,
+    "bathrooms": 1,
+    "floor": "3rd",
+    "total_floors": 5,
+    "elevator": true,
+    "balcony": true,
+    "loggia": false,
+    "terrace": false,
+    "cellar": true,
+    "parking": "Street parking",
+    "ownership_type": "Freehold",
+    "building_type": "Brick, renovated",
+    "construction_year": 1998,
+    "reconstruction_year": 2021,
+    "energy_rating": "B",
+    "condition": "Very good",
+    "source": "ImmoScout24",
+    "source_url": "https://example.com/listing/subject",
+    "first_seen_at": "2026-05-10",
+    "last_seen_at": "2026-07-01",
+    "days_on_market": 52,
+    "description": "A light-filled 3-room apartment in a well-maintained building in Kreuzberg. Renovated in 2021 with an open kitchen, oak flooring, and a south-facing balcony overlooking a quiet courtyard. Excellent public transport links and walking distance to shops and parks.",
+    "features": [
+      "South-facing balcony",
+      "Fitted kitchen",
+      "Oak flooring",
+      "Elevator",
+      "Cellar storage",
+      "Fiber internet"
+    ],
+    "images": []
+  },
+  "pricing": {
+    "currency": "EUR",
+    "list_price": 549000,
+    "price_per_sqm": 6536
+  },
+  "valuation": {
+    "estimated_value": 572000,
+    "estimated_price_per_sqm": 6810,
+    "confidence": 0.86,
+    "methodology": "Comparable sales adjusted for condition, floor, and energy rating.",
+    "recommended_price_range": { "low": 545000, "mid": 569000, "high": 595000 },
+    "negotiation_zone": { "low": 555000, "mid": null, "high": 572000 },
+    "local_median_price": 558000,
+    "local_median_price_per_sqm": 6699,
+    "sample_size": 4,
+    "why_this_estimate": [
+      "Locality: Kreuzberg is a high-demand, high-liquidity district",
+      "Layout and floor area closely match the strongest comparables",
+      "Price/m² sits slightly below the local median",
+      "Recent renovation (2021) supports a condition premium",
+      "Low days-on-market across comparable listings"
+    ]
+  },
+  "comparables": [
+    {
+      "label": "Subject property",
+      "locality": "Kreuzberg",
+      "layout": "3+kk",
+      "floor_area": 84,
+      "price": 549000,
+      "price_per_sqm": 6536,
+      "is_subject": true
+    },
+    {
+      "label": "Local median",
+      "locality": "Kreuzberg",
+      "layout": "—",
+      "floor_area": 82,
+      "price": 558000,
+      "price_per_sqm": 6699,
+      "is_median": true
+    },
+    {
+      "label": "Oranienstraße 118",
+      "locality": "Kreuzberg",
+      "layout": "3+kk",
+      "floor_area": 82,
+      "price": 560000,
+      "price_per_sqm": 6829,
+      "adjusted_price_per_sqm": 6780,
+      "price_difference_vs_subject": 11000,
+      "similarity_score": 92,
+      "distance_km": 0.4,
+      "days_on_market": 31,
+      "price_change": -1.5,
+      "source": "ImmoScout24",
+      "source_url": "https://example.com/listing/1"
+    },
+    {
+      "label": "Wrangelstraße 9",
+      "locality": "Kreuzberg",
+      "layout": "3+kk",
+      "floor_area": 80,
+      "price": 535000,
+      "price_per_sqm": 6687,
+      "adjusted_price_per_sqm": 6710,
+      "price_difference_vs_subject": -14000,
+      "similarity_score": 88,
+      "distance_km": 0.9,
+      "days_on_market": 74,
+      "price_change": 0,
+      "source": "Immowelt",
+      "source_url": "https://example.com/listing/2"
+    },
+    {
+      "label": "Gneisenaustraße 44",
+      "locality": "Kreuzberg",
+      "layout": "3+kk",
+      "floor_area": 90,
+      "price": 598000,
+      "price_per_sqm": 6644,
+      "adjusted_price_per_sqm": 6600,
+      "price_difference_vs_subject": 49000,
+      "similarity_score": 81,
+      "distance_km": 1.3,
+      "days_on_market": 18,
+      "price_change": 2.1,
+      "source": "ImmoScout24",
+      "source_url": "https://example.com/listing/3"
+    },
+    {
+      "label": "Bergmannstraße 12",
+      "locality": "Kreuzberg",
+      "layout": "3+kk",
+      "floor_area": 78,
+      "price": 512000,
+      "price_per_sqm": 6564,
+      "adjusted_price_per_sqm": 6590,
+      "price_difference_vs_subject": -37000,
+      "similarity_score": 77,
+      "distance_km": 1.6,
+      "days_on_market": 45,
+      "price_change": -3.0,
+      "source": "Immowelt",
+      "source_url": "https://example.com/listing/4"
+    }
+  ],
+  "benchmarks": [
+    {
+      "name": "Estima local listing median",
+      "benchmark_type": "listing_asking",
+      "value_per_sqm": 6699,
+      "source": "Estima listing index"
+    },
+    {
+      "name": "Deloitte Real Index",
+      "benchmark_type": "realized_sale",
+      "value_per_sqm": 6250,
+      "source": "Deloitte Property Index Q2 2026"
+    },
+    {
+      "name": "Deloitte Develop Index",
+      "benchmark_type": "newbuild_asking",
+      "value_per_sqm": 7400,
+      "source": "Deloitte Property Index Q2 2026"
+    }
+  ],
+  "market_statistics": {
+    "region": "Berlin",
+    "country": "Germany",
+    "scope_note": "Existing apartments, city-wide asking prices",
+    "source": "Estima market index, Q2 2026",
+    "period": "2Q 2026",
+    "average_price_per_sqm": 6480,
+    "yoy_change": 4.2,
+    "series": [
+      { "period": "2Q 2024", "value": 6010 },
+      { "period": "3Q 2024", "value": 6080 },
+      { "period": "4Q 2024", "value": 6150 },
+      { "period": "1Q 2025", "value": 6190 },
+      { "period": "2Q 2025", "value": 6220 },
+      { "period": "3Q 2025", "value": 6290 },
+      { "period": "4Q 2025", "value": 6350 },
+      { "period": "1Q 2026", "value": 6410 },
+      { "period": "2Q 2026", "value": 6480 }
+    ],
+    "distribution": {
+      "scope": "3-room apartments, Kreuzberg",
+      "min_price_per_sqm": 5400,
+      "p25_price_per_sqm": 6100,
+      "median_price_per_sqm": 6699,
+      "p75_price_per_sqm": 7150,
+      "max_price_per_sqm": 8200,
+      "sample_size": 37
+    }
+  },
+  "rent_investment": {
+    "estimated_rent_month": 1850,
+    "rent_per_sqm_month": 22.0,
+    "gross_yield": 0.0388,
+    "net_yield": 0.031,
+    "vacancy_rate": 0.04,
+    "maintenance_cost": 900,
+    "service_charges": 2100,
+    "tax_fees": 450,
+    "mortgage_sensitivity": [
+      { "rate": 0.035, "monthly_payment": 1620, "coverage_ratio": 1.14 },
+      { "rate": 0.045, "monthly_payment": 1810, "coverage_ratio": 1.02 },
+      { "rate": 0.055, "monthly_payment": 2005, "coverage_ratio": 0.92 }
+    ]
+  },
+  "location_facilities": {
+    "available": true,
+    "map_image_url": null,
+    "facilities": [
+      { "category": "Public transport", "count": 6, "nearest_distance_km": 0.3 },
+      { "category": "Groceries", "count": 4, "nearest_distance_km": 0.2 },
+      { "category": "Schools", "count": 2, "nearest_distance_km": 0.5 },
+      { "category": "Parks", "count": 1, "nearest_distance_km": 0.6 },
+      { "category": "Restaurants", "count": 18, "nearest_distance_km": 0.1 },
+      { "category": "Doctors / pharmacies", "count": 3, "nearest_distance_km": 0.4 }
+    ],
+    "nearest_pois": [
+      { "name": "U-Bahn Kottbusser Tor", "category": "Transit", "distance_km": 0.3, "walking_time_min": 4 },
+      { "name": "Görlitzer Park", "category": "Park", "distance_km": 0.6, "walking_time_min": 7 },
+      { "name": "Aldi Süd", "category": "Grocery", "distance_km": 0.2, "walking_time_min": 3 },
+      { "name": "Lenau-Grundschule", "category": "School", "distance_km": 0.5, "walking_time_min": 6 },
+      { "name": "Vivantes Klinikum", "category": "Health", "distance_km": 1.1, "walking_time_min": 13 }
+    ]
+  },
+  "vision_analysis": {
+    "available": true,
+    "summary": "Automated analysis measured the technical quality of 8 listing photos — brightness, sharpness, exposure and resolution. These metrics describe the photographs themselves; they are not an assessment of the property's condition, renovation state or materials.",
+    "brightness": 0.95,
+    "sharpness": 0.9,
+    "photo_quality": 0.87,
+    "gallery_size": 8,
+    "observations": [
+      "The gallery is bright and generally well exposed.",
+      "Image resolution is sufficient for presentation."
+    ],
+    "images": []
+  },
+  "risk": {
+    "verified": true,
+    "ownership_type": "Freehold",
+    "cadastre_checked": true,
+    "liens_easements": "None registered",
+    "cooperative_ownership": false,
+    "flood_zone": "Not in a designated flood zone",
+    "noise_exposure": "Low (courtyard-facing rooms)",
+    "building_condition": "Good, renovated common areas in 2019",
+    "hoa_fees": 210,
+    "reserve_fund": 45000
+  },
+  "summary": {
+    "headline": "Priced competitively with strong upside in a high-demand district",
+    "recommendation": "List at or slightly above the current asking price. The property's condition, energy efficiency, and Kreuzberg location support a valuation modestly above list. Expect strong buyer interest within the first two weeks.",
+    "action": "negotiate",
+    "suggested_offer_range": { "low": 545000, "mid": null, "high": 560000 },
+    "strengths": [
+      "Estimated value ~4% above list price",
+      "Energy rating B lowers running costs",
+      "Prime, high-liquidity Kreuzberg location",
+      "Move-in ready, renovated in 2021"
+    ],
+    "risks": [
+      "Third floor with elevator but no en-suite bathroom",
+      "Courtyard-facing rooms limit skyline views",
+      "Interest-rate sensitivity in the buyer segment"
+    ],
+    "next_steps": [
+      "Confirm reserve fund adequacy with the HOA before offer",
+      "Schedule a viewing during weekend mornings for best light",
+      "Prepare an offer near the recommended range within 1-2 weeks"
+    ],
+    "agent_notes": "Emphasize the balcony and recent renovation in the listing photos. Schedule viewings on weekend mornings to showcase natural light."
+  },
+  "methodology": {
+    "valuation_date": "2026-07-01",
+    "model_version": "estima-sale-xgb-2026.06",
+    "model_run_id": "run_8f21ac",
+    "data_freshness_note": "Comparable listings refreshed within the last 7 days"
+  },
+  "branding": {
+    "name": "Estima Realty",
+    "logo_url": null,
+    "primary_color": "#1f4e5f",
+    "accent_color": "#12333d",
+    "agent_name": "Anna Bergmann",
+    "agent_email": "anna.bergmann@estima-realty.example",
+    "agent_phone": "+49 30 1234 5678",
+    "website": "estima-realty.example",
+    "footer_text": "Estima Realty · Confidential Valuation Report"
+  },
+  "options": {
+    "template": "default",
+    "language": "en"
+  }
+}

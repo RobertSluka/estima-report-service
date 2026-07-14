@@ -1,0 +1,33 @@
+{# --------------------------------------------------- 9. Risk & Due Diligence Checklist #}
+{% if risk %}
+{% set rows = [
+    ("Ownership type", risk.ownership_type),
+    ("Cadastre / LV check", risk.cadastre_checked | yesno if risk.cadastre_checked is not none else None),
+    ("Liens / easements", risk.liens_easements),
+    ("Cooperative ownership", risk.cooperative_ownership | yesno if risk.cooperative_ownership is not none else None),
+    ("Flood zone", risk.flood_zone),
+    ("Noise exposure", risk.noise_exposure),
+    ("Building condition", risk.building_condition),
+    ("SVJ / HOA fees", risk.hoa_fees | money(currency) if risk.hoa_fees is not none else None),
+    ("Reserve fund", risk.reserve_fund | money(currency) if risk.reserve_fund is not none else None),
+] %}
+<section class="section">
+    <div class="section-title"><span class="num">10</span><h2>Risk &amp; Due Diligence Checklist</h2></div>
+
+    {% if not risk.verified %}
+    <p class="small muted" style="margin-bottom:8px;">
+        These fields have not been independently verified for this report. Treat the list below as
+        recommended checks to complete before purchase, not as confirmed facts.
+    </p>
+    {% endif %}
+
+    <ul class="pill-list{% if not risk.verified %} risk{% endif %}">
+        {% for k, v in rows %}
+        <li>
+            <strong>{{ k }}:</strong>
+            {% if v %}{{ v }}{% else %}to be checked{% endif %}
+        </li>
+        {% endfor %}
+    </ul>
+</section>
+{% endif %}

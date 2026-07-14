@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>{{ report_title }}</title>
+    <style>
+        :root {
+            --primary: {{ (branding.primary_color if branding and branding.primary_color) or "#1f4e5f" }};
+            --primary-dark: {{ (branding.accent_color if branding and branding.accent_color) or "#12333d" }};
+            --ink: #1b2733;
+            --muted: #6b7684;
+            --border: #e3e8ee;
+            --surface: #f4f6f9;
+            --surface-soft: #fbfcfd;
+            --footer-text: "{{ (branding.footer_text if branding and branding.footer_text) or (branding.name if branding and branding.name) or 'Estima Property Report' }}";
+        }
+        {% include "default/styles.css" %}
+    </style>
+</head>
+<body>
+
+{# ---------------------------------------------------------------- Cover #}
+<section class="cover">
+    <div class="brand-row">
+        {% if branding and branding.logo_url %}
+            <img class="brand-logo" src="{{ branding.logo_url }}" alt="{{ branding.name }}" />
+        {% elif branding and branding.name %}
+            <div class="brand-name">{{ branding.name }}</div>
+        {% else %}
+            <div class="brand-name">ESTIMA</div>
+        {% endif %}
+        <div class="small">{{ generated_at.strftime("%d %B %Y") }}</div>
+    </div>
+
+    <div>
+        <div class="eyebrow">Property {{ "Rental" if property.deal_type == "rent" else "Valuation" }} Report</div>
+        <h1>{{ property.title | orblank(report_title) }}</h1>
+        {% if property.locality or property.address %}
+            <div class="subtitle">
+                {{ property.address | orblank(property.locality) }}{% if property.city and property.city not in (property.locality or "") %}, {{ property.city }}{% endif %}
+            </div>
+        {% endif %}
+
+        {% if valuation.estimated_value %}
+        <div class="headline-value">
+            <div class="label">Estima estimated {{ "monthly rent" if property.deal_type == "rent" else "market value" }}</div>
+            <div class="value">{{ valuation.estimated_value | money(currency) }}</div>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="cover-meta">
+        <div>
+            {% if property.floor_area %}{{ property.floor_area | area }}{% endif %}
+            {% if property.layout %} · {{ property.layout }}{% endif %}
+            {% if property.construction_year %} · Built {{ property.construction_year }}{% endif %}
+        </div>
+        <div>
+            {% if branding and branding.agent_name %}Prepared by {{ branding.agent_name }}{% endif %}
+        </div>
+    </div>
+</section>
+
+{% include "default/en/sections/_executive_summary.html" %}
+{% include "default/en/sections/_property_details.html" %}
+{% include "default/en/sections/_valuation.html" %}
+{% include "default/en/sections/_comparables.html" %}
+{% include "default/en/sections/_benchmarks.html" %}
+{% include "default/en/sections/_market_statistics.html" %}
+{% include "default/en/sections/_rent_investment.html" %}
+{% include "default/en/sections/_vision.html" %}
+{% include "default/en/sections/_location.html" %}
+{% include "default/en/sections/_risk.html" %}
+{% include "default/en/sections/_recommendation.html" %}
+{% include "default/en/sections/_methodology.html" %}
+
+</body>
+</html>
