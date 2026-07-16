@@ -28,7 +28,13 @@ a professional real estate **HTML/PDF report**.
 | GET    | `/reports/{report_id}`           | HTML preview (`?format=json` for metadata)    |
 | GET    | `/reports/{report_id}/download`  | Download the generated PDF                    |
 | GET    | `/reports`                       | List generated reports (newest first)         |
+| DELETE | `/reports/{report_id}`           | Delete a report (requires `API_KEY` configured) |
 | GET    | `/health`                        | Health check                                  |
+
+When the `API_KEY` env var is set, all `/reports` endpoints require an
+`X-API-Key` header; when it is empty (default), the API is open and DELETE is
+disabled. The public API surface is snapshot-guarded — see
+[Design guardrails](#design-guardrails).
 
 `POST /reports/generate` returns:
 
@@ -114,19 +120,52 @@ pytest -q
 
 PDF-dependent tests are skipped automatically when WeasyPrint's native libraries
 are not installed, so the rendering/storage/API logic can be tested anywhere.
+CI ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) runs the full suite
+twice: on the host with native libs installed, and inside the Docker image that
+actually ships.
+
+## Design guardrails
+
+The repo's design rules are executable, not just documented:
+
+- [`tests/test_architecture.py`](tests/test_architecture.py) enforces:
+  WeasyPrint only imported in `app/services/pdf.py`; env access only in
+  `app/config.py`; fully pinned requirements (incl. the weasyprint/pydyf
+  pair); every template language dir has a `report.html`; and the public API
+  surface matches [`tests/openapi_snapshot.json`](tests/openapi_snapshot.json).
+  On an intentional API change run
+  `python scripts/update_openapi_snapshot.py` and commit the diff.
+- [`tests/test_backend_contract.py`](tests/test_backend_contract.py) pins the
+  field-name alignment with estima-backend's report schema against
+  [`tests/backend_contract_fields.json`](tests/backend_contract_fields.json);
+  refresh with `python scripts/refresh_backend_contract.py` after backend
+  schema changes.
+- A Claude Code hook ([`.claude/settings.json`](.claude/settings.json) →
+  [`scripts/claude_arch_check.sh`](scripts/claude_arch_check.sh)) re-runs the
+  architecture tests after every edit to `app/`, `requirements.txt`, or the
+  API snapshot.
 
 ## Configuration
 
 All settings ([`app/config.py`](app/config.py)) can be overridden via env vars:
 
-| Variable            | Default              | Purpose                                  |
-| ------------------- | -------------------- | ---------------------------------------- |
-| `REPORTS_DIR`       | `./reports`          | Where HTML/PDF artifacts are written     |
-| `TEMPLATES_DIR`     | `./app/templates`    | Template root                            |
-| `ASSETS_DIR`        | `./app/assets`       | Static assets (fonts, logos)             |
-| `DEFAULT_TEMPLATE`  | `default`            | Template style when payload omits one    |
-| `DEFAULT_LANGUAGE`  | `en`                 | Language when payload omits one          |
-| `PUBLIC_BASE_URL`   | *(request base URL)* | Base URL used in returned links          |
+| Variable              | Default              | Purpose                                  |
+| --------------------- | -------------------- | ---------------------------------------- |
+| `REPORTS_DIR`         | `./reports`          | Where HTML/PDF artifacts are written     |
+| `TEMPLATES_DIR`       | `./app/templates`    | Template root                            |
+| `ASSETS_DIR`          | `./app/assets`       | Static assets (fonts, logos)             |
+| `DEFAULT_TEMPLATE`    | `default`            | Template style when payload omits one    |
+| `DEFAULT_LANGUAGE`    | `en`                 | Language when payload omits one          |
+| `PUBLIC_BASE_URL`     | *(request base URL)* | Base URL used in returned links          |
+| `API_KEY`             | *(empty = auth off)* | Require `X-API-Key` on `/reports` endpoints |
+| `REPORTS_TTL_DAYS`    | `0` (off)            | Delete reports older than N days (hourly sweep) |
+| `MAX_PAYLOAD_BYTES`   | `10485760`           | Reject request bodies larger than this (413) |
+| `ASSET_FETCH_TIMEOUT` | `10`                 | Timeout (s) for remote assets during PDF render |
+| `ASSET_ALLOWED_HOSTS` | *(empty = any public)* | Comma-separated allowlist for remote asset hosts |
+
+Remote assets referenced by a payload (images, logos) are only fetched from
+hosts resolving to public addresses; `file:` access is confined to
+`ASSETS_DIR`. This protects the service from SSRF via crafted payloads.
 
 ## Project layout
 

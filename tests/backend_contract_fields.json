@@ -1,0 +1,154 @@
+{
+  "Comparable": [
+    "floor_area",
+    "is_median",
+    "is_subject",
+    "label",
+    "layout",
+    "locality",
+    "price",
+    "price_difference_vs_subject",
+    "price_per_sqm",
+    "property_id",
+    "similarity_score",
+    "source_url"
+  ],
+  "IndexPoint": [
+    "label",
+    "value"
+  ],
+  "IndexSeries": [
+    "kind",
+    "name",
+    "points",
+    "scope",
+    "unit"
+  ],
+  "LocationAnalysis": [
+    "available",
+    "explanation",
+    "location_score",
+    "nearby_grocery_count_1km",
+    "nearby_grocery_count_500m",
+    "nearby_healthcare_count_1km",
+    "nearby_parks_count_1km",
+    "nearby_restaurants_count_1km",
+    "nearby_schools_count_1km",
+    "nearby_transport_count_1km",
+    "nearby_transport_count_3km",
+    "nearby_transport_count_500m",
+    "nearest_facilities",
+    "static_map_url"
+  ],
+  "MarketAnalysis": [
+    "comparable_count",
+    "estimated_high",
+    "estimated_low",
+    "estimated_value",
+    "explanation",
+    "local_median_price",
+    "local_median_price_per_sqm",
+    "price_difference",
+    "price_difference_percent",
+    "valuation_label"
+  ],
+  "MarketBenchmark": [
+    "name",
+    "period",
+    "scope",
+    "unit",
+    "value_per_sqm"
+  ],
+  "NearestFacility": [
+    "category",
+    "distance_m",
+    "name"
+  ],
+  "Property": [
+    "address",
+    "currency",
+    "days_on_market",
+    "deal_type",
+    "first_seen_at",
+    "floor",
+    "floor_area",
+    "id",
+    "image_urls",
+    "land_area",
+    "last_seen_at",
+    "lat",
+    "layout",
+    "locality",
+    "lon",
+    "price",
+    "price_per_sqm",
+    "property_type",
+    "source",
+    "source_url",
+    "title"
+  ],
+  "Recommendation": [
+    "attractiveness",
+    "next_steps",
+    "risks",
+    "strengths",
+    "summary"
+  ],
+  "ReportData": [
+    "benchmarks",
+    "comparables",
+    "index_series",
+    "location_analysis",
+    "market_analysis",
+    "meta",
+    "property",
+    "recommendation",
+    "vision_analysis"
+  ],
+  "ReportMeta": [
+    "brand",
+    "disclaimer",
+    "generated_at",
+    "report_id",
+    "tagline"
+  ],
+  "VisionAnalysis": [
+    "adjusted_estimate",
+    "available",
+    "base_estimate",
+    "blurry_image_ratio",
+    "brightness_score",
+    "comparison",
+    "condition_adjustment_percent",
+    "confidence",
+    "dark_image_ratio",
+    "gallery_size",
+    "images",
+    "luxury_score",
+    "observations",
+    "overall_condition",
+    "renovation_adjustment_percent",
+    "renovation_score",
+    "sharpness_score",
+    "summary",
+    "visual_quality_score"
+  ],
+  "VisionComparison": [
+    "comparable_count",
+    "comparables_brightness",
+    "comparables_quality",
+    "comparables_sharpness",
+    "subject_brightness",
+    "subject_quality",
+    "subject_sharpness"
+  ],
+  "VisionImage": [
+    "brightness",
+    "condition_notes",
+    "contrast",
+    "detected_room",
+    "image_url",
+    "score",
+    "sharpness"
+  ]
+}

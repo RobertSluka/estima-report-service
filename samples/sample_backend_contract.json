@@ -1,0 +1,111 @@
+{
+  "report_title": "Backend Contract Fixture — 3+kk Praha 4",
+  "generated_at": "2026-07-16T09:00:00Z",
+  "property": {
+    "title": "Prodej bytu 3+kk 78 m², Praha 4",
+    "deal_type": "sale",
+    "property_type": "apartment",
+    "layout": "3+kk",
+    "address": "Na Strži, Praha 4",
+    "locality": "Praha 4 - Krč",
+    "city": "Praha",
+    "floor_area": 78.0,
+    "floor": "4",
+    "days_on_market": 21,
+    "first_seen_at": "2026-06-01",
+    "last_seen_at": "2026-06-20",
+    "source": "sreality",
+    "source_url": "https://example.com/listing/contract-subject"
+  },
+  "pricing": {
+    "currency": "CZK",
+    "list_price": 8500000,
+    "price_per_sqm": 108974
+  },
+  "valuation": {
+    "estimated_value": 8900000,
+    "estimated_price_per_sqm": 114103,
+    "confidence": 0.72,
+    "local_median_price": 8700000,
+    "local_median_price_per_sqm": 111000,
+    "sample_size": 14,
+    "why_this_estimate": [
+      "14 comparable 3+kk listings within Praha 4",
+      "Asking price sits 4.5% below the comparable median"
+    ]
+  },
+  "comparables": [
+    {
+      "label": "Subject property",
+      "locality": "Praha 4 - Krč",
+      "layout": "3+kk",
+      "floor_area": 78.0,
+      "price": 8500000,
+      "price_per_sqm": 108974,
+      "similarity_score": 100,
+      "is_subject": true,
+      "source_url": "https://example.com/listing/contract-subject"
+    },
+    {
+      "label": "Best comparable 1",
+      "locality": "Praha 4 - Podolí",
+      "layout": "3+kk",
+      "floor_area": 81.0,
+      "price": 9200000,
+      "price_per_sqm": 113580,
+      "price_difference_vs_subject": 700000,
+      "similarity_score": 91,
+      "source_url": "https://example.com/listing/contract-comp-1"
+    },
+    {
+      "label": "Median comparable",
+      "locality": "Praha 4",
+      "layout": "3+kk",
+      "floor_area": 79.0,
+      "price": 8700000,
+      "price_per_sqm": 111000,
+      "is_median": true
+    }
+  ],
+  "benchmarks": [
+    {
+      "name": "Deloitte Real Index",
+      "benchmark_type": "realized_sale",
+      "value_per_sqm": 105000,
+      "source": "Deloitte"
+    }
+  ],
+  "vision_analysis": {
+    "available": true,
+    "summary": "Bright, sharp gallery of 12 photos.",
+    "gallery_size": 12,
+    "brightness": 74,
+    "sharpness": 68,
+    "photo_quality": 71,
+    "observations": [
+      "Most photos are bright and in focus",
+      "Two images have low resolution"
+    ]
+  },
+  "summary": {
+    "headline": "Priced below the comparable median",
+    "recommendation": "Inspect and negotiate from a position of data.",
+    "action": "negotiate",
+    "strengths": [
+      "Asking price below local median",
+      "Liquid layout segment (3+kk)"
+    ],
+    "risks": [
+      "Valuation confidence is medium",
+      "No cadastre check performed"
+    ],
+    "next_steps": [
+      "Order an in-person inspection",
+      "Verify ownership and liens in the cadastre"
+    ]
+  },
+  "options": {
+    "template": "default",
+    "language": "en"
+  }
+}

@@ -1,0 +1,319 @@
+{
+  "paths": {
+    "GET /health": {
+      "params": [],
+      "has_body": false,
+      "responses": [
+        "200"
+      ]
+    },
+    "GET /reports": {
+      "params": [
+        "x-api-key"
+      ],
+      "has_body": false,
+      "responses": [
+        "200",
+        "422"
+      ]
+    },
+    "POST /reports/generate": {
+      "params": [
+        "x-api-key"
+      ],
+      "has_body": true,
+      "responses": [
+        "201",
+        "422"
+      ]
+    },
+    "DELETE /reports/{report_id}": {
+      "params": [
+        "report_id",
+        "x-api-key"
+      ],
+      "has_body": false,
+      "responses": [
+        "204",
+        "422"
+      ]
+    },
+    "GET /reports/{report_id}": {
+      "params": [
+        "report_id",
+        "x-api-key"
+      ],
+      "has_body": false,
+      "responses": [
+        "200",
+        "422"
+      ]
+    },
+    "GET /reports/{report_id}/download": {
+      "params": [
+        "report_id",
+        "x-api-key"
+      ],
+      "has_body": false,
+      "responses": [
+        "200",
+        "422"
+      ]
+    },
+    "GET /sample": {
+      "params": [],
+      "has_body": false,
+      "responses": [
+        "200"
+      ]
+    }
+  },
+  "schemas": {
+    "AgencyBranding": [
+      "accent_color",
+      "agent_email",
+      "agent_name",
+      "agent_phone",
+      "footer_text",
+      "logo_url",
+      "name",
+      "primary_color",
+      "website"
+    ],
+    "Comparable": [
+      "adjusted_price_per_sqm",
+      "days_on_market",
+      "distance_km",
+      "floor_area",
+      "is_median",
+      "is_subject",
+      "label",
+      "layout",
+      "locality",
+      "price",
+      "price_change",
+      "price_difference_vs_subject",
+      "price_per_sqm",
+      "similarity_score",
+      "source",
+      "source_url"
+    ],
+    "EvaluationPayload": [
+      "benchmarks",
+      "branding",
+      "comparables",
+      "generated_at",
+      "location_facilities",
+      "market_statistics",
+      "methodology",
+      "options",
+      "pricing",
+      "property",
+      "rent_investment",
+      "report_title",
+      "risk",
+      "summary",
+      "valuation",
+      "vision_analysis"
+    ],
+    "FacilityCount": [
+      "category",
+      "count",
+      "nearest_distance_km"
+    ],
+    "GenerateResponse": [
+      "created_at",
+      "html_url",
+      "pdf_url",
+      "report_id",
+      "status"
+    ],
+    "HTTPValidationError": [
+      "detail"
+    ],
+    "LocationFacilities": [
+      "available",
+      "facilities",
+      "map_image_url",
+      "nearest_pois"
+    ],
+    "MarketBenchmark": [
+      "benchmark_type",
+      "name",
+      "source",
+      "value_per_sqm"
+    ],
+    "MarketDistribution": [
+      "max_price_per_sqm",
+      "median_price_per_sqm",
+      "min_price_per_sqm",
+      "p25_price_per_sqm",
+      "p75_price_per_sqm",
+      "sample_size",
+      "scope"
+    ],
+    "MarketStatPoint": [
+      "period",
+      "value"
+    ],
+    "MarketStatistics": [
+      "average_price_per_sqm",
+      "country",
+      "distribution",
+      "index_base_period",
+      "period",
+      "price_index",
+      "region",
+      "scope_note",
+      "series",
+      "source",
+      "subject_price_per_sqm",
+      "yoy_change"
+    ],
+    "Methodology": [
+      "data_freshness_note",
+      "model_run_id",
+      "model_version",
+      "valuation_date"
+    ],
+    "MortgageScenario": [
+      "coverage_ratio",
+      "monthly_payment",
+      "rate"
+    ],
+    "POI": [
+      "category",
+      "distance_km",
+      "name",
+      "walking_time_min"
+    ],
+    "PriceRange": [
+      "high",
+      "low",
+      "mid"
+    ],
+    "Pricing": [
+      "currency",
+      "list_price",
+      "price_per_sqm"
+    ],
+    "PropertyMetadata": [
+      "address",
+      "balcony",
+      "bathrooms",
+      "bedrooms",
+      "building_type",
+      "cellar",
+      "city",
+      "condition",
+      "construction_year",
+      "country",
+      "days_on_market",
+      "deal_type",
+      "description",
+      "elevator",
+      "energy_rating",
+      "features",
+      "first_seen_at",
+      "floor",
+      "floor_area",
+      "images",
+      "land_area",
+      "last_seen_at",
+      "latitude",
+      "layout",
+      "locality",
+      "loggia",
+      "longitude",
+      "ownership_type",
+      "parking",
+      "postal_code",
+      "property_type",
+      "reconstruction_year",
+      "rooms",
+      "source",
+      "source_url",
+      "terrace",
+      "title",
+      "total_floors"
+    ],
+    "RenderOptions": [
+      "language",
+      "template"
+    ],
+    "RentInvestment": [
+      "estimated_rent_month",
+      "gross_yield",
+      "maintenance_cost",
+      "mortgage_sensitivity",
+      "net_yield",
+      "rent_per_sqm_month",
+      "service_charges",
+      "tax_fees",
+      "vacancy_rate"
+    ],
+    "ReportInfo": [
+      "created_at",
+      "html_url",
+      "language",
+      "pdf_url",
+      "property_title",
+      "report_id",
+      "status",
+      "template"
+    ],
+    "ReportSummary": [
+      "action",
+      "agent_notes",
+      "headline",
+      "next_steps",
+      "recommendation",
+      "risks",
+      "strengths",
+      "suggested_offer_range"
+    ],
+    "RiskDueDiligence": [
+      "building_condition",
+      "cadastre_checked",
+      "cooperative_ownership",
+      "flood_zone",
+      "hoa_fees",
+      "liens_easements",
+      "noise_exposure",
+      "ownership_type",
+      "reserve_fund",
+      "verified"
+    ],
+    "ValidationError": [
+      "loc",
+      "msg",
+      "type"
+    ],
+    "Valuation": [
+      "confidence",
+      "estimated_price_per_sqm",
+      "estimated_value",
+      "local_median_price",
+      "local_median_price_per_sqm",
+      "methodology",
+      "negotiation_zone",
+      "recommended_price_range",
+      "sample_size",
+      "why_this_estimate"
+    ],
+    "VisionAnalysis": [
+      "available",
+      "brightness",
+      "detected_features",
+      "gallery_size",
+      "images",
+      "observations",
+      "overall_condition_score",
+      "photo_quality",
+      "price_adjustment",
+      "renovation_score",
+      "sharpness",
+      "summary"
+    ]
+  }
+}
