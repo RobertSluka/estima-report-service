@@ -50,54 +50,53 @@ a { color: var(--primary); text-decoration: none; }
 .cover {
     page: cover;
     height: 297mm;
-    padding: 32mm 22mm 24mm 22mm;
-    background: linear-gradient(160deg, var(--primary) 0%, var(--primary-dark) 100%);
+    padding: 24mm 20mm 18mm 20mm;
+    /* Navy → teal gradient, matching the estima-backend (CZ) report cover. */
+    background: linear-gradient(160deg, var(--primary-dark) 0%, var(--primary) 48%, #1f6f8b 100%);
     color: #fff;
     display: flex;
     flex-direction: column;
     page-break-after: always;
 }
-.cover .brand-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: auto;
-}
-.cover .brand-name { font-size: 13pt; font-weight: 600; letter-spacing: 0.04em; }
+.cover .cover-top { display: flex; align-items: flex-start; justify-content: space-between; }
+.cover .brand-mark { font-size: 22pt; font-weight: 800; letter-spacing: 0.04em; }
 .cover .brand-logo { max-height: 46px; max-width: 200px; }
 .cover .eyebrow {
     text-transform: uppercase;
-    letter-spacing: 0.22em;
-    font-size: 9pt;
+    letter-spacing: 0.18em;
+    font-size: 8.5pt;
     opacity: 0.85;
-    margin-bottom: 10px;
 }
-.cover h1 { color: #fff; font-size: 30pt; line-height: 1.12; font-weight: 700; }
-.cover .subtitle { font-size: 13pt; opacity: 0.92; margin-top: 12px; }
-.cover .cover-meta {
-    margin-top: auto;
-    border-top: 1px solid rgba(255, 255, 255, 0.35);
-    padding-top: 16px;
-    display: flex;
-    justify-content: space-between;
-    font-size: 9.5pt;
-    opacity: 0.95;
-}
-.cover .headline-value {
-    margin-top: 28px;
-    background: rgba(255, 255, 255, 0.12);
-    border: 1px solid rgba(255, 255, 255, 0.28);
+.cover .cover-photo {
+    margin: 16pt 0;
     border-radius: 10px;
-    padding: 18px 22px;
-    display: inline-block;
+    overflow: hidden;
+    height: 78mm;
+    border: 1px solid rgba(255, 255, 255, 0.18);
 }
-.cover .headline-value .label {
+.cover .cover-photo img { width: 100%; height: 100%; object-fit: cover; }
+.cover .cover-title { color: #fff; font-size: 26pt; line-height: 1.15; font-weight: 700; margin-top: 6pt; }
+.cover .cover-locality { font-size: 12pt; color: #cfe3ee; margin-top: 6pt; }
+.cover .cover-spacer { flex: 1; }
+.cover .badge-strip { display: flex; margin-top: 14pt; }
+/* margin instead of flex `gap`: WeasyPrint does not apply gap here. */
+.cover .badge-card {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.10);
+    border: 1px solid rgba(255, 255, 255, 0.20);
+    border-radius: 8px;
+    padding: 10pt 12pt;
+    margin-right: 10pt;
+}
+.cover .badge-card:last-child { margin-right: 0; }
+.cover .badge-card .label {
+    font-size: 7.5pt;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
-    letter-spacing: 0.14em;
-    font-size: 8pt;
-    opacity: 0.85;
+    color: #b9d4e4;
 }
-.cover .headline-value .value { font-size: 24pt; font-weight: 700; margin-top: 4px; }
+.cover .badge-card .value { font-size: 14pt; font-weight: 700; margin-top: 3pt; }
+.cover .cover-foot { font-size: 8pt; color: #9ec7dd; margin-top: 16pt; }
 
 /* ---------- Sections ---------- */
 .section { page-break-inside: avoid; margin-bottom: 20px; }
@@ -114,18 +113,17 @@ a { color: var(--primary); text-decoration: none; }
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 22px;
-    height: 22px;
     /* margin instead of flex `gap`: WeasyPrint does not apply gap here. */
     margin-right: 10px;
     flex: 0 0 auto;
-    border-radius: 50%;
+    border-radius: 3px;
+    padding: 1.5pt 6pt;
     background: var(--primary);
     color: #fff;
     font-size: 9pt;
     font-weight: 700;
 }
-.section-title h2 { font-size: 14pt; }
+.section-title h2 { font-size: 13pt; color: var(--primary); letter-spacing: 0.2px; }
 
 .lead { font-size: 10.5pt; color: var(--muted); margin-bottom: 12px; }
 

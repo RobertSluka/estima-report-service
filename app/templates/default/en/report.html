@@ -5,8 +5,8 @@
     <title>{{ report_title }}</title>
     <style>
         :root {
-            --primary: {{ (branding.primary_color if branding and branding.primary_color) or "#1f4e5f" }};
-            --primary-dark: {{ (branding.accent_color if branding and branding.accent_color) or "#12333d" }};
+            --primary: {{ (branding.primary_color if branding and branding.primary_color) or "#123a5e" }};
+            --primary-dark: {{ (branding.accent_color if branding and branding.accent_color) or "#0d2f4d" }};
             --ink: #1b2733;
             --muted: #6b7684;
             --border: #e3e8ee;
@@ -21,44 +21,57 @@
 
 {# ---------------------------------------------------------------- Cover #}
 <section class="cover">
-    <div class="brand-row">
+    <div class="cover-top">
         {% if branding and branding.logo_url %}
             <img class="brand-logo" src="{{ branding.logo_url }}" alt="{{ branding.name }}" />
-        {% elif branding and branding.name %}
-            <div class="brand-name">{{ branding.name }}</div>
         {% else %}
-            <div class="brand-name">ESTIMA</div>
+            <div class="brand-mark">{{ (branding.name if branding and branding.name) or "ESTIMA" }}</div>
         {% endif %}
-        <div class="small">{{ generated_at.strftime("%d %B %Y") }}</div>
+        <div style="text-align:right">
+            <div class="eyebrow">Property {{ "Rental" if property.deal_type == "rent" else "Valuation" }} Report</div>
+            <div class="small" style="opacity:.85; margin-top:4px">{{ generated_at.strftime("%d %B %Y") }}</div>
+        </div>
     </div>
 
-    <div>
-        <div class="eyebrow">Property {{ "Rental" if property.deal_type == "rent" else "Valuation" }} Report</div>
-        <h1>{{ property.title | orblank(report_title) }}</h1>
-        {% if property.locality or property.address %}
-            <div class="subtitle">
-                {{ property.address | orblank(property.locality) }}{% if property.city and property.city not in (property.locality or "") %}, {{ property.city }}{% endif %}
-            </div>
-        {% endif %}
+    {% if property.images %}
+    <div class="cover-photo"><img src="{{ property.images[0] }}" alt="" /></div>
+    {% endif %}
 
-        {% if valuation.estimated_value %}
-        <div class="headline-value">
+    <h1 class="cover-title">{{ property.title | orblank(report_title) }}</h1>
+    {% if property.locality or property.address %}
+    <div class="cover-locality">{{ property.address | orblank(property.locality) }}{% if property.property_type %} · {{ property.property_type }}{% endif %}{% if property.layout %} · {{ property.layout }}{% endif %}</div>
+    {% endif %}
+
+    <div class="cover-spacer"></div>
+
+    {% if valuation.estimated_value %}
+    <div class="badge-strip">
+        {% set verdict = pricing.list_price | verdict_label(valuation.estimated_value) %}
+        {% if verdict %}
+        <div class="badge-card">
+            <div class="label">Assessment</div>
+            <div class="verdict-badge {{ verdict | lower | replace(' ', '-') }}" style="margin-top:4px">{{ verdict }}</div>
+        </div>
+        {% endif %}
+        <div class="badge-card">
             <div class="label">Estima estimated {{ "monthly rent" if property.deal_type == "rent" else "market value" }}</div>
             <div class="value">{{ valuation.estimated_value | money(currency) }}</div>
         </div>
+        {% if pricing.list_price %}
+        {% set delta = valuation.estimated_value - pricing.list_price %}
+        <div class="badge-card">
+            <div class="label">vs asking price</div>
+            <div class="value">{{ delta | abs | money(currency) if delta >= 0 else "−" ~ (delta | abs | money(currency)) }}
+                <span class="small" style="opacity:.8; font-weight:600">({{ '%+.1f' | format(delta / pricing.list_price * 100) }}%)</span>
+            </div>
+        </div>
         {% endif %}
     </div>
+    {% endif %}
 
-    <div class="cover-meta">
-        <div>
-            {% if property.floor_area %}{{ property.floor_area | area }}{% endif %}
-            {% if property.layout %} · {{ property.layout }}{% endif %}
-            {% if property.construction_year %} · Built {{ property.construction_year }}{% endif %}
-        </div>
-        <div>
-            {% if branding and branding.agent_name %}Prepared by {{ branding.agent_name }}{% endif %}
-        </div>
-    </div>
+    {% if pricing.list_price %}
+    <div class="cover-foot">Asking price {{ pricing.list_price | money(currency) }}{% if pricing.price_per_sqm %} · {{ pricing.price_per_sqm | number(0) }} {{ currency }}/m²{% endif %}{% if property.source %} · Source: {{ property.source }}{% endif %}</div>
+    {% endif %}
 </section>
 
 {% include "default/en/sections/_executive_summary.html" %}
