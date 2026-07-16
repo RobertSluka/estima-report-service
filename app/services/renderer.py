@@ -14,7 +14,7 @@ from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 from app.config import settings
 from app.models import EvaluationPayload
-from app.services.formatting import FILTERS
+from app.services.formatting import build_filters
 
 
 class TemplateNotFoundError(Exception):
@@ -43,14 +43,14 @@ def _resolve_template(style: str, language: str) -> str:
     )
 
 
-def _build_env() -> Environment:
+def _build_env(language: str) -> Environment:
     env = Environment(
         loader=FileSystemLoader(str(settings.TEMPLATES_DIR)),
         autoescape=select_autoescape(["html", "xml"]),
         trim_blocks=True,
         lstrip_blocks=True,
     )
-    env.filters.update(FILTERS)
+    env.filters.update(build_filters(language))
     return env
 
 
@@ -60,7 +60,12 @@ def render_html(payload: EvaluationPayload) -> str:
     language = payload.options.language or settings.DEFAULT_LANGUAGE
 
     template_path = _resolve_template(style, language)
-    env = _build_env()
+    # Bind label filters to the language of the template that actually
+    # resolved (templates/<style>/<language>/report.html), not the requested
+    # one — a fallback to English templates must not produce mixed-language
+    # output from localized filter labels.
+    resolved_language = Path(template_path).parts[-2]
+    env = _build_env(resolved_language)
     template = env.get_template(template_path)
 
     generated_at = payload.generated_at or datetime.now(timezone.utc)

@@ -2,10 +2,65 @@
 
 Kept separate from templates so the same formatting rules can be reused across
 different template styles and languages.
+
+Label-emitting filters (verdicts, bands, yes/no, benchmark names) read from a
+per-language dictionary: the renderer builds the filter set with
+:func:`build_filters` for the language of the *resolved* template, so a report
+never mixes template language and filter-label language. Numbers, currencies,
+and units are locale-neutral and shared.
 """
 from __future__ import annotations
 
 from typing import Optional
+
+_LABELS = {
+    "en": {
+        "underpriced": "Underpriced",
+        "overpriced": "Overpriced",
+        "fairly_priced": "Fairly priced",
+        "very_high": "Very high",
+        "high": "High",
+        "medium": "Medium",
+        "low": "Low",
+        "strong": "Strong",
+        "average": "Average",
+        "weak": "Weak",
+        "yes": "Yes",
+        "no": "No",
+        "benchmark_types": {
+            "listing_asking": "Listing asking prices",
+            "realized_sale": "Realized sale prices",
+            "newbuild_asking": "New-build asking/supply prices",
+            "rent_monthly": "Rent CZK/m²/month",
+        },
+    },
+    "sk": {
+        "underpriced": "Pod trhovou cenou",
+        "overpriced": "Nad trhovou cenou",
+        "fairly_priced": "Primeraná cena",
+        "very_high": "Veľmi vysoká",
+        "high": "Vysoká",
+        "medium": "Stredná",
+        "low": "Nízka",
+        "strong": "Silná",
+        "average": "Priemerná",
+        "weak": "Slabá",
+        "yes": "Áno",
+        "no": "Nie",
+        "benchmark_types": {
+            "listing_asking": "Ponukové ceny inzerátov",
+            "realized_sale": "Realizované predajné ceny",
+            "newbuild_asking": "Ponukové ceny novostavieb",
+            "rent_monthly": "Nájomné za m²/mesiac",
+        },
+    },
+}
+
+
+def labels_for(language: Optional[str]) -> dict:
+    """Labels for ``language``, falling back to English for unknown ones."""
+    return _LABELS.get((language or "en").lower(), _LABELS["en"])
+
 
 _CURRENCY_SYMBOLS = {
     "EUR": "€",
@@ -73,71 +128,76 @@ def default(value, fallback: str = "—"):
     return value if value not in (None, "", []) else fallback
 
 
-def verdict_label(list_price: Optional[float], estimated_value: Optional[float]) -> Optional[str]:
+def verdict_label(
+    list_price: Optional[float],
+    estimated_value: Optional[float],
+    labels: Optional[dict] = None,
+) -> Optional[str]:
     """Classify asking price vs. estimate as underpriced / fairly priced / overpriced.
 
     A +/-3% band around the estimate is treated as "fairly priced" noise, not a
     meaningful mispricing signal.
     """
+    labels = labels or _LABELS["en"]
     if list_price is None or estimated_value is None or list_price == 0:
         return None
     delta_pct = (estimated_value - list_price) / list_price * 100
     if delta_pct > 3:
-        return "Underpriced"
+        return labels["underpriced"]
     if delta_pct < -3:
-        return "Overpriced"
-    return "Fairly priced"
+        return labels["overpriced"]
+    return labels["fairly_priced"]
 
 
-def confidence_label(value: Optional[float]) -> Optional[str]:
+def confidence_label(
+    value: Optional[float], labels: Optional[dict] = None
+) -> Optional[str]:
     """Map a 0..1 confidence score to low / medium / high."""
+    labels = labels or _LABELS["en"]
     if value is None:
         return None
     pct = value * 100 if value <= 1 else value
     if pct >= 75:
-        return "High"
+        return labels["high"]
     if pct >= 50:
-        return "Medium"
-    return "Low"
+        return labels["medium"]
+    return labels["low"]
 
 
-def similarity_band(value: Optional[float]) -> str:
+def similarity_band(value: Optional[float], labels: Optional[dict] = None) -> str:
     """Map a 0..100 similarity score to a coarse band, never a raw '100%'."""
+    labels = labels or _LABELS["en"]
     if value is None:
         return "—"
     if value >= 90:
-        return "Very high"
+        return labels["very_high"]
     if value >= 75:
-        return "High"
+        return labels["high"]
     if value >= 50:
-        return "Medium"
-    return "Low"
+        return labels["medium"]
+    return labels["low"]
 
 
-def investor_attractiveness(gross_yield: Optional[float]) -> Optional[str]:
+def investor_attractiveness(
+    gross_yield: Optional[float], labels: Optional[dict] = None
+) -> Optional[str]:
     """Classify gross rental yield as weak / average / strong."""
+    labels = labels or _LABELS["en"]
     if gross_yield is None:
         return None
     pct = gross_yield * 100 if gross_yield <= 1 else gross_yield
     if pct >= 6:
-        return "Strong"
+        return labels["strong"]
     if pct >= 4:
-        return "Average"
-    return "Weak"
+        return labels["average"]
+    return labels["weak"]
 
 
-_BENCHMARK_TYPE_LABELS = {
-    "listing_asking": "Listing asking prices",
-    "realized_sale": "Realized sale prices",
-    "newbuild_asking": "New-build asking/supply prices",
-    "rent_monthly": "Rent CZK/m²/month",
-}
-
-
-def benchmark_type_label(key: Optional[str]) -> str:
+def benchmark_type_label(key: Optional[str], labels: Optional[dict] = None) -> str:
+    labels = labels or _LABELS["en"]
     if not key:
         return "—"
-    return _BENCHMARK_TYPE_LABELS.get(key, key.replace("_", " ").title())
+    return labels["benchmark_types"].get(key, key.replace("_", " ").title())
 
 
 def walking_time(distance_km: Optional[float]) -> str:
@@ -148,10 +208,11 @@ def walking_time(distance_km: Optional[float]) -> str:
     return f"{minutes} min" if minutes >= 1 else "<1 min"
 
 
-def yesno(value: Optional[bool]) -> str:
+def yesno(value: Optional[bool], labels: Optional[dict] = None) -> str:
+    labels = labels or _LABELS["en"]
     if value is None:
         return "—"
-    return "Yes" if value else "No"
+    return labels["yes"] if value else labels["no"]
 
 
 def span_pct(value: Optional[float], lo: Optional[float], hi: Optional[float]) -> Optional[float]:
@@ -247,22 +308,33 @@ def line_chart(
     }
 
 
-FILTERS = {
-    "money": money,
-    "number": number,
-    "area": area,
-    "per_sqm": per_sqm,
-    "percent": percent,
-    "score_pct": score_pct,
-    "distance": distance,
-    "orblank": default,
-    "verdict_label": verdict_label,
-    "confidence_label": confidence_label,
-    "similarity_band": similarity_band,
-    "investor_attractiveness": investor_attractiveness,
-    "benchmark_type_label": benchmark_type_label,
-    "walking_time": walking_time,
-    "yesno": yesno,
-    "span_pct": span_pct,
-    "line_chart": line_chart,
-}
+def build_filters(language: str = "en") -> dict:
+    """Jinja2 filter set with label filters bound to ``language``.
+
+    Template usage stays identical across languages (e.g. ``x | yesno``);
+    only the emitted label strings differ.
+    """
+    labels = labels_for(language)
+    return {
+        "money": money,
+        "number": number,
+        "area": area,
+        "per_sqm": per_sqm,
+        "percent": percent,
+        "score_pct": score_pct,
+        "distance": distance,
+        "orblank": default,
+        "verdict_label": lambda lp, ev: verdict_label(lp, ev, labels),
+        "confidence_label": lambda v: confidence_label(v, labels),
+        "similarity_band": lambda v: similarity_band(v, labels),
+        "investor_attractiveness": lambda v: investor_attractiveness(v, labels),
+        "benchmark_type_label": lambda k: benchmark_type_label(k, labels),
+        "walking_time": walking_time,
+        "yesno": lambda v: yesno(v, labels),
+        "span_pct": span_pct,
+        "line_chart": line_chart,
+    }
+
+
+# Default (English) filter set, kept for callers that don't resolve a language.
+FILTERS = build_filters("en")
