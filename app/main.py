@@ -32,6 +32,18 @@ app = FastAPI(
 )
 
 
+@app.middleware("http")
+async def limit_payload_size(request: Request, call_next):
+    # Content-Length is authoritative for JSON clients; chunked bodies are not
+    # expected from the services that call this API.
+    length = request.headers.get("content-length")
+    if length and length.isdigit() and int(length) > settings.MAX_PAYLOAD_BYTES:
+        return JSONResponse(
+            {"detail": "Payload too large"}, status_code=413
+        )
+    return await call_next(request)
+
+
 def _base_url(request: Request) -> str:
     if settings.PUBLIC_BASE_URL:
         return settings.PUBLIC_BASE_URL
