@@ -1,0 +1,42 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  # Fast feedback: full suite on the host. Native Pango/Cairo libs are
+  # installed so the WeasyPrint PDF tests run here instead of auto-skipping.
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install WeasyPrint native libraries
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            libpango-1.0-0 libpangocairo-1.0-0 libgdk-pixbuf-2.0-0 \
+            libcairo2 shared-mime-info fonts-dejavu-core
+      - name: Install dependencies
+        run: pip install -r requirements.txt pytest httpx
+      - name: Run tests
+        run: pytest -q
+
+  # The image that actually ships: run the same suite inside it, proving the
+  # bundled native PDF stack works end-to-end.
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build image
+        run: docker build -t estima-report-service:ci .
+      - name: Run test suite inside the image
+        run: |
+          docker run --rm \
+            -v "$PWD/tests:/app/tests:ro" \
+            -v "$PWD/scripts:/app/scripts:ro" \
+            estima-report-service:ci \
+            sh -c "pip install --no-cache-dir pytest httpx && python -m pytest -q"
