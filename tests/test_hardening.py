@@ -158,3 +158,95 @@ def test_fetcher_allows_files_inside_assets_dir():
 
     inside = settings.ASSETS_DIR / "logo.png"
     _validate_file_url(inside.as_uri())
+
+
+# --------------------------------------------------------------------------- #
+# API key auth (opt-in via API_KEY env)
+# --------------------------------------------------------------------------- #
+def _generate_html_only(sample_payload):
+    from app.models import EvaluationPayload
+    from app.services.generator import generate_report
+
+    return generate_report(
+        EvaluationPayload.model_validate(sample_payload), make_pdf=False
+    )
+
+
+def test_api_key_disabled_by_default():
+    from app.main import app
+
+    client = TestClient(app)
+    assert client.get("/reports").status_code == 200
+
+
+def test_api_key_enforced_when_configured(sample_payload, monkeypatch):
+    from app.config import settings
+    from app.main import app
+
+    monkeypatch.setattr(settings, "API_KEY", "sekrit")
+    client = TestClient(app)
+
+    # /health and / stay open; /reports endpoints require the header.
+    assert client.get("/health").status_code == 200
+    assert client.get("/reports").status_code == 401
+    assert client.post("/reports/generate", json=sample_payload).status_code == 401
+    assert (
+        client.get("/reports", headers={"X-API-Key": "wrong"}).status_code == 401
+    )
+    assert (
+        client.get("/reports", headers={"X-API-Key": "sekrit"}).status_code == 200
+    )
+
+
+# --------------------------------------------------------------------------- #
+# DELETE /reports/{id}
+# --------------------------------------------------------------------------- #
+def test_delete_disabled_without_api_key(sample_payload):
+    from app.main import app
+
+    record = _generate_html_only(sample_payload)
+    client = TestClient(app)
+    assert client.delete(f"/reports/{record.report_id}").status_code == 403
+
+
+def test_delete_report_with_api_key(sample_payload, monkeypatch):
+    from app.config import settings
+    from app.main import app
+    from app.services import storage
+
+    monkeypatch.setattr(settings, "API_KEY", "sekrit")
+    record = _generate_html_only(sample_payload)
+    client = TestClient(app)
+    headers = {"X-API-Key": "sekrit"}
+
+    assert client.delete(f"/reports/{record.report_id}").status_code == 401
+    assert (
+        client.delete(f"/reports/{record.report_id}", headers=headers).status_code
+        == 204
+    )
+    assert storage.get_report(record.report_id) is None
+    assert (
+        client.delete(f"/reports/{record.report_id}", headers=headers).status_code
+        == 404
+    )
+
+
+# --------------------------------------------------------------------------- #
+# Retention cleanup
+# --------------------------------------------------------------------------- #
+def test_cleanup_expired_removes_only_old_reports(sample_payload):
+    from app.services import storage
+
+    old = _generate_html_only(sample_payload)
+    fresh = _generate_html_only(sample_payload)
+
+    # Backdate the first report far past any TTL.
+    meta_path = old.dir / "meta.json"
+    meta = json.loads(meta_path.read_text(encoding="utf-8"))
+    meta["created_at"] = "2020-01-01T00:00:00+00:00"
+    meta_path.write_text(json.dumps(meta), encoding="utf-8")
+
+    assert storage.cleanup_expired(0) == []  # disabled TTL never deletes
+    deleted = storage.cleanup_expired(30)
+    assert deleted == [old.report_id]
+    assert storage.get_report(fresh.report_id) is not None

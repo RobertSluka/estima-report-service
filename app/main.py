@@ -1,10 +1,14 @@
 """FastAPI application exposing the report generation endpoints."""
 from __future__ import annotations
 
+import asyncio
+import contextlib
 import json
+import logging
 from contextlib import asynccontextmanager
+from typing import Optional
 
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import Depends, FastAPI, Header, HTTPException, Request, Response
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
 
 from app import __version__
@@ -13,11 +17,41 @@ from app.models import EvaluationPayload, GenerateResponse, ReportInfo
 from app.services import storage
 from app.services.generator import ReportGenerationError, generate_report
 
+logger = logging.getLogger("estima_report")
+
+RETENTION_SWEEP_SECONDS = 3600
+
+
+async def _retention_loop() -> None:
+    while True:
+        deleted = await asyncio.to_thread(
+            storage.cleanup_expired, settings.REPORTS_TTL_DAYS
+        )
+        if deleted:
+            logger.info(
+                "retention sweep deleted=%d ttl_days=%d",
+                len(deleted), settings.REPORTS_TTL_DAYS,
+            )
+        await asyncio.sleep(RETENTION_SWEEP_SECONDS)
+
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     settings.ensure_dirs()
+    retention_task = None
+    if settings.REPORTS_TTL_DAYS > 0:
+        retention_task = asyncio.create_task(_retention_loop())
     yield
+    if retention_task is not None:
+        retention_task.cancel()
+        with contextlib.suppress(asyncio.CancelledError):
+            await retention_task
+
+
+def require_api_key(x_api_key: Optional[str] = Header(None)) -> None:
+    """Optional auth: enforced only when the API_KEY env var is set."""
+    if settings.API_KEY and x_api_key != settings.API_KEY:
+        raise HTTPException(status_code=401, detail="Invalid or missing API key")
 
 
 app = FastAPI(
@@ -88,6 +122,7 @@ def sample_payload():
     response_model=GenerateResponse,
     status_code=201,
     tags=["reports"],
+    dependencies=[Depends(require_api_key)],
 )
 def create_report(payload: EvaluationPayload, request: Request) -> GenerateResponse:
     """Generate an HTML + PDF report from an evaluation payload."""
@@ -110,7 +145,12 @@ def create_report(payload: EvaluationPayload, request: Request) -> GenerateRespo
     )
 
 
-@app.get("/reports", response_model=list[ReportInfo], tags=["reports"])
+@app.get(
+    "/reports",
+    response_model=list[ReportInfo],
+    tags=["reports"],
+    dependencies=[Depends(require_api_key)],
+)
 def list_all_reports(request: Request) -> list[ReportInfo]:
     """List previously generated reports (newest first)."""
     result = []
@@ -131,7 +171,9 @@ def list_all_reports(request: Request) -> list[ReportInfo]:
     return result
 
 
-@app.get("/reports/{report_id}", tags=["reports"])
+@app.get(
+    "/reports/{report_id}", tags=["reports"], dependencies=[Depends(require_api_key)]
+)
 def get_report(report_id: str, request: Request):
     """Return the rendered HTML preview for a report.
 
@@ -160,7 +202,11 @@ def get_report(report_id: str, request: Request):
     return HTMLResponse(html_path.read_text(encoding="utf-8"))
 
 
-@app.get("/reports/{report_id}/download", tags=["reports"])
+@app.get(
+    "/reports/{report_id}/download",
+    tags=["reports"],
+    dependencies=[Depends(require_api_key)],
+)
 def download_report(report_id: str):
     """Download the generated PDF for a report."""
     record = storage.get_report(report_id)
@@ -177,3 +223,26 @@ def download_report(report_id: str):
         media_type="application/pdf",
         filename=filename,
     )
+
+
+@app.delete(
+    "/reports/{report_id}",
+    status_code=204,
+    tags=["reports"],
+    dependencies=[Depends(require_api_key)],
+)
+def delete_report(report_id: str) -> Response:
+    """Delete a report and its artifacts.
+
+    Deletion is only available when the service is configured with an API key
+    — an unauthenticated deployment must not allow destructive operations.
+    """
+    if not settings.API_KEY:
+        raise HTTPException(
+            status_code=403, detail="Deletion is disabled: no API_KEY configured"
+        )
+    if storage.get_report(report_id) is None:
+        raise HTTPException(status_code=404, detail="Report not found")
+    storage.delete_report(report_id)
+    logger.info("report deleted report_id=%s", report_id)
+    return Response(status_code=204)
