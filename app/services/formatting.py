@@ -62,6 +62,15 @@ def labels_for(language: Optional[str]) -> dict:
     return _LABELS.get((language or "en").lower(), _LABELS["en"])
 
 
+# Localized month abbreviations for the date_l10n filter (estima style).
+_MONTHS = {
+    "en": ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+           "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+    "sk": ["jan", "feb", "mar", "apr", "máj", "jún",
+           "júl", "aug", "sep", "okt", "nov", "dec"],
+}
+
+
 _CURRENCY_SYMBOLS = {
     "EUR": "€",
     "USD": "$",
@@ -308,6 +317,222 @@ def line_chart(
     }
 
 
+# --------------------------------------------------------------------------- #
+# Estima-style filters (ported from the estima-backend report renderer so both
+# products' reports read identically: space-grouped numbers with a trailing
+# currency, em-dash fallbacks, localized dates, embedded images, SVG chart).
+# --------------------------------------------------------------------------- #
+
+_DASH = "—"
+_NNBSP = " "  # narrow no-break space: thousands separator in EU formats
+
+# Cap on remotely fetched images so a rogue URL can't bloat or hang the PDF.
+_IMAGE_MAX_BYTES = 6 * 1024 * 1024
+
+_PLACEHOLDER_SVG = (
+    "<svg xmlns='http://www.w3.org/2000/svg' width='400' height='300'>"
+    "<rect width='100%' height='100%' fill='#eef1f5'/>"
+    "<text x='50%' y='50%' fill='#9aa5b1' font-family='sans-serif' "
+    "font-size='18' text-anchor='middle' dominant-baseline='middle'>"
+    "Image unavailable</text></svg>"
+)
+
+
+def _placeholder_data_uri() -> str:
+    import base64
+
+    return "data:image/svg+xml;base64," + base64.b64encode(
+        _PLACEHOLDER_SVG.encode("utf-8")
+    ).decode("ascii")
+
+
+def num(value: Optional[float], decimals: int = 0, suffix: str = "") -> str:
+    """Space-grouped number: 3482 -> '3 482', with an optional suffix."""
+    if value is None:
+        return _DASH
+    try:
+        f = float(value)
+    except (TypeError, ValueError):
+        return _DASH
+    return f"{f:,.{decimals}f}".replace(",", _NNBSP) + suffix
+
+
+def amount(value: Optional[float], currency: str = "EUR") -> str:
+    """Money with trailing currency: 195000 -> '195 000 EUR'."""
+    if value is None:
+        return _DASH
+    try:
+        n = round(float(value))
+    except (TypeError, ValueError):
+        return _DASH
+    return f"{n:,}".replace(",", _NNBSP) + f" {currency}"
+
+
+def signed_amount(value: Optional[float], currency: str = "EUR") -> str:
+    if value is None:
+        return _DASH
+    try:
+        f = float(value)
+    except (TypeError, ValueError):
+        return _DASH
+    sign = "+" if f > 0 else ("-" if f < 0 else "")
+    return f"{sign}{amount(abs(f), currency)}"
+
+
+def pct(value: Optional[float], decimals: int = 1, signed: bool = False) -> str:
+    if value is None:
+        return _DASH
+    try:
+        f = float(value)
+    except (TypeError, ValueError):
+        return _DASH
+    sign = "+" if (signed and f > 0) else ""
+    return f"{sign}{f:.{decimals}f} %"
+
+
+def date_l10n(value, language: str = "en") -> str:
+    """Localized 'D Mon YYYY' (e.g. '16 júl 2026' for sk)."""
+    if value is None:
+        return _DASH
+    months = _MONTHS.get((language or "en").lower(), _MONTHS["en"])
+    try:
+        return f"{value.day} {months[value.month - 1]} {value.year}"
+    except (AttributeError, IndexError, TypeError):
+        return str(value)
+
+
+def verdict_key(
+    list_price: Optional[float], estimated_value: Optional[float]
+) -> str:
+    """Language-independent verdict slug for CSS classes and label lookup.
+
+    Same +/-3% band as :func:`verdict_label`; 'unknown' when unassessable.
+    """
+    if list_price is None or estimated_value is None or list_price == 0:
+        return "unknown"
+    delta_pct = (estimated_value - list_price) / list_price * 100
+    if delta_pct > 3:
+        return "undervalued"
+    if delta_pct < -3:
+        return "overpriced"
+    return "fair"
+
+
+def embed_image(url: Optional[str]) -> str:
+    """Return a data URI for ``url``, or a neutral placeholder.
+
+    Fetches go through the same SSRF policy as PDF asset fetching
+    (public hosts only, optional allowlist, timeout) and are size-capped.
+    Never raises — any failure yields the placeholder, so a broken image URL
+    cannot break report generation.
+    """
+    import base64
+
+    if not url:
+        return _placeholder_data_uri()
+    if url.startswith("data:"):
+        return url
+    if not url.startswith(("http://", "https://")):
+        return _placeholder_data_uri()
+
+    from app.services import pdf as pdf_service
+
+    try:
+        fetched = pdf_service._fetch_remote(url)
+        content = fetched["file_obj"].read(_IMAGE_MAX_BYTES + 1)
+        if not content or len(content) > _IMAGE_MAX_BYTES:
+            return _placeholder_data_uri()
+        mime = fetched.get("mime_type") or "image/jpeg"
+        if not mime.startswith("image/"):
+            mime = "image/jpeg"
+        return f"data:{mime};base64," + base64.b64encode(content).decode("ascii")
+    except Exception:
+        return _placeholder_data_uri()
+
+
+def index_svg(series, width: int = 640, height: int = 150):
+    """Render a price-index series as a self-contained SVG line chart.
+
+    Accepts a sequence of points with ``period``/``value`` (attributes or dict
+    keys). WeasyPrint ignores CSS inside inline SVG, so every style is an
+    attribute. Returns empty markup below 3 usable points.
+    """
+    from markupsafe import Markup, escape
+
+    pts: list = []
+    for p in series or []:
+        period = p.get("period") if isinstance(p, dict) else getattr(p, "period", None)
+        value = p.get("value") if isinstance(p, dict) else getattr(p, "value", None)
+        if value is None:
+            continue
+        pts.append((str(period or ""), float(value)))
+    if len(pts) < 3:
+        return Markup("")
+
+    W, H = width, height
+    PAD_L, PAD_R, PAD_T, PAD_B = 8, 8, 16, 22
+    BRAND, GRID, MUTED = "#123a5e", "#dbe4ec", "#6b7f90"
+
+    vals = [v for _, v in pts]
+    lo, hi = min(vals), max(vals)
+    span = (hi - lo) or max(abs(hi), 1.0)
+    lo -= span * 0.10
+    hi += span * 0.10
+    span = hi - lo
+
+    def x(i: int) -> float:
+        return PAD_L + i * (W - PAD_L - PAD_R) / (len(pts) - 1)
+
+    def y(v: float) -> float:
+        return PAD_T + (hi - v) * (H - PAD_T - PAD_B) / span
+
+    def fmt(v: float) -> str:
+        return f"{v:,.0f}".replace(",", _NNBSP)
+
+    poly = " ".join(f"{x(i):.1f},{y(v):.1f}" for i, (_, v) in enumerate(pts))
+    area = f"{PAD_L},{H - PAD_B} {poly} {W - PAD_R},{H - PAD_B}"
+
+    parts = [
+        f'<svg width="{W}" height="{H}" viewBox="0 0 {W} {H}" '
+        f'xmlns="http://www.w3.org/2000/svg">'
+    ]
+    for frac in (0.0, 0.5, 1.0):
+        gy = PAD_T + frac * (H - PAD_T - PAD_B)
+        parts.append(
+            f'<line x1="{PAD_L}" y1="{gy:.1f}" x2="{W - PAD_R}" y2="{gy:.1f}" '
+            f'stroke="{GRID}" stroke-width="1"/>'
+        )
+    parts.append(f'<polygon points="{area}" fill="{BRAND}" fill-opacity="0.07"/>')
+    parts.append(
+        f'<polyline points="{poly}" fill="none" stroke="{BRAND}" '
+        f'stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>'
+    )
+    for i, (_, v) in enumerate(pts):
+        r = 3.4 if i == len(pts) - 1 else 2.2
+        parts.append(f'<circle cx="{x(i):.1f}" cy="{y(v):.1f}" r="{r}" fill="{BRAND}"/>')
+    first_label, first_v = pts[0]
+    last_label, last_v = pts[-1]
+    parts.append(
+        f'<text x="{x(0):.1f}" y="{y(first_v) - 6:.1f}" text-anchor="start" '
+        f'font-family="Helvetica, Arial, sans-serif" font-size="9" fill="{MUTED}">'
+        f"{fmt(first_v)}</text>"
+    )
+    parts.append(
+        f'<text x="{x(len(pts) - 1):.1f}" y="{y(last_v) - 6:.1f}" text-anchor="end" '
+        f'font-family="Helvetica, Arial, sans-serif" font-size="9" font-weight="bold" '
+        f'fill="{BRAND}">{fmt(last_v)}</text>'
+    )
+    for i in (0, len(pts) // 2, len(pts) - 1):
+        anchor = "start" if i == 0 else ("end" if i == len(pts) - 1 else "middle")
+        parts.append(
+            f'<text x="{x(i):.1f}" y="{H - 7}" text-anchor="{anchor}" '
+            f'font-family="Helvetica, Arial, sans-serif" font-size="8.5" fill="{MUTED}">'
+            f"{escape(pts[i][0])}</text>"
+        )
+    parts.append("</svg>")
+    return Markup("".join(parts))
+
+
 def build_filters(language: str = "en") -> dict:
     """Jinja2 filter set with label filters bound to ``language``.
 
@@ -333,6 +558,16 @@ def build_filters(language: str = "en") -> dict:
         "yesno": lambda v: yesno(v, labels),
         "span_pct": span_pct,
         "line_chart": line_chart,
+        # estima style (backend-aligned formatting)
+        "num": num,
+        "amount": amount,
+        "signed_amount": signed_amount,
+        "pct": pct,
+        "dash": default,
+        "date_l10n": lambda v: date_l10n(v, language),
+        "verdict_key": verdict_key,
+        "embed_image": embed_image,
+        "index_svg": index_svg,
     }
 
 

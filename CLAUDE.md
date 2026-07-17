@@ -43,6 +43,11 @@ No database. Artifacts are written to `reports/<report_id>/`
 - `app/static/index.html` — minimal UI served at `GET /` (path via `STATIC_DIR`)
 - `app/templates/<style>/<language>/report.html` — new agencies/styles/languages
   are added by dropping in directories, **not** by code changes
+- `app/templates/estima/` — the production report design, ported from
+  estima-backend/estima-sk-backend so all Estima products emit the same
+  document: shared `base.html` + per-language `report.html` string dicts
+  (sk, en). The estima.sk deployment runs with `DEFAULT_TEMPLATE=estima`.
+  Keep wording aligned with the backends' `i18n.py` when strings change.
 - `samples/sample_evaluation.json` — canonical working payload example
 - `scripts/render_local.py` — render the sample without a server
   (`--no-pdf` skips WeasyPrint, useful when native libs are missing)

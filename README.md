@@ -12,7 +12,8 @@ a professional real estate **HTML/PDF report**.
 - **FastAPI** JSON API with three core endpoints.
 - **Jinja2** templates, organized as `templates/<style>/<language>/` so new
   agencies, languages, and report styles are added by dropping in directories —
-  no code changes.
+  no code changes. The `estima` style (sk/en) is the production design shared
+  with estima-backend; `default` is a simpler standalone style.
 - **WeasyPrint** HTML → PDF conversion (isolated behind `app/services/pdf.py`,
   so it can later be swapped for Playwright/Puppeteer).
 - **Local file storage** under `reports/<report_id>/` (`report.html`,

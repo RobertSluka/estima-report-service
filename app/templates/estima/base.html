@@ -1,0 +1,628 @@
+{#
+  Estima report design — shared base for all languages of the "estima" style.
+
+  Ported from estima-backend/estima-sk-backend's report template so the
+  standalone report service produces the same document as the backends.
+  Language files (<lang>/report.html) define the string dict `T` and include
+  this file; label-emitting filters are already bound to the resolved
+  language by the renderer.
+
+  WeasyPrint 62.3 notes (differs from the backends' 65.1): flex `gap` is
+  unreliable here, so all flex gaps are adjacent-sibling margins; the photo
+  strip uses inline-block for the same reason.
+#}
+{% set cur = currency or "EUR" %}
+{% set brand = (branding.name if branding and branding.name else "Estima") %}
+{% set v = pricing.list_price | verdict_key(valuation.estimated_value) %}
+{% set price_diff = (pricing.list_price - valuation.estimated_value)
+   if (pricing.list_price is not none and valuation.estimated_value is not none) else None %}
+{% set price_diff_pct = (price_diff / valuation.estimated_value * 100)
+   if (price_diff is not none and valuation.estimated_value) else None %}
+<!DOCTYPE html>
+<html lang="{{ T.lang_code }}">
+<head>
+<meta charset="utf-8">
+<title>{{ brand }} — {{ T.report_title }}</title>
+<style>
+  @page {
+    size: A4;
+    margin: 18mm 16mm 20mm 16mm;
+    @bottom-left {
+      content: "{{ brand }} · {{ T.tagline }}";
+      font-size: 7.5pt;
+      color: #9aa5b1;
+    }
+    @bottom-right {
+      content: "Page " counter(page) " / " counter(pages);
+      font-size: 7.5pt;
+      color: #9aa5b1;
+    }
+  }
+  @page :first {
+    margin: 0;             /* full-bleed cover */
+    @bottom-left { content: ""; }
+    @bottom-right { content: ""; }
+  }
+
+  :root {
+    --ink:        #1d2733;
+    --ink-soft:   #55616e;
+    --muted:      #8a95a1;
+    --line:       #e3e8ee;
+    --panel:      #f6f8fa;
+    --brand:      #123a5e;
+    --brand-2:    #1f6f8b;
+    --accent:     #c9a227;
+    --good:       #1f8a54;
+    --good-bg:    #e7f5ee;
+    --warn:       #b9821b;
+    --warn-bg:    #fbf2df;
+    --bad:        #c0392b;
+    --bad-bg:     #fcecea;
+    --info:       #1f6f8b;
+    --info-bg:    #e8f2f6;
+  }
+
+  * { box-sizing: border-box; }
+  html { -weasy-hyphens: auto; }
+  body {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    color: var(--ink);
+    font-size: 10pt;
+    line-height: 1.5;
+    margin: 0;
+  }
+  h1, h2, h3 { margin: 0; font-weight: 700; }
+  p { margin: 0 0 6pt; }
+  a { color: var(--brand-2); text-decoration: none; word-break: break-all; }
+  table { width: 100%; border-collapse: collapse; }
+
+  .section { margin-top: 20pt; }
+  .section-head {
+    display: flex;
+    align-items: baseline;
+    border-bottom: 2px solid var(--brand);
+    padding-bottom: 5pt;
+    margin-bottom: 12pt;
+  }
+  .section-num {
+    font-size: 9pt;
+    font-weight: 700;
+    color: #fff;
+    background: var(--brand);
+    border-radius: 3px;
+    padding: 1.5pt 6pt;
+    margin-right: 8pt;
+  }
+  .section-title { font-size: 13pt; color: var(--brand); letter-spacing: .2px; }
+  .page-break { page-break-before: always; }
+  .avoid-break { page-break-inside: avoid; }
+
+  .muted { color: var(--muted); }
+  .soft  { color: var(--ink-soft); }
+  .fallback {
+    color: var(--muted);
+    font-style: italic;
+    background: var(--panel);
+    border: 1px dashed var(--line);
+    border-radius: 6px;
+    padding: 10pt 12pt;
+    font-size: 9.5pt;
+  }
+
+  /* Cover — explicit A4 height: 100vh is unreliable in WeasyPrint 62.3 */
+  .cover {
+    height: 297mm;
+    display: flex;
+    flex-direction: column;
+    color: #fff;
+    background: linear-gradient(160deg, #0d2f4d 0%, #123a5e 45%, #1f6f8b 100%);
+    padding: 22mm 18mm 16mm 18mm;
+  }
+  .cover-top { display: flex; justify-content: space-between; align-items: flex-start; }
+  .brand-mark { font-size: 22pt; font-weight: 800; letter-spacing: 1px; }
+  .brand-mark .dot { color: var(--accent); }
+  .brand-tag { font-size: 8.5pt; letter-spacing: 3px; text-transform: uppercase; color: #b9d4e4; margin-top: 2pt; }
+  .cover-kicker { font-size: 9pt; letter-spacing: 2px; text-transform: uppercase; color: #9ec7dd; }
+
+  .cover-img-wrap {
+    margin: 16pt 0;
+    border-radius: 10px;
+    overflow: hidden;
+    height: 78mm;
+    border: 1px solid rgba(255,255,255,.18);
+  }
+  .cover-img { width: 100%; height: 100%; object-fit: cover; }
+
+  .cover-title { font-size: 26pt; line-height: 1.15; margin-top: 6pt; }
+  .cover-locality { font-size: 12pt; color: #cfe3ee; margin-top: 6pt; }
+  .cover-spacer { flex: 1; }
+
+  .badge-strip { display: flex; margin-top: 14pt; }
+  .badge-card {
+    flex: 1;
+    background: rgba(255,255,255,.10);
+    border: 1px solid rgba(255,255,255,.20);
+    border-radius: 8px;
+    padding: 10pt 12pt;
+  }
+  .badge-card + .badge-card { margin-left: 10pt; }
+  .badge-card .label { font-size: 7.5pt; letter-spacing: 1.5px; text-transform: uppercase; color: #b9d4e4; }
+  .badge-card .value { font-size: 14pt; font-weight: 700; margin-top: 3pt; }
+  .verdict-pill {
+    display: inline-block;
+    font-size: 12pt;
+    font-weight: 700;
+    padding: 4pt 12pt;
+    border-radius: 20px;
+    margin-top: 3pt;
+  }
+  .cover-foot { font-size: 8pt; color: #9ec7dd; margin-top: 16pt; }
+
+  .v-undervalued { background: var(--good-bg); color: var(--good); }
+  .v-fair        { background: var(--info-bg); color: var(--info); }
+  .v-overpriced  { background: var(--bad-bg);  color: var(--bad); }
+  .v-unknown     { background: var(--panel);   color: var(--muted); }
+
+  /* Key-value details: a real table — CSS grid is unreliable in WP 62.3 */
+  .kv-table {
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    border-collapse: separate;
+    border-spacing: 0;
+  }
+  .kv-table td {
+    padding: 7pt 12pt;
+    border-bottom: 1px solid var(--line);
+    font-size: 9pt;
+  }
+  .kv-table tr:last-child td { border-bottom: none; }
+  .kv-table td.k { color: var(--muted); width: 18%; }
+  .kv-table td.v { font-weight: 600; text-align: right; width: 32%; }
+  .kv-table td.divider { border-right: 1px solid var(--line); }
+
+  .cards { display: flex; }
+  .card {
+    flex: 1;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 9pt 13pt;
+  }
+  .card + .card { margin-left: 10pt; }
+  .card .label { font-size: 7.5pt; letter-spacing: 1.2px; text-transform: uppercase; color: var(--muted); }
+  .card .big { font-size: 15pt; font-weight: 700; margin-top: 3pt; }
+  .card .sub { font-size: 8.5pt; color: var(--ink-soft); margin-top: 2pt; }
+
+  .callout {
+    background: var(--info-bg);
+    border-left: 3px solid var(--brand-2);
+    border-radius: 4px;
+    padding: 7pt 12pt;
+    margin-top: 8pt;
+    font-size: 9.5pt;
+    color: var(--ink);
+  }
+
+  /* Tables */
+  .data-table { font-size: 8.6pt; margin-top: 4pt; }
+  .data-table th {
+    text-align: left;
+    background: var(--brand);
+    color: #fff;
+    padding: 6pt 7pt;
+    font-weight: 600;
+    font-size: 8pt;
+  }
+  .data-table td { padding: 4pt 7pt; border-bottom: 1px solid var(--line); }
+  .data-table tr.subject-row td { background: var(--warn-bg); font-weight: 700; }
+  .data-table tr.median-row td { background: var(--panel); font-style: italic; }
+  .data-table .num { text-align: right; white-space: nowrap; }
+  .pos { color: var(--good); }
+  .neg { color: var(--bad); }
+
+  /* Score badges / bars */
+  .score-row { display: flex; margin: 4pt 0 2pt; }
+  .score-badge {
+    flex: 1;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 9pt 11pt;
+    text-align: center;
+    background: #fff;
+  }
+  .score-badge + .score-badge { margin-left: 10pt; }
+  .score-badge .n { font-size: 17pt; font-weight: 800; color: var(--brand); }
+  .score-badge .n small { font-size: 8pt; color: var(--muted); font-weight: 600; }
+  .score-badge .l { font-size: 7.5pt; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); margin-top: 2pt; }
+
+  /* Photo strip: inline-block, not flex — WeasyPrint's flex gap is unreliable. */
+  .photo-strip { margin: 8pt 0 2pt; font-size: 0; }
+  .photo-strip img {
+    display: inline-block;
+    width: 32.3%;
+    height: 100pt;
+    object-fit: cover;
+    border-radius: 6px;
+    margin-right: 1.5%;
+  }
+  .photo-strip img:last-child { margin-right: 0; }
+
+  /* Location facilities */
+  .map-box {
+    height: 55mm; border-radius: 8px; overflow: hidden;
+    border: 1px solid var(--line); background: var(--panel);
+    display: flex; align-items: center; justify-content: center; color: var(--muted);
+    font-size: 9pt; margin-bottom: 12pt;
+  }
+  .map-box img { width: 100%; height: 100%; object-fit: cover; }
+
+  .poi-grid { font-size: 0; margin-right: -10pt; }
+  .poi {
+    display: inline-block; vertical-align: top;
+    width: 33.3%; padding-right: 10pt; margin-bottom: 10pt;
+  }
+  .poi-inner {
+    border: 1px solid var(--line); border-radius: 8px; padding: 10pt 12pt; background: #fff;
+  }
+  .poi .n { font-size: 15pt; font-weight: 800; color: var(--brand); }
+  .poi .l { font-size: 8pt; color: var(--muted); }
+  .poi .r { font-size: 7pt; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; }
+
+  .nearest-head {
+    margin: 6pt 0 6pt; font-size: 7.5pt; font-weight: 700; color: var(--muted);
+    text-transform: uppercase; letter-spacing: .5px;
+  }
+  .nearest-grid { font-size: 0; margin-right: -8pt; }
+  .nearest-cell {
+    display: inline-block; vertical-align: top;
+    width: 33.3%; padding-right: 8pt; margin-bottom: 8pt;
+  }
+  .nearest {
+    display: flex; align-items: center;
+    border: 1px solid var(--line); border-radius: 8px; padding: 7pt 9pt; background: #fff;
+    font-size: 8.5pt;
+  }
+  .nearest .ni {
+    width: 16pt; height: 16pt; flex: none; border-radius: 50%;
+    background: var(--info-bg); color: var(--brand-2);
+    display: flex; align-items: center; justify-content: center;
+    margin-right: 7pt;
+  }
+  .nearest .ni svg { width: 9pt; height: 9pt; }
+  .nearest .nn {
+    font-size: 8.5pt; font-weight: 700; color: var(--ink);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .nearest .nt { min-width: 0; }
+  .nearest .nd { font-size: 7.5pt; color: var(--muted); }
+
+  /* Recommendation */
+  .rec-summary {
+    background: var(--brand); color: #fff; border-radius: 8px; padding: 14pt 16pt;
+    font-size: 10.5pt; line-height: 1.55;
+  }
+  .rec-cols { display: flex; margin-top: 12pt; }
+  .rec-col { flex: 1; border: 1px solid var(--line); border-radius: 8px; padding: 11pt 13pt; }
+  .rec-col + .rec-col { margin-left: 10pt; }
+  .rec-col h3 { font-size: 9.5pt; margin-bottom: 6pt; }
+  .rec-col.strengths h3 { color: var(--good); }
+  .rec-col.risks h3 { color: var(--bad); }
+  .rec-col.steps h3 { color: var(--brand-2); }
+  .rec-col ul { margin: 0; padding-left: 14pt; }
+  .rec-col li { font-size: 9pt; margin-bottom: 4pt; }
+
+  .disclaimer {
+    margin-top: 20pt; padding-top: 8pt; border-top: 1px solid var(--line);
+    font-size: 7.5pt; color: var(--muted); line-height: 1.4;
+  }
+</style>
+</head>
+<body>
+
+{# ================================ COVER ================================ #}
+<section class="cover">
+  <div class="cover-top">
+    <div>
+      <div class="brand-mark">{{ brand }}<span class="dot">.</span></div>
+      <div class="brand-tag">{{ T.tagline }}</div>
+    </div>
+    <div style="text-align:right">
+      <div class="cover-kicker">{{ T.report_title }}</div>
+      <div style="font-size:9pt; color:#cfe3ee; margin-top:4pt">{{ generated_at | date_l10n }}</div>
+    </div>
+  </div>
+
+  <div class="cover-img-wrap">
+    <img class="cover-img" src="{{ (property.images[0] if property.images else None) | embed_image }}" alt="">
+  </div>
+
+  <h1 class="cover-title">{{ property.title | dash(T.fb_untitled) }}</h1>
+  <div class="cover-locality">{{ property.locality | dash(property.city | dash(T.fb_no_locality)) }}{% if property.property_type %} · {{ property.property_type }}{% endif %}{% if property.layout %} · {{ property.layout }}{% endif %}</div>
+
+  <div class="cover-spacer"></div>
+
+  <div class="badge-strip">
+    <div class="badge-card">
+      <div class="label">{{ T.assessment }}</div>
+      <span class="verdict-pill v-{{ v }}">
+        {% if v == "undervalued" %}{{ T.undervalued }}{% elif v == "fair" %}{{ T.fairly_priced }}{% elif v == "overpriced" %}{{ T.overpriced }}{% else %}{{ T.not_assessed }}{% endif %}
+      </span>
+    </div>
+    <div class="badge-card">
+      <div class="label">{{ T.est_market_value }}</div>
+      <div class="value">{{ valuation.estimated_value | amount(cur) }}</div>
+    </div>
+    <div class="badge-card">
+      <div class="label">{{ T.vs_asking }}</div>
+      <div class="value">{{ price_diff | signed_amount(cur) }}
+        {% if price_diff_pct is not none %}
+          <span style="font-size:9pt; font-weight:600; color:#cfe3ee">({{ price_diff_pct | pct(1, true) }})</span>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="cover-foot">{{ T.asking_price }} {{ pricing.list_price | amount(cur) }}
+    {% if pricing.price_per_sqm %} · {{ pricing.price_per_sqm | num(0) }} {{ cur }}/m²{% endif %}
+    {% if property.source %} · {{ T.source }}: {{ property.source }}{% endif %}
+  </div>
+</section>
+
+{# ========================== 01 PROPERTY DETAILS ======================== #}
+<section class="section">
+  <div class="section-head"><span class="section-num">01</span><h2 class="section-title">{{ T.sec_details }}</h2></div>
+  <table class="kv-table">
+    <tr>
+      <td class="k">{{ T.m_address }}</td><td class="v divider">{{ property.address | dash(property.locality | dash) }}</td>
+      <td class="k">{{ T.m_type }}</td><td class="v">{{ property.property_type | dash }}</td>
+    </tr>
+    <tr>
+      <td class="k">{{ T.m_deal }}</td><td class="v divider">{% if property.deal_type == "sale" %}{{ T.sale }}{% elif property.deal_type == "rent" %}{{ T.rent }}{% else %}—{% endif %}</td>
+      <td class="k">{{ T.m_layout }}</td><td class="v">{{ property.layout | dash }}</td>
+    </tr>
+    <tr>
+      <td class="k">{{ T.m_floor_area }}</td><td class="v divider">{{ property.floor_area | num(0, " m²") if property.floor_area is not none else "—" }}</td>
+      <td class="k">{{ T.m_land_area }}</td><td class="v">{{ property.land_area | num(0, " m²") if property.land_area is not none else "—" }}</td>
+    </tr>
+    <tr>
+      <td class="k">{{ T.m_floor }}</td><td class="v divider">{{ property.floor | dash }}</td>
+      <td class="k">{{ T.m_asking }}</td><td class="v">{{ pricing.list_price | amount(cur) }}</td>
+    </tr>
+    <tr>
+      <td class="k">{{ T.m_psqm }}</td><td class="v divider">{{ pricing.price_per_sqm | num(0, " " ~ cur ~ "/m²") }}</td>
+      <td class="k">{{ T.m_source }}</td><td class="v">{{ property.source | dash }}</td>
+    </tr>
+    <tr>
+      <td class="k">{{ T.m_first_seen }}</td><td class="v divider">{{ property.first_seen_at | date_l10n }}</td>
+      <td class="k">{{ T.m_last_seen }}</td><td class="v">{{ property.last_seen_at | date_l10n }}</td>
+    </tr>
+    <tr>
+      <td class="k">{{ T.m_days }}</td><td class="v divider">{{ property.days_on_market | dash }}</td>
+      <td class="k">{{ T.m_reference }}</td><td class="v">{% if property.source_url %}<a href="{{ property.source_url }}">{{ T.listing_link }}</a>{% else %}—{% endif %}</td>
+    </tr>
+  </table>
+</section>
+
+{# =========================== 02 MARKET ANALYSIS ======================== #}
+<section class="section">
+  <div class="section-head"><span class="section-num">02</span><h2 class="section-title">{{ T.sec_market }}</h2></div>
+
+  <div class="cards">
+    <div class="card">
+      <div class="label">{{ T.est_fair_value }}</div>
+      <div class="big">{{ valuation.estimated_value | amount(cur) }}</div>
+      {% set rng = valuation.recommended_price_range %}
+      {% if rng and (rng.low is not none or rng.high is not none) %}
+      <div class="sub">{{ T.range }} {{ rng.low | amount(cur) }} – {{ rng.high | amount(cur) }}</div>
+      {% endif %}
+    </div>
+    <div class="card">
+      <div class="label">{{ T.local_median }}</div>
+      <div class="big">{{ valuation.local_median_price | amount(cur) }}</div>
+      <div class="sub">{{ T.median_psqm }}: {{ valuation.local_median_price_per_sqm | num(0, " " ~ cur ~ "/m²") }}</div>
+    </div>
+    <div class="card">
+      <div class="label">{{ T.asking_vs_est }}</div>
+      <div class="big {% if price_diff is not none and price_diff < 0 %}pos{% elif price_diff is not none and price_diff > 0 %}neg{% endif %}">
+        {{ price_diff_pct | pct(1, true) }}
+      </div>
+      <div class="sub">{{ price_diff | signed_amount(cur) }}</div>
+    </div>
+  </div>
+
+  {% if valuation.why_this_estimate %}
+  <div class="callout">{{ valuation.why_this_estimate | join(" ") }}</div>
+  {% endif %}
+
+  {% if benchmarks %}
+  <div class="callout avoid-break">
+    <strong>{{ T.benchmark_title }}:</strong>
+    {% for b in benchmarks %}
+      {{ b.name | dash }} ({{ b.benchmark_type | benchmark_type_label }}):
+      <strong>{{ b.value_per_sqm | num(0, " " ~ cur ~ "/m²") }}</strong>{% if not loop.last %} · {% endif %}
+    {% endfor %}
+    <div class="muted" style="font-size:7.5pt; margin-top:2pt">{{ T.benchmark_note }}</div>
+  </div>
+  {% endif %}
+
+  {% if market_statistics and market_statistics.series | length >= 3 %}
+  <div class="avoid-break" style="margin-top:6pt; border:1px solid var(--line); border-radius:6pt; padding:6pt 10pt">
+    <div style="font-size:9pt; font-weight:600; color:var(--brand)">
+      {{ T.index_chart_title }}
+      <span class="muted" style="font-weight:400">
+        — {{ market_statistics.source | dash }}{% if market_statistics.region %} ({{ market_statistics.region }}){% endif %}, {{ cur }}/m²
+      </span>
+    </div>
+    <div style="margin-top:4pt">{{ market_statistics.series | index_svg }}</div>
+    <div class="muted" style="font-size:7.5pt; margin-top:2pt">{{ T.index_chart_note_external }}</div>
+  </div>
+  {% endif %}
+
+  <h3 style="font-size:10pt; color:var(--brand); margin-top:10pt; margin-bottom:4pt">{{ T.comparables }}</h3>
+  {% if comparables %}
+  {# No avoid-break: WeasyPrint would push the whole table to a near-empty
+     next page even with room under the chart (matches the backend variant). #}
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>{{ T.th_property }}</th><th>{{ T.th_locality }}</th><th>{{ T.th_layout }}</th>
+        <th class="num">{{ T.th_area }}</th><th class="num">{{ T.th_price }}</th><th class="num">{{ T.th_psqm }}</th>
+        <th class="num">{{ T.th_delta }}</th><th class="num">{{ T.th_similarity }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for c in comparables %}
+      <tr class="{% if c.is_subject %}subject-row{% elif c.is_median %}median-row{% endif %}">
+        <td>{{ c.label | dash }}</td>
+        <td>{{ c.locality | dash }}</td>
+        <td>{{ c.layout | dash }}</td>
+        <td class="num">{{ c.floor_area | num(0, " m²") if c.floor_area is not none else "—" }}</td>
+        <td class="num">{{ c.price | amount(cur) }}</td>
+        <td class="num">{{ c.price_per_sqm | num(0) }}</td>
+        <td class="num {% if c.price_difference_vs_subject and c.price_difference_vs_subject < 0 %}neg{% elif c.price_difference_vs_subject and c.price_difference_vs_subject > 0 %}pos{% endif %}">
+          {% if c.is_subject %}—{% else %}{{ c.price_difference_vs_subject | signed_amount(cur) }}{% endif %}
+        </td>
+        <td class="num">{% if c.is_subject %}—{% else %}{{ c.similarity_score | num(0, " %") if c.similarity_score is not none else "—" }}{% endif %}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <p class="muted" style="font-size:7.5pt; margin-top:3pt">{{ T.comp_footnote }}</p>
+  {% else %}
+  <div class="fallback">{{ T.fb_no_comparables }}</div>
+  {% endif %}
+</section>
+
+{# ======================== 03 LISTING PHOTO QUALITY ===================== #}
+{# Measurable photo statistics only — never a claim about the property's
+   condition, and never a price adjustment. #}
+<section class="section page-break">
+  <div class="section-head"><span class="section-num">03</span><h2 class="section-title">{{ T.sec_vision }}</h2></div>
+
+  {% if vision_analysis.available %}
+  <div class="score-row">
+    <div class="score-badge"><div class="n">{{ vision_analysis.photo_quality | num(0) }}<small>/100</small></div><div class="l">{{ T.photo_quality }}</div></div>
+    <div class="score-badge"><div class="n">{{ vision_analysis.brightness | num(0) }}<small>/100</small></div><div class="l">{{ T.brightness }}</div></div>
+    <div class="score-badge"><div class="n">{{ vision_analysis.sharpness | num(0) }}<small>/100</small></div><div class="l">{{ T.sharpness }}</div></div>
+    <div class="score-badge"><div class="n">{{ vision_analysis.gallery_size | num(0) }}</div><div class="l">{{ T.gallery_photos }}</div></div>
+  </div>
+
+  {% set strip_images = vision_analysis.images or property.images %}
+  {% if strip_images %}
+  <div class="photo-strip">
+    {% for img in strip_images[:3] %}<img src="{{ img | embed_image }}" alt="">{% endfor %}
+  </div>
+  {% endif %}
+
+  <div class="callout">{{ vision_analysis.summary | dash(T.fb_vision_summary) }}</div>
+
+  {% if vision_analysis.observations %}
+  <p class="soft" style="font-weight:600; margin-top:8pt">{{ T.observations }}</p>
+  <ul class="soft" style="font-size:9pt; margin-top:4pt">
+    {% for obs in vision_analysis.observations %}<li>{{ obs }}</li>{% endfor %}
+  </ul>
+  {% endif %}
+
+  <p class="muted" style="font-size:7.5pt; margin-top:8pt">{{ T.vision_footnote }}</p>
+
+  {% else %}
+  <div class="fallback">{{ T.fb_no_vision }}</div>
+  {% endif %}
+</section>
+
+{# ========================== 04 LOCATION CONTEXT ======================== #}
+{% macro poi_icon(category) %}
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  {% if category == "transport" %}
+  <rect x="5" y="3" width="14" height="13" rx="2"/><path d="M5 10h14"/><path d="M8 20l-1 2M16 20l1 2"/><path d="M9 16v4h6v-4"/>
+  {% elif category in ("grocery", "groceries") %}
+  <circle cx="9" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2 3h3l2.7 12.4a2 2 0 0 0 2 1.6h8.7a2 2 0 0 0 2-1.6L22 7H6"/>
+  {% elif category == "schools" %}
+  <path d="M22 9 12 4 2 9l10 5 10-5z"/><path d="M6 11.5V16c0 1.5 2.7 3 6 3s6-1.5 6-3v-4.5"/>
+  {% elif category == "parks" %}
+  <path d="M12 3 6.5 10h2L4 16h16l-4.5-6h2L12 3z"/><path d="M12 16v5"/>
+  {% elif category == "restaurants" %}
+  <path d="M5 2v7a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2V2"/><path d="M7.5 2v20"/><path d="M18 2c-2 2.5-2.5 5.5-2.5 8.5 0 1.8 1 3 2.5 3v8.5"/>
+  {% else %}
+  <circle cx="12" cy="12" r="9.5"/><path d="M12 8v8M8 12h8"/>
+  {% endif %}
+</svg>
+{% endmacro %}
+<section class="section page-break">
+  <div class="section-head"><span class="section-num">04</span><h2 class="section-title">{{ T.sec_location }}</h2></div>
+  {% if location_facilities.available %}
+  <div class="map-box">
+    {% if location_facilities.map_image_url %}
+      <img src="{{ location_facilities.map_image_url | embed_image }}" alt="Map">
+    {% elif property.latitude and property.longitude %}
+      {{ T.map_preview }} · {{ property.latitude | num(4) }}, {{ property.longitude | num(4) }}
+    {% else %}
+      {{ T.map_unavailable }}
+    {% endif %}
+  </div>
+
+  {% if location_facilities.facilities %}
+  {% set poi_keys = {"groceries": "poi_grocery", "grocery": "poi_grocery",
+                     "health": "poi_healthcare", "healthcare": "poi_healthcare"} %}
+  <div class="poi-grid">
+    {% for f in location_facilities.facilities %}
+    <div class="poi"><div class="poi-inner">
+      <div class="n">{{ f.count | dash }}</div>
+      <div class="l">{{ T[poi_keys.get(f.category, "poi_" ~ f.category)] | dash(f.category) }}</div>
+      <div class="r">{% if f.nearest_distance_km is not none %}{{ T.nearest_label }} {{ f.nearest_distance_km | distance }}{% endif %}</div>
+    </div></div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {% if location_facilities.nearest_pois %}
+  <div class="nearest-head">{{ T.nearest_facilities }}</div>
+  <div class="nearest-grid">
+    {% for p in location_facilities.nearest_pois %}
+    {% set wmin = p.walking_time_min if p.walking_time_min is not none
+       else ((p.distance_km / 5 * 60) | round if p.distance_km is not none else None) %}
+    <div class="nearest-cell"><div class="nearest">
+      <div class="ni">{{ poi_icon(p.category) }}</div>
+      <div class="nt">
+        <div class="nn">{{ p.name | dash }}</div>
+        <div class="nd">{{ T[poi_keys.get(p.category, "poi_" ~ p.category)] | dash(p.category) }}{% if p.distance_km is not none %} · {{ p.distance_km | distance }}{% endif %}{% if wmin is not none %} · {{ wmin | num(0) }} {{ T.min_walk }}{% endif %}</div>
+      </div>
+    </div></div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {% else %}
+  <div class="fallback">{{ T.fb_no_location }}{% if not (property.latitude and property.longitude) %}{{ T.fb_no_location_coords }}{% endif %}{{ T.fb_no_location_tail }}</div>
+  {% endif %}
+</section>
+
+{# ======================== 05 FINAL RECOMMENDATION ====================== #}
+<section class="section avoid-break">
+  <div class="section-head"><span class="section-num">05</span><h2 class="section-title">{{ T.sec_recommendation }}</h2></div>
+  <div class="rec-summary">
+    {{ summary.recommendation | dash(T.fb_rec_summary) }}
+    {% if summary.headline %}<div style="margin-top:8pt; font-weight:700; color:var(--accent)">{{ summary.headline }}</div>{% endif %}
+  </div>
+
+  <div class="rec-cols">
+    <div class="rec-col strengths">
+      <h3>{{ T.strengths }}</h3>
+      {% if summary.strengths %}<ul>{% for s in summary.strengths %}<li>{{ s }}</li>{% endfor %}</ul>{% else %}<p class="muted" style="font-size:8.5pt">{{ T.none_identified }}</p>{% endif %}
+    </div>
+    <div class="rec-col risks">
+      <h3>{{ T.risks }}</h3>
+      {% if summary.risks %}<ul>{% for s in summary.risks %}<li>{{ s }}</li>{% endfor %}</ul>{% else %}<p class="muted" style="font-size:8.5pt">{{ T.none_identified }}</p>{% endif %}
+    </div>
+    <div class="rec-col steps">
+      <h3>{{ T.next_steps }}</h3>
+      {% if summary.next_steps %}<ul>{% for s in summary.next_steps %}<li>{{ s }}</li>{% endfor %}</ul>{% else %}<p class="muted" style="font-size:8.5pt">{{ T.none_identified }}</p>{% endif %}
+    </div>
+  </div>
+
+  <div class="disclaimer">{{ T.disclaimer }}</div>
+</section>
+
+</body>
+</html>
