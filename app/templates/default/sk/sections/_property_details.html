@@ -1,0 +1,54 @@
+{# --------------------------------------------------------- 2. Údaje o nehnuteľnosti #}
+<section class="section">
+    <div class="section-title"><span class="num">2</span><h2>Údaje o nehnuteľnosti</h2></div>
+
+    {% if property.description %}
+        <p class="lead">{{ property.description }}</p>
+    {% endif %}
+
+    <div class="spec-grid">
+        {% set specs = [
+            ("Lokalita", property.locality | orblank(property.city)),
+            ("Adresa", property.address),
+            ("Zdroj", property.source),
+            ("Typ ponuky", ("Predaj" if property.deal_type == "sale" else "Prenájom") if property.deal_type else None),
+            ("Typ nehnuteľnosti", property.property_type),
+            ("Dispozícia", property.layout),
+            ("Úžitková plocha", property.floor_area | area if property.floor_area else None),
+            ("Plocha pozemku", property.land_area | area if property.land_area else None),
+            ("Poschodie", property.floor),
+            ("Počet poschodí", property.total_floors),
+            ("Výťah", property.elevator | yesno),
+            ("Balkón", property.balcony | yesno),
+            ("Lodžia", property.loggia | yesno),
+            ("Terasa", property.terrace | yesno),
+            ("Pivnica", property.cellar | yesno),
+            ("Parkovanie", property.parking),
+            ("Typ vlastníctva", property.ownership_type),
+            ("Energetický štítok", property.energy_rating),
+            ("Typ budovy", property.building_type),
+            ("Rok výstavby", property.construction_year),
+            ("Rok rekonštrukcie", property.reconstruction_year),
+            ("Prvýkrát zaznamenané", property.first_seen_at),
+            ("Naposledy zaznamenané", property.last_seen_at),
+        ] %}
+        {% for k, v in specs %}
+            <div class="spec"><div class="k">{{ k }}</div><div class="v">{{ v | orblank }}</div></div>
+        {% endfor %}
+    </div>
+
+    {% if property.source_url %}
+    <p class="small muted" style="margin-top:8px;">
+        Inzerát: <a href="{{ property.source_url }}">{{ property.source_url }}</a>
+    </p>
+    {% endif %}
+
+    {% if property.features %}
+    <div style="margin-top:12px;">
+        <div class="k small strong" style="margin-bottom:4px;">Kľúčové vlastnosti</div>
+        <div class="grid" style="flex-wrap:wrap;gap:6px;">
+            {% for f in property.features %}<span class="tag">{{ f }}</span>{% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</section>

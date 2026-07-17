@@ -1,0 +1,41 @@
+{# --------------------------------------------------------- 11. Metodika a upozornenie #}
+<section class="section">
+    <div class="section-title"><span class="num">12</span><h2>Metodika a upozornenie</h2></div>
+
+    <p class="small muted">
+        Tento report kombinuje údaje z inzerátu, porovnateľné inzeráty, oceňovací model Estima,
+        externé trhové referencie (ak sú dostupné), automatické merania kvality fotografií
+        inzerátu (ak sú dostupné) a údaje o lokalite a občianskej vybavenosti (ak sú dostupné).
+        Metriky kvality fotografií opisujú iba fotografie — nie sú hodnotením stavu nehnuteľnosti.
+        Každá sekcia sa zobrazí len vtedy, keď boli v čase generovania dostupné podkladové údaje;
+        sekcie bez údajov sa vynechávajú namiesto zobrazenia zástupných núl.
+    </p>
+
+    <div class="spec-grid" style="margin-top:10px;">
+        {% set meta = [
+            ("Dátum ocenenia", methodology.valuation_date if methodology else None),
+            ("Verzia modelu", methodology.model_version if methodology else None),
+            ("ID behu modelu", methodology.model_run_id if methodology else None),
+            ("Počet porovnateľných", valuation.sample_size),
+            ("Aktuálnosť údajov", methodology.data_freshness_note if methodology else None),
+        ] %}
+        {% for k, v in meta %}
+            {% if v %}<div class="spec"><div class="k">{{ k }}</div><div class="v">{{ v }}</div></div>{% endif %}
+        {% endfor %}
+    </div>
+
+    {% if not vision_analysis.available %}
+    <p class="small muted" style="margin-top:8px;">Analýza kvality fotografií nebola pre tento report dostupná.</p>
+    {% endif %}
+    {% if not location_facilities.available %}
+    <p class="small muted">Údaje o lokalite a občianskej vybavenosti neboli pre tento report dostupné.</p>
+    {% endif %}
+
+    <p class="disclaimer">
+        Tento report je vygenerovaný automatizovaným ocenením nehnuteľnosti a slúži len na
+        informačné účely. Nie je znaleckým posudkom, finančným poradenstvom ani ponukou. Ponukové
+        ceny odrážajú aktuálne inzerované ceny a môžu sa líšiť od nakoniec realizovaných
+        transakčných cien. Údaje sú odhady na základe informácií dostupných v čase generovania
+        ({{ generated_at.strftime("%d %B %Y") }}).
+    </p>
+</section>

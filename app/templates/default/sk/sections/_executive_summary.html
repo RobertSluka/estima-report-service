@@ -1,0 +1,72 @@
+{# ------------------------------------------------------- 1. Zhrnutie #}
+<section class="section">
+    <div class="section-title"><span class="num">1</span><h2>Zhrnutie</h2></div>
+
+    <div class="two-col">
+        {% if property.images %}
+        <div style="flex:0 0 160px;">
+            <img class="photo" src="{{ property.images[0] }}" alt="{{ property.title | orblank }}" />
+        </div>
+        {% endif %}
+        <div>
+            <div class="k small strong">{{ property.locality | orblank(property.city) }}{% if property.address %} · {{ property.address }}{% endif %}</div>
+            <div style="margin-top:4px;">
+                {{ property.property_type | orblank }}
+                {% if property.layout %} · {{ property.layout }}{% endif %}
+                {% if property.floor_area %} · {{ property.floor_area | area }}{% endif %}
+            </div>
+
+            {% set verdict = pricing.list_price | verdict_label(valuation.estimated_value) %}
+            {% if verdict and pricing.list_price %}
+            {% set vpct = (valuation.estimated_value - pricing.list_price) / pricing.list_price %}
+            {% set vclass = "underpriced" if vpct > 0.03 else ("overpriced" if vpct < -0.03 else "fairly-priced") %}
+            <div class="verdict-badge {{ vclass }}" style="margin-top:10px;">{{ verdict }}</div>
+            {% endif %}
+            {% if valuation.confidence is not none %}
+            <span class="tag" style="margin-left:6px;">Spoľahlivosť: {{ valuation.confidence | confidence_label }}</span>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="stat-cards" style="margin-top:14px;">
+        <div class="stat-card">
+            <div class="label">Ponuková cena</div>
+            <div class="value">{{ pricing.list_price | money(currency) }}</div>
+        </div>
+        <div class="stat-card">
+            <div class="label">Ponuková cena / m²</div>
+            <div class="value">{{ pricing.price_per_sqm | per_sqm(currency) }}</div>
+        </div>
+        <div class="stat-card">
+            <div class="label">Odhadovaná hodnota Estima</div>
+            <div class="value accent">{{ valuation.estimated_value | money(currency) }}</div>
+        </div>
+        {% if pricing.list_price and valuation.estimated_value %}
+        {% set delta = valuation.estimated_value - pricing.list_price %}
+        {% set delta_pct = (delta / pricing.list_price * 100) %}
+        <div class="stat-card">
+            <div class="label">Voči ponukovej cene</div>
+            <div class="value accent">{{ '%+.1f' | format(delta_pct) }}%</div>
+        </div>
+        {% endif %}
+    </div>
+
+    {% if valuation.recommended_price_range %}
+    {% set r = valuation.recommended_price_range %}
+    <div class="callout" style="margin-top:12px;">
+        Rozpätie odhadovanej hodnoty: <strong>{{ r.low | money(currency) }} – {{ r.high | money(currency) }}</strong>
+        {% if r.mid is not none %}(stred {{ r.mid | money(currency) }}){% endif %}.
+    </div>
+    {% endif %}
+
+    {% if valuation.negotiation_zone %}
+    {% set nz = valuation.negotiation_zone %}
+    <div class="callout" style="margin-top:8px;">
+        Odporúčané vyjednávacie pásmo: <strong>{{ nz.low | money(currency) }} – {{ nz.high | money(currency) }}</strong>.
+    </div>
+    {% endif %}
+
+    {% if summary.headline %}
+    <p class="lead" style="margin-top:12px;">{{ summary.headline }}</p>
+    {% endif %}
+</section>

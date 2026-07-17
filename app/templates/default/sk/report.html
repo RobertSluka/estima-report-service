@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>{{ report_title }}</title>
+    <style>
+        :root {
+            --primary: {{ (branding.primary_color if branding and branding.primary_color) or "#123a5e" }};
+            --primary-dark: {{ (branding.accent_color if branding and branding.accent_color) or "#0d2f4d" }};
+            --ink: #1b2733;
+            --muted: #6b7684;
+            --border: #e3e8ee;
+            --surface: #f4f6f9;
+            --surface-soft: #fbfcfd;
+            --footer-text: "{{ (branding.footer_text if branding and branding.footer_text) or (branding.name if branding and branding.name) or 'Estima Property Report' }}";
+        }
+        {% include "default/styles.css" %}
+    </style>
+</head>
+<body>
+
+{# ---------------------------------------------------------------- Cover #}
+<section class="cover">
+    <div class="cover-top">
+        {% if branding and branding.logo_url %}
+            <img class="brand-logo" src="{{ branding.logo_url }}" alt="{{ branding.name }}" />
+        {% else %}
+            <div class="brand-mark">{{ (branding.name if branding and branding.name) or "ESTIMA" }}</div>
+        {% endif %}
+        <div style="text-align:right">
+            <div class="eyebrow">{{ "Ocenenie prenájmu" if property.deal_type == "rent" else "Ocenenie nehnuteľnosti" }}</div>
+            <div class="small" style="opacity:.85; margin-top:4px">{{ generated_at.strftime("%d %B %Y") }}</div>
+        </div>
+    </div>
+
+    {% if property.images %}
+    <div class="cover-photo"><img src="{{ property.images[0] }}" alt="" /></div>
+    {% endif %}
+
+    <h1 class="cover-title">{{ property.title | orblank(report_title) }}</h1>
+    {% if property.locality or property.address %}
+    <div class="cover-locality">{{ property.address | orblank(property.locality) }}{% if property.property_type %} · {{ property.property_type }}{% endif %}{% if property.layout %} · {{ property.layout }}{% endif %}</div>
+    {% endif %}
+
+    <div class="cover-spacer"></div>
+
+    {% if valuation.estimated_value %}
+    <div class="badge-strip">
+        {% set verdict = pricing.list_price | verdict_label(valuation.estimated_value) %}
+        {% if verdict and pricing.list_price %}
+        {% set vpct = (valuation.estimated_value - pricing.list_price) / pricing.list_price %}
+        {% set vclass = "underpriced" if vpct > 0.03 else ("overpriced" if vpct < -0.03 else "fairly-priced") %}
+        <div class="badge-card">
+            <div class="label">Hodnotenie</div>
+            <div class="verdict-badge {{ vclass }}" style="margin-top:4px">{{ verdict }}</div>
+        </div>
+        {% endif %}
+        <div class="badge-card">
+            <div class="label">Odhadované {{ "mesačné nájomné" if property.deal_type == "rent" else "trhová hodnota" }}</div>
+            <div class="value">{{ valuation.estimated_value | money(currency) }}</div>
+        </div>
+        {% if pricing.list_price %}
+        {% set delta = valuation.estimated_value - pricing.list_price %}
+        <div class="badge-card">
+            <div class="label">voči ponukovej cene</div>
+            <div class="value">{{ delta | abs | money(currency) if delta >= 0 else "−" ~ (delta | abs | money(currency)) }}
+                <span class="small" style="opacity:.8; font-weight:600">({{ '%+.1f' | format(delta / pricing.list_price * 100) }}%)</span>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    {% if pricing.list_price %}
+    <div class="cover-foot">Ponuková cena {{ pricing.list_price | money(currency) }}{% if pricing.price_per_sqm %} · {{ pricing.price_per_sqm | number(0) }} {{ currency }}/m²{% endif %}{% if property.source %} · Zdroj: {{ property.source }}{% endif %}</div>
+    {% endif %}
+</section>
+
+{% include "default/sk/sections/_executive_summary.html" %}
+{% include "default/sk/sections/_property_details.html" %}
+{% include "default/sk/sections/_valuation.html" %}
+{% include "default/sk/sections/_comparables.html" %}
+{% include "default/sk/sections/_benchmarks.html" %}
+{% include "default/sk/sections/_market_statistics.html" %}
+{% include "default/sk/sections/_rent_investment.html" %}
+{% include "default/sk/sections/_vision.html" %}
+{% include "default/sk/sections/_location.html" %}
+{% include "default/sk/sections/_risk.html" %}
+{% include "default/sk/sections/_recommendation.html" %}
+{% include "default/sk/sections/_methodology.html" %}
+
+</body>
+</html>

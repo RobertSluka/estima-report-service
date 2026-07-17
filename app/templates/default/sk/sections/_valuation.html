@@ -1,0 +1,57 @@
+{# ----------------------------------------------------------- 3. Trhové ocenenie #}
+<section class="section">
+    <div class="section-title"><span class="num">3</span><h2>Trhové ocenenie</h2></div>
+
+    <div class="stat-cards">
+        <div class="stat-card">
+            <div class="label">Odhadovaná trhová hodnota</div>
+            <div class="value accent">{{ valuation.estimated_value | money(currency) }}</div>
+        </div>
+        {% if valuation.recommended_price_range %}
+        {% set r = valuation.recommended_price_range %}
+        <div class="stat-card">
+            <div class="label">Rozpätie hodnoty</div>
+            <div class="value" style="font-size:12pt;">{{ r.low | money(currency) }} – {{ r.high | money(currency) }}</div>
+        </div>
+        {% endif %}
+        {% if valuation.local_median_price_per_sqm %}
+        <div class="stat-card">
+            <div class="label">Miestny medián ceny / m²</div>
+            <div class="value">{{ valuation.local_median_price_per_sqm | per_sqm(currency) }}</div>
+        </div>
+        {% endif %}
+        {% if valuation.sample_size %}
+        <div class="stat-card">
+            <div class="label">Počet porovnateľných</div>
+            <div class="value">{{ valuation.sample_size }}</div>
+        </div>
+        {% endif %}
+    </div>
+
+    {% if pricing.list_price and valuation.estimated_value %}
+        {% set delta = valuation.estimated_value - pricing.list_price %}
+        {% set delta_pct = (delta / pricing.list_price * 100) %}
+        <div class="callout">
+            Odhadovaná trhová hodnota je o
+            <strong>{{ delta | abs | money(currency) }}
+            ({{ '%+.1f' | format(delta_pct) }}%)</strong>
+            {{ "nad" if delta > 0 else "pod" }} aktuálnou ponukovou cenou.
+            {% if valuation.local_median_price %}
+                Miestny medián porovnateľných inzerátov je {{ valuation.local_median_price | money(currency) }}.
+            {% endif %}
+        </div>
+    {% endif %}
+
+    {% if valuation.methodology %}
+        <p class="small muted">{{ valuation.methodology }}</p>
+    {% endif %}
+
+    {% if valuation.why_this_estimate %}
+    <div class="callout" style="margin-top:10px;">
+        <div class="k small strong" style="margin-bottom:6px;">Prečo tento odhad?</div>
+        <ul class="pill-list">
+            {% for w in valuation.why_this_estimate %}<li>{{ w }}</li>{% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+</section>

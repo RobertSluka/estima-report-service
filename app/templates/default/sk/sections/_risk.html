@@ -1,0 +1,33 @@
+{# --------------------------------------------------- 9. Riziká a previerka #}
+{% if risk %}
+{% set rows = [
+    ("Typ vlastníctva", risk.ownership_type),
+    ("Kontrola katastra / LV", risk.cadastre_checked | yesno if risk.cadastre_checked is not none else None),
+    ("Ťarchy / vecné bremená", risk.liens_easements),
+    ("Družstevné vlastníctvo", risk.cooperative_ownership | yesno if risk.cooperative_ownership is not none else None),
+    ("Záplavová zóna", risk.flood_zone),
+    ("Hlučnosť", risk.noise_exposure),
+    ("Stav budovy", risk.building_condition),
+    ("Poplatky SVB / spoločenstva", risk.hoa_fees | money(currency) if risk.hoa_fees is not none else None),
+    ("Fond opráv", risk.reserve_fund | money(currency) if risk.reserve_fund is not none else None),
+] %}
+<section class="section">
+    <div class="section-title"><span class="num">10</span><h2>Riziká a previerka</h2></div>
+
+    {% if not risk.verified %}
+    <p class="small muted" style="margin-bottom:8px;">
+        Tieto údaje neboli pre tento report nezávisle overené. Zoznam nižšie berte ako odporúčané
+        kontroly pred kúpou, nie ako potvrdené skutočnosti.
+    </p>
+    {% endif %}
+
+    <ul class="pill-list{% if not risk.verified %} risk{% endif %}">
+        {% for k, v in rows %}
+        <li>
+            <strong>{{ k }}:</strong>
+            {% if v %}{{ v }}{% else %}na overenie{% endif %}
+        </li>
+        {% endfor %}
+    </ul>
+</section>
+{% endif %}

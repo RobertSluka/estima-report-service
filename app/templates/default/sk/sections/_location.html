@@ -1,0 +1,43 @@
+{# --------------------------------------------------- 8. Lokalita a občianska vybavenosť #}
+{% if location_facilities.available and (location_facilities.facilities or location_facilities.nearest_pois) %}
+<section class="section">
+    <div class="section-title"><span class="num">9</span><h2>Lokalita a občianska vybavenosť</h2></div>
+
+    {% if location_facilities.map_image_url %}
+    <img class="photo" style="margin-bottom:12px;max-height:220px;object-fit:cover;" src="{{ location_facilities.map_image_url }}" alt="Náhľad mapy" />
+    {% endif %}
+
+    {% if location_facilities.facilities %}
+    <div class="spec-grid">
+        {% for f in location_facilities.facilities %}
+        <div class="spec">
+            <div class="k">{{ f.category | orblank | title }}</div>
+            <div class="v">
+                {% if f.count is none %}
+                    Nedostupné
+                {% else %}
+                    {{ f.count }} nájdených{% if f.nearest_distance_km is not none %} · najbližšie {{ f.nearest_distance_km | distance }}{% endif %}
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if location_facilities.nearest_pois %}
+    <table style="margin-top:12px;">
+        <thead><tr><th>Názov</th><th>Kategória</th><th class="num">Vzdialenosť</th><th class="num">Čas chôdze</th></tr></thead>
+        <tbody>
+            {% for p in location_facilities.nearest_pois[:5] %}
+            <tr>
+                <td>{{ p.name | orblank }}</td>
+                <td><span class="tag">{{ p.category | orblank }}</span></td>
+                <td class="num">{{ p.distance_km | distance }}</td>
+                <td class="num">{% if p.walking_time_min is not none %}{{ p.walking_time_min | round | int }} min{% else %}{{ p.distance_km | walking_time }}{% endif %}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+</section>
+{% endif %}

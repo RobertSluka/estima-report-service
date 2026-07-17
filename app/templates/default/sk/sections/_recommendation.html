@@ -1,0 +1,60 @@
+{# -------------------------------------------------------------- 10. Záverečné odporúčanie #}
+<section class="section section-lead">
+    <div class="section-title"><span class="num">11</span><h2>Záverečné odporúčanie</h2></div>
+
+    <div class="recommendation-box">
+        {% if summary.action %}
+        <div class="action-badge">{{ summary.action | replace('_', ' ') | title }}</div>
+        {% endif %}
+        {% if summary.headline %}<h3>{{ summary.headline }}</h3>{% endif %}
+        <p>{{ summary.recommendation | orblank("Pre túto nehnuteľnosť nebolo poskytnuté odporúčanie.") }}</p>
+        {% if summary.suggested_offer_range %}
+        {% set o = summary.suggested_offer_range %}
+        <p style="margin-top:8px;">Odporúčané pásmo ponuky: <strong>{{ o.low | money(currency) }} – {{ o.high | money(currency) }}</strong></p>
+        {% endif %}
+    </div>
+
+    <div class="two-col" style="margin-top:16px;">
+        <div>
+            <div class="k small strong">Hlavné silné stránky</div>
+            {% if summary.strengths %}
+                <ul class="pill-list">{% for h in summary.strengths[:3] %}<li>{{ h }}</li>{% endfor %}</ul>
+            {% else %}<p class="small muted">—</p>{% endif %}
+        </div>
+        <div>
+            <div class="k small strong">Hlavné riziká</div>
+            {% if summary.risks %}
+                <ul class="pill-list risk">{% for r in summary.risks[:3] %}<li>{{ r }}</li>{% endfor %}</ul>
+            {% else %}<p class="small muted">—</p>{% endif %}
+        </div>
+    </div>
+
+    {% if summary.next_steps %}
+    <div style="margin-top:14px;">
+        <div class="k small strong" style="margin-bottom:4px;">Ďalšie kroky</div>
+        <ul class="pill-list">{% for s in summary.next_steps %}<li>{{ s }}</li>{% endfor %}</ul>
+    </div>
+    {% endif %}
+
+    {% if summary.agent_notes %}
+    <div class="callout" style="margin-top:14px;">
+        <div class="k small strong" style="margin-bottom:4px;">Poznámky pre makléra</div>
+        {{ summary.agent_notes }}
+    </div>
+    {% endif %}
+
+    {% if branding and (branding.agent_name or branding.name) %}
+    <div class="agent-card">
+        {% if branding.logo_url %}<img class="logo" src="{{ branding.logo_url }}" alt="{{ branding.name }}" />{% endif %}
+        <div>
+            {% if branding.agent_name %}<div class="who">{{ branding.agent_name }}</div>{% endif %}
+            {% if branding.name %}<div class="small muted">{{ branding.name }}</div>{% endif %}
+            <div class="small muted">
+                {% if branding.agent_phone %}{{ branding.agent_phone }}{% endif %}
+                {% if branding.agent_email %} · {{ branding.agent_email }}{% endif %}
+                {% if branding.website %} · {{ branding.website }}{% endif %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</section>

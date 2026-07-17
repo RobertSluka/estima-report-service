@@ -1,0 +1,55 @@
+{# ---------------------------------------------------- 7. Kvalita fotografií inzerátu
+   Measurable photo statistics only. The upstream analysis is local and
+   deterministic: it measures the photographs, never the property — so this
+   section must not claim renovation state, materials, detected rooms, or a
+   condition-based price adjustment. #}
+{% if vision_analysis.available %}
+<section class="section section-lead">
+    <div class="section-title"><span class="num">8</span><h2>Kvalita fotografií inzerátu</h2></div>
+
+    {% if vision_analysis.images %}
+    <div class="grid" style="margin-bottom:12px;">
+        {% for img in vision_analysis.images[:3] %}
+        <div class="col"><img class="photo" src="{{ img }}" alt="Fotografia inzerátu" /></div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if vision_analysis.summary %}<p class="lead">{{ vision_analysis.summary }}</p>{% endif %}
+
+    {% set scores = [
+        ("Kvalita fotografií", vision_analysis.photo_quality),
+        ("Jas", vision_analysis.brightness),
+        ("Ostrosť", vision_analysis.sharpness),
+    ] %}
+    {% for label, s in scores %}
+        {% if s is not none %}
+        {% set pct = s | score_pct %}
+        <div class="bar-row">
+            <div class="bl">{{ label }}</div>
+            <div class="bar-track"><div class="bar-fill" style="width:{{ pct }}%;"></div></div>
+            <div class="bv">{{ pct }}</div>
+        </div>
+        {% endif %}
+    {% endfor %}
+
+    {% if vision_analysis.gallery_size is not none %}
+    <p class="small muted" style="margin-top:6px;">Analyzovaných fotografií: {{ vision_analysis.gallery_size }}</p>
+    {% endif %}
+
+    {% if vision_analysis.observations %}
+    <div style="margin-top:10px;">
+        <div class="k small strong" style="margin-bottom:4px;">Pozorovania</div>
+        <ul class="small">
+            {% for obs in vision_analysis.observations %}<li>{{ obs }}</li>{% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+    <p class="small muted" style="margin-top:10px;">
+        Tieto hodnoty merajú iba fotografie inzerátu (jas, ostrosť, rozlíšenie).
+        Nie sú hodnotením stavu nehnuteľnosti, rekonštrukcie ani materiálov —
+        tie možno posúdiť len osobnou obhliadkou.
+    </p>
+</section>
+{% endif %}

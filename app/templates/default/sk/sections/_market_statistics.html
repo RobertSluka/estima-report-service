@@ -1,0 +1,118 @@
+{# ------------------------------------------------------------ 6. Štatistiky trhu #}
+{% set ms = market_statistics %}
+{% if ms and (ms.series or ms.average_price_per_sqm or ms.distribution) %}
+{% set subject_sqm = ms.subject_price_per_sqm or pricing.price_per_sqm or valuation.estimated_price_per_sqm %}
+<section class="section">
+    <div class="section-title"><span class="num">6</span><h2>Štatistiky trhu</h2></div>
+
+    {% if ms.region or ms.country or ms.period or ms.scope_note %}
+    <p class="lead">
+        {%- set place = [ms.region, ms.country] | select | join(", ") -%}
+        {{ place }}{% if ms.period %}{{ " · " if place }}{{ ms.period }}{% endif %}{% if ms.scope_note %} · {{ ms.scope_note }}{% endif %}
+    </p>
+    {% endif %}
+
+    <div class="stat-cards">
+        {% if ms.average_price_per_sqm %}
+        <div class="stat-card">
+            <div class="label">Priemer trhu</div>
+            <div class="value">{{ ms.average_price_per_sqm | per_sqm(currency) }}</div>
+        </div>
+        {% endif %}
+        {% if subject_sqm %}
+        <div class="stat-card">
+            <div class="label">Táto nehnuteľnosť</div>
+            <div class="value accent">{{ subject_sqm | per_sqm(currency) }}</div>
+        </div>
+        {% endif %}
+        {% if ms.average_price_per_sqm and subject_sqm %}
+        <div class="stat-card">
+            <div class="label">voči priemeru trhu</div>
+            <div class="value">{{ "%+.1f" | format((subject_sqm - ms.average_price_per_sqm) / ms.average_price_per_sqm * 100) }}%</div>
+        </div>
+        {% endif %}
+        {% if ms.yoy_change is not none %}
+        <div class="stat-card">
+            <div class="label">Medziročná zmena trhu</div>
+            <div class="value">{{ "%+.1f" | format(ms.yoy_change) }}%</div>
+        </div>
+        {% endif %}
+        {% if ms.price_index %}
+        <div class="stat-card">
+            <div class="label">Cenový index{% if ms.index_base_period %} ({{ ms.index_base_period }} = 100){% endif %}</div>
+            <div class="value">{{ ms.price_index | number(1) }}</div>
+        </div>
+        {% endif %}
+    </div>
+
+    {% set chart = ms.series | line_chart(subject_sqm) %}
+    {% if chart %}
+    {# WeasyPrint does not apply document CSS inside inline SVG, so every SVG
+       element is styled via presentation attributes; the classes only serve
+       browser preview and tests. #}
+    {% set primary = (branding.primary_color if branding and branding.primary_color) or "#123a5e" %}
+    <div class="chart-wrap">
+        <svg viewBox="0 0 {{ chart.width }} {{ chart.height }}" xmlns="http://www.w3.org/2000/svg" role="img"
+             aria-label="Vývoj trhovej ceny za m² s vyznačenou touto nehnuteľnosťou">
+            {% for t in chart.y_ticks %}
+            <line class="chart-grid" stroke="#e3e8ee" stroke-width="1" x1="{{ chart.pad_left }}" y1="{{ t.y }}" x2="{{ chart.plot_right }}" y2="{{ t.y }}" />
+            <text class="chart-tick-label" fill="#6b7684" font-size="9" x="{{ chart.pad_left - 6 }}" y="{{ t.y + 3 }}" text-anchor="end">{{ t.label }}</text>
+            {% endfor %}
+
+            <polygon class="chart-area" fill="{{ primary }}" fill-opacity="0.12" points="{{ chart.area }}" />
+            <polyline class="chart-line" fill="none" stroke="{{ primary }}" stroke-width="2" points="{{ chart.points }}" />
+            <circle class="chart-market-dot" fill="{{ primary }}" cx="{{ chart.last.x }}" cy="{{ chart.last.y }}" r="3" />
+
+            {% if chart.subject %}
+            <line class="chart-subject-line" stroke="#b3261e" stroke-width="1" stroke-dasharray="4 3" opacity="0.6" x1="{{ chart.pad_left }}" y1="{{ chart.subject.y }}" x2="{{ chart.plot_right }}" y2="{{ chart.subject.y }}" />
+            <circle class="chart-subject-dot" fill="#b3261e" stroke="#ffffff" stroke-width="1.5" cx="{{ chart.subject.x }}" cy="{{ chart.subject.y }}" r="5" />
+            <text class="chart-subject-label" fill="#b3261e" font-size="10" font-weight="600" x="{{ chart.subject.x - 10 }}" y="{{ chart.subject.label_y }}" text-anchor="end">
+                Táto nehnuteľnosť · {{ chart.subject.value | per_sqm(currency) }}
+            </text>
+            {% endif %}
+
+            {% for l in chart.x_labels %}
+            <text class="chart-tick-label" fill="#6b7684" font-size="9" x="{{ l.x }}" y="{{ chart.baseline + 14 }}" text-anchor="middle">{{ l.label }}</text>
+            {% endfor %}
+        </svg>
+        <div class="chart-legend">
+            <span><span class="key market"></span>Priemerná trhová cena za m²</span>
+            {% if chart.subject %}<span><span class="key subject"></span>Táto nehnuteľnosť</span>{% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+    {% if ms.distribution and ms.distribution.min_price_per_sqm and ms.distribution.max_price_per_sqm %}
+    {% set d = ms.distribution %}
+    {% set d_lo, d_hi = d.min_price_per_sqm, d.max_price_per_sqm %}
+    <div class="dist-wrap">
+        <div class="small strong" style="margin-bottom:8px;">
+            Rozloženie miestnych cien{% if d.scope %} — {{ d.scope }}{% endif %}{% if d.sample_size %} ({{ d.sample_size }} inzerátov){% endif %}
+        </div>
+        <div class="range-bar">
+            {% set p25 = d.p25_price_per_sqm | span_pct(d_lo, d_hi) %}
+            {% set p75 = d.p75_price_per_sqm | span_pct(d_lo, d_hi) %}
+            {% if p25 is not none and p75 is not none %}
+            <div class="range-fill" style="left:{{ p25 }}%; width:{{ p75 - p25 }}%;"></div>
+            {% endif %}
+            {% set med = d.median_price_per_sqm | span_pct(d_lo, d_hi) %}
+            {% if med is not none %}<div class="range-mid" style="left:{{ med }}%;"></div>{% endif %}
+            {% set subj = subject_sqm | span_pct(d_lo, d_hi) %}
+            {% if subj is not none %}<div class="range-subject-dot" style="left:{{ subj }}%;"></div>{% endif %}
+        </div>
+        <div class="range-labels">
+            <div class="rl"><div class="k">Min</div><div class="v">{{ d_lo | per_sqm(currency) }}</div></div>
+            {% if d.median_price_per_sqm %}<div class="rl mid"><div class="k">Medián</div><div class="v">{{ d.median_price_per_sqm | per_sqm(currency) }}</div></div>{% endif %}
+            <div class="rl"><div class="k">Max</div><div class="v">{{ d_hi | per_sqm(currency) }}</div></div>
+        </div>
+        {% if subject_sqm %}
+        <div class="chart-legend"><span><span class="key subject"></span>Táto nehnuteľnosť · {{ subject_sqm | per_sqm(currency) }}</span></div>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    {% if ms.source %}
+    <p class="small muted" style="margin-top:8px;">Zdroj: {{ ms.source }}</p>
+    {% endif %}
+</section>
+{% endif %}

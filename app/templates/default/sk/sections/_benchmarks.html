@@ -1,0 +1,22 @@
+{# ------------------------------------------------------------ 5. Trhové referencie #}
+{% if benchmarks %}
+{% set max_value = benchmarks | map(attribute='value_per_sqm') | select('number') | list | max %}
+<section class="section">
+    <div class="section-title"><span class="num">5</span><h2>Trhové referencie</h2></div>
+
+    {% for b in benchmarks %}
+        {% set pct = ((b.value_per_sqm / max_value) * 100) if (b.value_per_sqm and max_value) else 0 %}
+        <div class="bar-row">
+            <div class="bl">{{ b.name | orblank }}</div>
+            <div class="bar-track"><div class="bar-fill" style="width:{{ pct }}%;"></div></div>
+            <div class="bv" style="flex:0 0 90px;">{{ b.value_per_sqm | per_sqm(currency) }}</div>
+        </div>
+        <div class="small muted" style="margin:-2px 0 8px 140px;">{{ b.benchmark_type | benchmark_type_label }}{% if b.source %} · Zdroj: {{ b.source }}{% endif %}</div>
+    {% endfor %}
+
+    <p class="small muted" style="margin-top:6px;">
+        Externé indexy sú makro referencie agregované za širší trh a nemožno ich považovať za priame
+        porovnateľné inzeráty pre túto konkrétnu nehnuteľnosť.
+    </p>
+</section>
+{% endif %}
