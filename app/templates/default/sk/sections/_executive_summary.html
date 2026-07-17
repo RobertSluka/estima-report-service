@@ -2,12 +2,8 @@
 <section class="section">
     <div class="section-title"><span class="num">1</span><h2>Zhrnutie</h2></div>
 
-    <div class="two-col">
-        {% if property.images %}
-        <div style="flex:0 0 160px;">
-            <img class="photo" src="{{ property.images[0] }}" alt="{{ property.title | orblank }}" />
-        </div>
-        {% endif %}
+    {# Fotografia je iba na titulnej strane — tu sa neduplikuje. #}
+    <div>
         <div>
             <div class="k small strong">{{ property.locality | orblank(property.city) }}{% if property.address %} · {{ property.address }}{% endif %}</div>
             <div style="margin-top:4px;">

@@ -166,6 +166,25 @@ a { color: var(--primary); text-decoration: none; }
 .spec .k { font-size: 8pt; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
 .spec .v { font-size: 10.5pt; font-weight: 600; margin-top: 2px; }
 
+/* Paired label/value rows as a real table (CZ-report layout);
+   flex-wrap and CSS grid misrender in WeasyPrint 62.3. */
+.kv-table {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    border-collapse: separate;
+    border-spacing: 0;
+    width: 100%;
+}
+.kv-table td {
+    padding: 8px 14px;
+    border-bottom: 1px solid var(--border);
+    font-size: 9.5pt;
+}
+.kv-table tr:last-child td { border-bottom: none; }
+.kv-table td.k { color: var(--muted); width: 18%; }
+.kv-table td.v { font-weight: 600; text-align: right; width: 32%; }
+.kv-table td.divider { border-right: 1px solid var(--border); }
+
 /* ---------- Tables ---------- */
 table { width: 100%; border-collapse: collapse; font-size: 9.5pt; }
 thead th {

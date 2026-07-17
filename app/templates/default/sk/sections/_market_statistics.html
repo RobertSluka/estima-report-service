@@ -111,6 +111,15 @@
     </div>
     {% endif %}
 
+    {% if ms.average_price_per_sqm and ms.distribution and ms.distribution.median_price_per_sqm %}
+    <p class="small muted" style="margin-top:8px;">
+        Poznámka: trhový priemer vyššie je regionálny index skutočne zrealizovaných predajných
+        cien za všetky typy rezidenčných nehnuteľností, zatiaľ čo rozloženie miestnych cien
+        vychádza z ponukových cien aktuálne aktívnych inzerátov v bezprostrednom okolí.
+        Ide o dva rôzne trhy, preto tieto hodnoty nie sú priamo porovnateľné.
+    </p>
+    {% endif %}
+
     {% if ms.source %}
     <p class="small muted" style="margin-top:8px;">Zdroj: {{ ms.source }}</p>
     {% endif %}

@@ -111,6 +111,15 @@
     </div>
     {% endif %}
 
+    {% if ms.average_price_per_sqm and ms.distribution and ms.distribution.median_price_per_sqm %}
+    <p class="small muted" style="margin-top:8px;">
+        Note: the market average above is a region-wide index of realized transaction prices
+        across all residential property types, while the local price distribution reflects
+        asking prices of currently active listings in the immediate area. They describe
+        different markets, so the two figures are not directly comparable.
+    </p>
+    {% endif %}
+
     {% if ms.source %}
     <p class="small muted" style="margin-top:8px;">Source: {{ ms.source }}</p>
     {% endif %}

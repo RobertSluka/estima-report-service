@@ -6,8 +6,7 @@
         <p class="lead">{{ property.description }}</p>
     {% endif %}
 
-    <div class="spec-grid">
-        {% set specs = [
+    {% set specs = [
             ("Locality", property.locality | orblank(property.city)),
             ("Address", property.address),
             ("Source", property.source),
@@ -31,11 +30,23 @@
             ("Reconstruction year", property.reconstruction_year),
             ("First seen", property.first_seen_at),
             ("Last seen", property.last_seen_at),
-        ] %}
-        {% for k, v in specs %}
-            <div class="spec"><div class="k">{{ k }}</div><div class="v">{{ v | orblank }}</div></div>
+    ] %}
+    {# Real table, two label/value pairs per row — flex-wrap/grid render
+       unreliably in WeasyPrint, a table never does. #}
+    <table class="kv-table">
+        {% for pair in specs | batch(2) %}
+        <tr>
+            <td class="k">{{ pair[0][0] }}</td>
+            <td class="v divider">{{ pair[0][1] | orblank }}</td>
+            {% if pair | length > 1 %}
+            <td class="k">{{ pair[1][0] }}</td>
+            <td class="v">{{ pair[1][1] | orblank }}</td>
+            {% else %}
+            <td class="k"></td><td class="v"></td>
+            {% endif %}
+        </tr>
         {% endfor %}
-    </div>
+    </table>
 
     {% if property.source_url %}
     <p class="small muted" style="margin-top:8px;">
