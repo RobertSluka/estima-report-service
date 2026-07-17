@@ -129,7 +129,7 @@
     margin: 16pt 0;
     border-radius: 10px;
     overflow: hidden;
-    height: 78mm;
+    height: 60mm;
     border: 1px solid rgba(255,255,255,.18);
   }
   .cover-img { width: 100%; height: 100%; object-fit: cover; }
@@ -320,6 +320,18 @@
   .disclaimer {
     margin-top: 20pt; padding-top: 8pt; border-top: 1px solid var(--line);
     font-size: 7.5pt; color: var(--muted); line-height: 1.4;
+  }
+
+  /* Photo gallery appendix: compact thumbnails, three per row
+     (inline-block — WeasyPrint flex/grid gaps are unreliable). */
+  .gallery { font-size: 0; margin-right: -8pt; }
+  .gallery-cell {
+    display: inline-block; vertical-align: top;
+    width: 33.3%; padding-right: 8pt; margin-bottom: 8pt;
+  }
+  .gallery-cell img {
+    width: 100%; height: 42mm; object-fit: cover;
+    border-radius: 6px; border: 1px solid var(--line);
   }
 </style>
 </head>
@@ -513,13 +525,8 @@
     <div class="score-badge"><div class="n">{{ vision_analysis.gallery_size | num(0) }}</div><div class="l">{{ T.gallery_photos }}</div></div>
   </div>
 
-  {% set strip_images = vision_analysis.images or property.images %}
-  {% if strip_images %}
-  <div class="photo-strip">
-    {% for img in strip_images[:3] %}<img src="{{ img | embed_image }}" alt="">{% endfor %}
-  </div>
-  {% endif %}
-
+  {# The analysed photos are not repeated here — they live in the photo
+     gallery appendix at the end of the report. #}
   <div class="callout">{{ vision_analysis.summary | dash(T.fb_vision_summary) }}</div>
 
   {% if vision_analysis.observations %}
@@ -628,6 +635,22 @@
 
   <div class="disclaimer">{{ T.disclaimer }}</div>
 </section>
+
+{# ========================= 06 PHOTO GALLERY ============================ #}
+{# All listing photos beyond the cover hero, printed separately at the end
+   as compact thumbnails so they never crowd the analysis pages. #}
+{% set gallery_images = (vision_analysis.images or property.images) %}
+{% if gallery_images and gallery_images | length > 1 %}
+<section class="section page-break">
+  <div class="section-head"><span class="section-num">06</span><h2 class="section-title">{{ T.sec_photos }}</h2></div>
+  <div class="gallery">
+    {% for img in gallery_images[1:13] %}
+    <div class="gallery-cell"><img src="{{ img | embed_image }}" alt=""></div>
+    {% endfor %}
+  </div>
+  <p class="muted" style="font-size:7.5pt; margin-top:4pt">{{ T.photos_note }}</p>
+</section>
+{% endif %}
 
 </body>
 </html>
