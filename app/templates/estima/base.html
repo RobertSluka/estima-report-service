@@ -151,11 +151,15 @@
   .badge-card .value { font-size: 14pt; font-weight: 700; margin-top: 3pt; }
   .verdict-pill {
     display: inline-block;
-    font-size: 12pt;
+    font-size: 11pt;
     font-weight: 700;
-    padding: 4pt 12pt;
+    padding: 4pt 10pt;
     border-radius: 20px;
     margin-top: 3pt;
+    /* never break "Podhodnotené" etc. across lines */
+    white-space: nowrap;
+    -weasy-hyphens: none;
+    hyphens: none;
   }
   .cover-foot { font-size: 8pt; color: #9ec7dd; margin-top: 16pt; }
 
@@ -170,14 +174,15 @@
     border-radius: 8px;
     border-collapse: separate;
     border-spacing: 0;
+    page-break-inside: avoid;  /* the details block never straddles pages */
   }
   .kv-table td {
-    padding: 7pt 12pt;
+    padding: 6pt 12pt;
     border-bottom: 1px solid var(--line);
     font-size: 9pt;
   }
   .kv-table tr:last-child td { border-bottom: none; }
-  .kv-table td.k { color: var(--muted); width: 18%; }
+  .kv-table td.k { color: var(--muted); width: 18%; white-space: nowrap; }
   .kv-table td.v { font-weight: 600; text-align: right; width: 32%; }
   .kv-table td.divider { border-right: 1px solid var(--line); }
 
