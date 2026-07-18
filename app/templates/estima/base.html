@@ -639,7 +639,7 @@
 {# ========================= 06 PHOTO GALLERY ============================ #}
 {# All listing photos beyond the cover hero, printed separately at the end
    as compact thumbnails so they never crowd the analysis pages. #}
-{% set gallery_images = (vision_analysis.images or property.images) %}
+{% set gallery_images = (property.images or vision_analysis.images) %}
 {% if gallery_images and gallery_images | length > 1 %}
 <section class="section page-break">
   <div class="section-head"><span class="section-num">06</span><h2 class="section-title">{{ T.sec_photos }}</h2></div>

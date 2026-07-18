@@ -43,6 +43,12 @@
       "runtimeExecutable": "sh",
       "runtimeArgs": ["-c", "cd /Users/robertsluka/Desktop/estima-sk && NEXT_DIST_DIR=.next-3020 npm run dev -- -p 3020"],
       "port": 3020
+    },
+    {
+      "name": "estima-sk-dev-f",
+      "runtimeExecutable": "sh",
+      "runtimeArgs": ["-c", "cd /Users/robertsluka/Desktop/estima-sk && NEXT_DIST_DIR=.next-3022 npm run dev -- -p 3022"],
+      "port": 3022
     }
   ]
 }
