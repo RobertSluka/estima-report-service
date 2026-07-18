@@ -30,11 +30,15 @@ a professional real estate **HTML/PDF report**.
 | GET    | `/reports/{report_id}/download`  | Download the generated PDF                    |
 | GET    | `/reports`                       | List generated reports (newest first)         |
 | DELETE | `/reports/{report_id}`           | Delete a report (requires `API_KEY` configured) |
+| GET    | `/academy`                       | Estima Academy landing page (HTML)            |
+| GET    | `/academy/download`              | Estima Academy page as a downloadable PDF     |
 | GET    | `/health`                        | Health check                                  |
 
 When the `API_KEY` env var is set, all `/reports` endpoints require an
 `X-API-Key` header; when it is empty (default), the API is open and DELETE is
-disabled. The public API surface is snapshot-guarded — see
+disabled. The `/academy` pages are public marketing content (never gated); the
+page lives at `app/static/academy.html` and its PDF is rendered on first
+download, then cached in memory until the file changes. The public API surface is snapshot-guarded — see
 [Design guardrails](#design-guardrails).
 
 `POST /reports/generate` returns:

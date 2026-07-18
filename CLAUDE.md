@@ -16,8 +16,11 @@ No database. Artifacts are written to `reports/<report_id>/`
 
 - `app/main.py` — FastAPI app + endpoints (`POST /reports/generate`,
   `GET /reports/{id}`, `GET /reports/{id}/download`, `GET /reports`,
-  `DELETE /reports/{id}` (403 unless `API_KEY` is configured), `GET /health`);
-  optional `X-API-Key` auth, payload-size middleware, hourly TTL retention sweep
+  `DELETE /reports/{id}` (403 unless `API_KEY` is configured), `GET /health`,
+  `GET /academy` + `GET /academy/download` — public Estima Academy landing
+  page served from `app/static/academy.html`, PDF rendered via `pdf.py` and
+  cached in memory by file mtime); optional `X-API-Key` auth, payload-size
+  middleware, hourly TTL retention sweep
 - `app/config.py` — env-driven `Settings` singleton (`REPORTS_DIR`,
   `TEMPLATES_DIR`, `DEFAULT_TEMPLATE`, `DEFAULT_LANGUAGE`, `PUBLIC_BASE_URL`,
   `API_KEY`, `REPORTS_TTL_DAYS`, `MAX_PAYLOAD_BYTES`, `ASSET_FETCH_TIMEOUT`,

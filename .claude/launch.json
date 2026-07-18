@@ -5,7 +5,7 @@
     {
       "name": "estima-report-service",
       "runtimeExecutable": "sh",
-      "runtimeArgs": ["-c", ".venv/bin/uvicorn app.main:app --host 127.0.0.1 --port 8090"],
+      "runtimeArgs": ["-c", "cd /Users/robertsluka/Desktop/estima-report-service && .venv/bin/uvicorn app.main:app --host 127.0.0.1 --port 8090"],
       "port": 8090
     },
     {
@@ -49,6 +49,12 @@
       "runtimeExecutable": "sh",
       "runtimeArgs": ["-c", "cd /Users/robertsluka/Desktop/estima-sk && NEXT_DIST_DIR=.next-3022 npm run dev -- -p 3022"],
       "port": 3022
+    },
+    {
+      "name": "estima-sk-dev-g",
+      "runtimeExecutable": "sh",
+      "runtimeArgs": ["-c", "cd /Users/robertsluka/Desktop/estima-sk && AUTH_SECRET=dev-verify-secret INTERNAL_API_KEY=devkey-local-verify BACKEND_INTERNAL_URL=http://localhost:8012 NEXT_DIST_DIR=.next-3024 npm run dev -- -p 3024"],
+      "port": 3024
     }
   ]
 }

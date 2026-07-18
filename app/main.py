@@ -5,7 +5,9 @@ import asyncio
 import contextlib
 import json
 import logging
+import tempfile
 from contextlib import asynccontextmanager
+from pathlib import Path
 from typing import Optional
 
 from fastapi import Depends, FastAPI, Header, HTTPException, Request, Response
@@ -115,6 +117,59 @@ def sample_payload():
     if not settings.SAMPLE_PATH.is_file():
         raise HTTPException(status_code=404, detail="Sample payload not found")
     return JSONResponse(json.loads(settings.SAMPLE_PATH.read_text(encoding="utf-8")))
+
+
+# Academy PDF cache: {academy.html mtime: pdf bytes} — regenerated only when
+# the source page changes, so repeated downloads don't re-run WeasyPrint.
+_academy_pdf_cache: dict[float, bytes] = {}
+
+
+def _academy_page_path() -> Path:
+    page = settings.STATIC_DIR / "academy.html"
+    if not page.is_file():
+        raise HTTPException(status_code=404, detail="Academy page not found")
+    return page
+
+
+@app.get("/academy", tags=["academy"])
+def academy_page():
+    """Serve the Estima Academy landing page (valuation guidance for agents)."""
+    return FileResponse(str(_academy_page_path()), media_type="text/html")
+
+
+@app.get("/academy/download", tags=["academy"])
+def academy_download() -> Response:
+    """Download the Estima Academy landing page as a PDF."""
+    page = _academy_page_path()
+    mtime = page.stat().st_mtime
+    pdf_bytes = _academy_pdf_cache.get(mtime)
+    if pdf_bytes is None:
+        try:
+            from app.services.pdf import html_to_pdf
+
+            with tempfile.TemporaryDirectory() as tmp:
+                output = Path(tmp) / "estima-academy.pdf"
+                html_to_pdf(
+                    page.read_text(encoding="utf-8"),
+                    output,
+                    base_url=str(settings.STATIC_DIR),
+                )
+                pdf_bytes = output.read_bytes()
+        except Exception as exc:
+            # Most likely WeasyPrint's native libraries are absent on the host;
+            # the page itself stays available at /academy.
+            raise HTTPException(
+                status_code=503, detail=f"PDF engine unavailable: {exc}"
+            ) from exc
+        _academy_pdf_cache.clear()
+        _academy_pdf_cache[mtime] = pdf_bytes
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": 'attachment; filename="estima-academy.pdf"'
+        },
+    )
 
 
 @app.post(
