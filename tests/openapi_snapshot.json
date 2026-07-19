@@ -1,17 +1,23 @@
 {
   "paths": {
     "GET /academy": {
-      "params": [],
+      "params": [
+        "lang"
+      ],
       "has_body": false,
       "responses": [
-        "200"
+        "200",
+        "422"
       ]
     },
     "GET /academy/download": {
-      "params": [],
+      "params": [
+        "lang"
+      ],
       "has_body": false,
       "responses": [
-        "200"
+        "200",
+        "422"
       ]
     },
     "GET /health": {

@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<!--
+  Estima Academy landing page — Slovak version of academy.html.
+
+  Served at GET /academy?lang=sk (and by default when DEFAULT_LANGUAGE=sk,
+  e.g. the estima.sk deployment); converted to PDF at GET /academy/download.
+  Keep structure and CSS identical to academy.html — only strings differ.
+  Terminology follows app/templates/estima/sk/report.html (ponuková cena,
+  porovnateľné inzeráty, dní na trhu, …).
+-->
+<html lang="sk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Estima Academy — Aby sa každé ocenenie ľahšie vysvetľovalo</title>
+<style>
+  @page {
+    size: A4;
+    margin: 16mm 14mm 18mm 14mm;
+    @bottom-left {
+      content: "Estima Academy";
+      font-size: 7.5pt;
+      color: #9aa5b1;
+    }
+    @bottom-right {
+      content: "Strana " counter(page) " / " counter(pages);
+      font-size: 7.5pt;
+      color: #9aa5b1;
+    }
+  }
+
+  :root {
+    --ink:      #1d2733;
+    --ink-soft: #55616e;
+    --muted:    #8a95a1;
+    --line:     #e3e8ee;
+    --panel:    #f6f8fa;
+    --brand:    #123a5e;
+    --brand-2:  #1f6f8b;
+    --accent:   #c9a227;
+    --info-bg:  #e8f2f6;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    color: var(--ink);
+    font-size: 16px;
+    line-height: 1.6;
+    margin: 0;
+    background: #fff;
+  }
+  h1, h2, h3 { margin: 0; font-weight: 700; }
+  p { margin: 0 0 12px; }
+  ul, ol { margin: 0 0 12px; padding-left: 22px; }
+  li { margin-bottom: 4px; }
+  a { color: var(--brand-2); text-decoration: none; }
+
+  .wrap { max-width: 880px; margin: 0 auto; padding: 0 24px; }
+
+  /* Hero */
+  .hero {
+    color: #fff;
+    background: linear-gradient(160deg, #0d2f4d 0%, #123a5e 45%, #1f6f8b 100%);
+    padding: 48px 0 56px;
+  }
+  .brand-row { margin-bottom: 32px; }
+  .brand-row svg { vertical-align: middle; margin-right: 10px; }
+  .brand-cell { display: inline-block; vertical-align: middle; }
+  .brand-mark { font-size: 26px; font-weight: 800; letter-spacing: 1px; }
+  .brand-mark .dot { color: var(--accent); }
+  .brand-tag {
+    font-size: 11px; letter-spacing: 4px; text-transform: uppercase;
+    color: #b9d4e4; margin-top: 2px;
+  }
+  .lang-switch { float: right; font-size: 13px; color: #b9d4e4; margin-top: 8px; }
+  .lang-switch a { color: #fff; font-weight: 700; }
+  .lang-switch .active { color: var(--accent); }
+  .hero h1 { font-size: 38px; line-height: 1.2; max-width: 640px; }
+  .hero .lead {
+    font-size: 17px; color: #cfe3ee; max-width: 660px; margin-top: 18px;
+  }
+  .hero .btn-row { margin-top: 28px; }
+
+  .btn {
+    display: inline-block;
+    border-radius: 999px;
+    padding: 11px 24px;
+    font-weight: 700;
+    font-size: 15px;
+    margin-right: 12px;
+    margin-bottom: 8px;
+  }
+  .btn-primary { background: var(--accent); color: #1d2733; }
+  .btn-ghost { border: 1.5px solid rgba(255,255,255,.6); color: #fff; }
+
+  /* Contents */
+  .toc { padding: 36px 0 8px; }
+  .toc h2 { font-size: 14px; letter-spacing: 3px; text-transform: uppercase; color: var(--muted); margin-bottom: 14px; }
+  .toc ol { column-count: 2; column-gap: 36px; font-size: 14.5px; color: var(--ink-soft); }
+  .toc li { margin-bottom: 6px; }
+
+  /* Guides */
+  .guide { padding: 28px 0 6px; border-top: 1px solid var(--line); }
+  .guide:first-of-type { border-top: 0; }
+  .guide-head { margin-bottom: 14px; }
+  .guide-num {
+    display: inline-block;
+    font-size: 13px; font-weight: 700; color: #fff;
+    background: var(--brand);
+    border-radius: 4px; padding: 2px 9px;
+    margin-right: 10px;
+    vertical-align: 3px;
+  }
+  .guide h2 { display: inline; font-size: 23px; color: var(--brand); }
+  .quote {
+    border-left: 3px solid var(--accent);
+    background: var(--panel);
+    padding: 10px 16px;
+    margin: 0 0 12px;
+    font-style: italic;
+    color: var(--ink-soft);
+  }
+  .subhead { font-size: 16px; color: var(--brand-2); margin: 14px 0 6px; }
+
+  .helps {
+    background: var(--info-bg);
+    border-left: 4px solid var(--brand-2);
+    border-radius: 0 8px 8px 0;
+    padding: 14px 18px 6px;
+    margin: 16px 0 14px;
+    page-break-inside: avoid;
+  }
+  .helps h3 { font-size: 15px; color: var(--brand-2); margin-bottom: 8px; }
+  .cta {
+    display: inline-block;
+    font-weight: 700; font-size: 14.5px;
+    color: var(--brand);
+    border: 1.5px solid var(--brand);
+    border-radius: 999px;
+    padding: 8px 20px;
+    margin-bottom: 22px;
+    page-break-inside: avoid;
+  }
+  .cta::after { content: " \2192"; color: var(--accent); }
+
+  /* Final CTA */
+  .final {
+    color: #fff;
+    background: linear-gradient(160deg, #0d2f4d 0%, #123a5e 45%, #1f6f8b 100%);
+    border-radius: 12px;
+    padding: 36px 32px;
+    margin: 36px 0 28px;
+    page-break-inside: avoid;
+  }
+  .final h2 { font-size: 27px; line-height: 1.25; }
+  .final p { color: #cfe3ee; max-width: 640px; margin-top: 12px; }
+  .final .btn-row { margin-top: 20px; }
+
+  .disclaimer {
+    background: var(--panel);
+    border: 1px dashed var(--line);
+    border-radius: 8px;
+    padding: 14px 18px;
+    font-size: 13.5px;
+    color: var(--muted);
+    margin-bottom: 48px;
+    page-break-inside: avoid;
+  }
+  .disclaimer strong { color: var(--ink-soft); }
+
+  /* WeasyPrint renders with print media: keep self-referential UI out of the PDF. */
+  @media print {
+    .no-print { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="wrap">
+    <div class="lang-switch no-print"><span class="active">SK</span> · <a href="/academy?lang=en">EN</a></div>
+    <div class="brand-row">
+      <svg width="40" height="40" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 42v-8M13 42V27M19 42V14l9-8 9 8v12M37 32v7h-8" stroke="#F4F6F8" stroke-width="3" fill="none"/><path d="M27 45h11" stroke="#91A6C2" stroke-width="3" fill="none"/></svg>
+      <div class="brand-cell">
+        <div class="brand-mark">Estima<span class="dot">.</span></div>
+        <div class="brand-tag">Estima Academy</div>
+      </div>
+    </div>
+    <h1>Aby sa každé ocenenie ľahšie vysvetľovalo</h1>
+    <p class="lead">Úspešní realitní makléri robia viac než len odhad hodnoty nehnuteľnosti. Svoje odporúčanie musia vedieť vysvetliť, podložiť dôkazmi a vybudovať u majiteľa dostatočnú dôveru na to, aby konal.</p>
+    <p class="lead">Estima Academy prináša praktické návody pre oceňovanie nehnuteľností, analýzu porovnateľných inzerátov, cenové rozhovory a náborové prezentácie. Cieľom nie je nahradiť profesionálne skúsenosti. Cieľom je pomôcť maklérom podporiť tieto skúsenosti jasnejšími dátami, silnejšími reportmi a presvedčivejšou komunikáciou s klientom.</p>
+    <div class="btn-row">
+      <a class="btn btn-primary" href="/">Vytvorte svoj prvý report Estima</a>
+      <a class="btn btn-ghost no-print" href="/academy/download?lang=sk">Stiahnuť túto príručku ako PDF</a>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <div class="toc">
+    <h2>Čo nájdete vo vnútri</h2>
+    <ol>
+      <li>Ako pripraviť ocenenie nehnuteľnosti podložené dátami</li>
+      <li>Ako vybrať skutočne porovnateľné nehnuteľnosti</li>
+      <li>Ponuková cena verzus pravdepodobná predajná cena</li>
+      <li>Ako predávajúcemu vysvetliť cenové rozpätie Estima</li>
+      <li>Ako reagovať, keď majiteľ očakáva nereálnu cenu</li>
+      <li>Ako stav nehnuteľnosti a fotografie ovplyvňujú ocenenie</li>
+      <li>Ako využiť report Estima počas náborovej prezentácie</li>
+      <li>Ako získať viac exkluzívnych zákaziek vďaka lepším reportom</li>
+      <li>Najčastejšie chyby pri oceňovaní nehnuteľností</li>
+      <li>Prečo záleží na počte dní na trhu</li>
+      <li>Čo o trhu hovoria zľavy z ceny</li>
+      <li>Ako lokalita a mikrolokalita ovplyvňujú hodnotu nehnuteľnosti</li>
+      <li>Ako profesionálne prezentovať neistotu ocenenia</li>
+      <li>Ako upraviť ocenenie, keď sa trh zmení</li>
+      <li>Ako nadviazať kontakt po náborovej prezentácii</li>
+      <li>Ako klientom vysvetliť automatizované ocenenie</li>
+      <li>Ako budovať dôveru bez sľubovania najvyššej ceny</li>
+      <li>Ako môže kancelária vytvoriť jednotný štandard oceňovania</li>
+    </ol>
+  </div>
+
+  <div class="guide">
+    <div class="guide-head"><span class="guide-num">1</span><h2>Ako pripraviť ocenenie nehnuteľnosti podložené dátami</h2></div>
+    <p>Kvalitné ocenenie nehnuteľnosti by sa nemalo opierať o jedinú priemernú cenu za meter štvorcový. Dva byty v tej istej mestskej časti môžu mať výrazne odlišnú hodnotu — kvôli stavu, podlažiu, dispozícii, kvalite budovy, orientácii, polohe a aktuálnej konkurencii na trhu.</p>
+    <p>Ocenenie podložené dátami by malo obsahovať:</p>
+    <ul>
+      <li>kľúčové charakteristiky nehnuteľnosti;</li>
+      <li>podobné nehnuteľnosti aktuálne v ponuke;</li>
+      <li>nedávne zmeny cien;</li>
+      <li>miestnu cenu za meter štvorcový;</li>
+      <li>rozdiely medzi oceňovanou nehnuteľnosťou a porovnateľnými inzerátmi;</li>
+      <li>aktuálnu ponuku a dopyt;</li>
+      <li>odhadované cenové rozpätie namiesto jedného nevysvetleného čísla.</li>
+    </ul>
+    <p>Skúsenosti makléra zostávajú kľúčové. Dáta poskytujú dôkazy, maklér interpretuje kontext.</p>
+    <div class="helps">
+      <h3>Ako pomáha Estima</h3>
+      <p>Estima zhromaždí relevantné informácie o nehnuteľnosti, identifikuje porovnateľné inzeráty a spracuje analýzu do oceňovacieho reportu zrozumiteľného pre klienta.</p>
+      <p>Namiesto ručného skladania informácií z viacerých realitných portálov a tabuliek dostane maklér štruktúrovaný podklad, ktorý môže skontrolovať a upraviť na základe profesionálneho úsudku.</p>
+    </div>
+    <a class="cta" href="/">Vytvorte oceňovací report s Estimou</a>
+  </div>
+
+  <div class="guide">
+    <div class="guide-head"><span class="guide-num">2</span><h2>Ako vybrať skutočne porovnateľné nehnuteľnosti</h2></div>
+    <p>Porovnateľná nehnuteľnosť nie je jednoducho ďalší byt v okolí. Najsilnejšie porovnateľné inzeráty zvyčajne zdieľajú s oceňovanou nehnuteľnosťou viacero charakteristík:</p>
+    <ul>
+      <li>typ nehnuteľnosti;</li>
+      <li>lokalitu a mikrolokalitu;</li>
+      <li>úžitkovú plochu;</li>
+      <li>počet izieb;</li>
+      <li>formu vlastníctva;</li>
+      <li>podlažie a prítomnosť výťahu;</li>
+      <li>stav budovy;</li>
+      <li>stav bytu;</li>
+      <li>balkón, terasu, parkovanie alebo pivnicu;</li>
+      <li>približnú dĺžku inzercie.</li>
+    </ul>
+    <p>Kompletne zrekonštruovaný byt by sa nemal priamo porovnávať s bytom vyžadujúcim celkovú rekonštrukciu bez zohľadnenia tohto rozdielu. Podobne dva byty vzdialené len jeden kilometer môžu patriť do úplne odlišných mikrotrhov.</p>
+    <p>Zmyslom analýzy porovnateľných nehnuteľností nie je nájsť identické nehnuteľnosti. Identické nehnuteľnosti takmer neexistujú. Zmyslom je identifikovať najrelevantnejšie dostupné dôkazy a vysvetliť rozdiely.</p>
+    <div class="helps">
+      <h3>Ako pomáha Estima</h3>
+      <p>Estima zoradí potenciálne porovnateľné inzeráty podľa podobnosti a umožní maklérovi rozhodnúť, ktoré nehnuteľnosti sa dostanú do finálneho reportu.</p>
+      <p>To skracuje čas strávený manuálnym vyhľadávaním a konečné rozhodnutie necháva v rukách makléra.</p>
+    </div>
+    <a class="cta" href="/">Nájdite silnejšie porovnateľné inzeráty s Estimou</a>
+  </div>
+
+  <div class="guide">
+    <div class="guide-head"><span class="guide-num">3</span><h2>Ponuková cena verzus pravdepodobná predajná cena</h2></div>
+    <p>Ponuková cena vyjadruje, čo majiteľ dúfa, že dostane. Pravdepodobná predajná cena vyjadruje, čo je trh aktuálne ochotný akceptovať. Tieto čísla sa často líšia.</p>
+    <p>Nehnuteľnosť môže byť inzerovaná nad trhovou hodnotou, pretože:</p>
+    <ul>
+      <li>majiteľ počíta s priestorom na vyjednávanie;</li>
+      <li>ponuková cena vychádza z citovej väzby;</li>
+      <li>majiteľ porovnáva nehnuteľnosť s nevhodnými inzerátmi;</li>
+      <li>nehnuteľnosť zostala na trhu, zatiaľ čo podmienky sa zmenili;</li>
+      <li>konkurenčné nehnuteľnosti znížili ceny.</li>
+    </ul>
+    <p>Makléri by preto nemali prezentovať aktuálne ponukové ceny ako potvrdené trhové hodnoty. Dôveryhodné ocenenie by malo zohľadniť charakteristiky nehnuteľnosti, konkurenciu, počet dní na trhu a viditeľné zľavy z ceny.</p>
+    <p>Ak nie sú k dispozícii overené údaje o realizovaných predajoch, maklér by mal jasne uviesť, že ponukové ceny slúžia ako trhový dôkaz, nie ako ceny skutočne uzavretých predajov.</p>
+    <div class="helps">
+      <h3>Ako pomáha Estima</h3>
+      <p>Estima oddeľuje inzerovanú cenu od odhadovaného trhového rozpätia a ukazuje dôkazy, o ktoré sa odporúčanie opiera.</p>
+      <p>Maklér tak vie vysvetliť, prečo jednoduché prevzatie najvyššej ceny z okolia môže viesť k nereálnemu oceneniu.</p>
+    </div>
+    <a class="cta" href="/">Porovnajte ponukovú cenu s odhadovaným trhovým rozpätím</a>
+  </div>
+
+  <div class="guide">
+    <div class="guide-head"><span class="guide-num">4</span><h2>Ako predávajúcemu vysvetliť cenové rozpätie Estima</h2></div>
+    <p>Cenové rozpätie je často dôveryhodnejšie než jedno presné číslo. Trhová hodnota nehnuteľnosti nie je fixná na euro presne. Závisí od dopytu kupujúcich, prezentácie nehnuteľnosti, vyjednávania a zmien v konkurenčnej ponuke.</p>
+    <p>Pri prezentovaní rozpätia Estima vysvetlite tri možné pozície:</p>
+    <p class="subhead">Konkurencieschopná cena</p>
+    <p>Cena pri spodnej časti rozpätia môže vyvolať väčší záujem a zvýšiť pravdepodobnosť viacerých dopytov alebo ponúk.</p>
+    <p class="subhead">Vyvážená trhová cena</p>
+    <p>Cena okolo stredu rozpätia predstavuje rozumnú rovnováhu medzi pritiahnutím dopytu a ochranou hodnoty pre majiteľa.</p>
+    <p class="subhead">Ambiciózna cena</p>
+    <p>Cenu pri hornej hranici rozpätia alebo nad ňou možno otestovať, majiteľ by však mal rozumieť riziku dlhšieho predaja a budúcich zliav z ceny.</p>
+    <p>Maklér by mal odporučiť stratégiu, nielen predložiť číslo.</p>
+    <div class="helps">
+      <h3>Ako pomáha Estima</h3>
+      <p>Report Estima dáva predávajúcemu vizuálne vysvetlenie cenového rozpätia, porovnateľných nehnuteľností a relevantných trhových podmienok.</p>
+      <p>Cenový rozhovor sa tak mení z osobného sporu na profesionálnu diskusiu podloženú dôkazmi.</p>
+    </div>
+    <a class="cta" href="/">Prezentujte svoje cenové odporúčanie s istotou</a>
+  </div>
+
+  <div class="guide">
+    <div class="guide-head"><span class="guide-num">5</span><h2>Ako reagovať, keď majiteľ očakáva nereálnu cenu</h2></div>
+    <p>Povedať majiteľovi, že jeho cenové očakávanie je nereálne, môže okamžite vyvolať odpor.</p>
+    <p>Lepší prístup je vyhnúť sa vete:</p>
+    <p class="quote">Vaša nehnuteľnosť toľko nestojí.</p>
+    <p>Namiesto toho povedzte:</p>
+    <p class="quote">Pozrime sa, ako budú kupujúci pravdepodobne porovnávať vašu nehnuteľnosť s alternatívami, ktoré sú aktuálne v ponuke.</p>
+    <p>Začnite prioritami majiteľa. Opýtajte sa, či je pre neho dôležitejšia najvyššia možná cena, predvídateľný predaj alebo rýchlejšia transakcia. Potom predložte:</p>
+    <ul>
+      <li>podobné aktívne inzeráty;</li>
+      <li>ako dlho sú inzerované;</li>
+      <li>nedávne zľavy z ceny;</li>
+      <li>rozdiely v stave a lokalite;</li>
+      <li>úroveň konkurencie pri navrhovanej cene.</li>
+    </ul>
+    <p>Cieľom nie je vyhrať spor. Cieľom je pomôcť majiteľovi pochopiť dôsledky každého cenového rozhodnutia.</p>
+    <div class="helps">
+      <h3>Ako pomáha Estima</h3>
+      <p>Report Estima umožňuje maklérovi podložiť odporúčanie neutrálnymi trhovými dôkazmi.</p>
+      <p>Ak je zdôvodnenie jasne zdokumentované, majiteľ si ocenenie menej pravdepodobne vyloží ako snahu o rýchly predaj.</p>
+    </div>
+    <a class="cta" href="/">Zmeňte náročné cenové rozhovory na rozhodnutia podložené dôkazmi</a>
+  </div>
+
+  <div class="guide">
+    <div class="guide-head"><span class="guide-num">6</span><h2>Ako stav nehnuteľnosti a fotografie ovplyvňujú ocenenie</h2></div>
+    <p>Stav nehnuteľnosti môže výrazne ovplyvniť záujem kupujúcich, očakávané náklady na rekonštrukciu aj konečnú dosiahnuteľnú cenu. Dôležité faktory zahŕňajú:</p>
+    <ul>
+      <li>stav kuchyne a kúpeľne;</li>
+      <li>podlahy a okná;</li>
+      <li>elektroinštaláciu a rozvody vody;</li>
+      <li>denné svetlo;</li>
+      <li>viditeľné nedostatky údržby;</li>
+      <li>kvalitu rekonštrukcie;</li>
+      <li>konzistentnosť materiálov a povrchov;</li>
+      <li>stav budovy a spoločných priestorov.</li>
+    </ul>
+    <p>Aj fotografie ovplyvňujú, ako kupujúci vnímajú nehnuteľnosť ešte pred obhliadkou. Tmavé, nejasné alebo neúplné fotografie môžu znížiť záujem aj pri atraktívnej nehnuteľnosti. Kvalitné fotografie nenapravia nevhodnú cenu, môžu však zlepšiť kvalitu a počet prvotných dopytov.</p>
+    <p>Makléri by mali rozlišovať medzi:</p>
+    <ul>
+      <li>fyzickým stavom nehnuteľnosti;</li>
+      <li>kvalitou jej prezentácie;</li>
+      <li>trhovou hodnotou vykonaných vylepšení.</li>
+    </ul>
+    <p>Nie každá rekonštrukcia zvýši hodnotu nehnuteľnosti o celú investovanú sumu.</p>
+    <div class="helps">
+      <h3>Ako pomáha Estima</h3>
+      <p>Estima dokáže zdokumentovať viditeľný stav nehnuteľnosti a zohľadniť relevantné rozdiely pri porovnávaní s konkurenčnými inzerátmi.</p>
+      <p>Maklér tak získa ďalšiu štruktúru na vysvetlenie, prečo dve zdanlivo podobné nehnuteľnosti môžu vyžadovať rôzne ceny.</p>
+    </div>
+    <a class="cta" href="/">Zahrňte stav nehnuteľnosti do svojej analýzy ocenenia</a>
+  </div>
+
+  <div class="guide">
+    <div class="guide-head"><span class="guide-num">7</span><h2>Ako využiť report Estima počas náborovej prezentácie</h2></div>
+    <p>Oceňovací report má rozhovor podporiť, nie nahradiť. Prezentáciu začnite otázkami na ciele majiteľa:</p>
+    <ul>
+      <li>Prečo uvažuje o predaji?</li>
+      <li>Aký je jeho preferovaný časový plán?</li>
+      <li>Dostal už iné ocenenia?</li>
+      <li>Akú cenu aktuálne očakáva?</li>
+      <li>Čo je pre neho pri výbere makléra najdôležitejšie?</li>
+    </ul>
+    <p>Po pochopení situácie majiteľa predstavte report. Osvedčené poradie prezentácie:</p>
+    <ol>
+      <li>zhrnutie nehnuteľnosti;</li>
+      <li>aktuálne podmienky na miestnom trhu;</li>
+      <li>porovnateľné nehnuteľnosti;</li>
+      <li>rozdiely medzi porovnateľnými inzerátmi a oceňovanou nehnuteľnosťou;</li>
+      <li>odhadované cenové rozpätie;</li>
+      <li>odporúčaná stratégia inzercie;</li>
+      <li>navrhované ďalšie kroky.</li>
+    </ol>
+    <p>Nestrávte celé stretnutie čítaním reportu stranu po strane. Používajte ho na zodpovedanie otázok a podporu odporúčania.</p>
+    <div class="helps">
+      <h3>Ako pomáha Estima</h3>
+      <p>Report Estima dáva maklérovi profesionálny vizuálny dokument, ktorý môže prezentovať na stretnutí a následne zdieľať s majiteľom.</p>
+      <p>Ocenenie vďaka nemu pôsobí štruktúrovane, transparentne a pripravené špeciálne pre danú nehnuteľnosť.</p>
+    </div>
+    <a class="cta" href="/">Posilnite svoju najbližšiu náborovú prezentáciu</a>
+  </div>
+
+  <div class="guide">
+    <div class="guide-head"><span class="guide-num">8</span><h2>Ako získať viac exkluzívnych zákaziek vďaka lepším oceňovacím reportom</h2></div>
+    <p>Majitelia sa pred rozhodnutím, koho poveria predajom, často rozprávajú s viacerými maklérmi. Mnohí makléri poskytnú len ústny odhad ceny alebo krátky e-mail. Štruktúrovaný oceňovací report vytvára silnejší profesionálny dojem.</p>
+    <p>Dobrý report ukazuje, že maklér:</p>
+    <ul>
+      <li>preskúmal nehnuteľnosť;</li>
+      <li>prešiel relevantnú konkurenciu;</li>
+      <li>zohľadnil trhové podmienky;</li>
+      <li>pripravil jasnú cenovú stratégiu;</li>
+      <li>vynaložil úsilie ešte pred získaním zákazky.</li>
+    </ul>
+    <p>Report by sa nemal používať ako záruka, že sa nehnuteľnosť predá za konkrétnu sumu. Má demonštrovať kvalitu maklérovho procesu.</p>
+    <div class="helps">
+      <h3>Ako pomáha Estima</h3>
+      <p>Estima umožňuje maklérom pripraviť profesionálne reporty s vlastnou značkou bez ručného vytvárania každého grafu, tabuľky a porovnania.</p>
+      <p>Aj menšie kancelárie tak dosiahnu úroveň prezentácie, ktorá je bežne spájaná s veľkými firmami a oceňovacími oddeleniami.</p>
+    </div>
+    <a class="cta" href="/">Odlíšte svoju kanceláriu profesionálnymi reportmi</a>
+  </div>
+
+  <div class="guide">
+    <div class="guide-head"><span class="guide-num">9</span><h2>Najčastejšie chyby pri oceňovaní nehnuteľností</h2></div>
+    <p>Aj skúsení makléri môžu pri unáhlenom alebo nekonzistentnom postupe pripraviť slabšie ocenenie. Medzi časté chyby patrí:</p>
+    <ul>
+      <li>spoliehanie sa iba na priemernú cenu za meter štvorcový;</li>
+      <li>výber nehnuteľností, ktoré sú síce blízko, ale nie sú skutočne porovnateľné;</li>
+      <li>ignorovanie stavu nehnuteľnosti;</li>
+      <li>porovnávanie rôznych foriem vlastníctva;</li>
+      <li>používanie iba najdrahších inzerátov;</li>
+      <li>ignorovanie inzerátov, ktoré zostávajú dlhodobo nepredané;</li>
+      <li>zamieňanie ponukovej ceny s cenou realizovaného predaja;</li>
+      <li>prezentovanie jednej presnej hodnoty bez vysvetlenia neistoty;</li>
+      <li>neaktualizovanie ocenenia pri zmene trhu.</li>
+    </ul>
+    <p>Spoľahlivý proces oceňovania by mal byť opakovateľný. Iný člen tímu by mal pri tej istej nehnuteľnosti vedieť pochopiť, ako odporúčanie vzniklo.</p>
+    <div class="helps">
+      <h3>Ako pomáha Estima</h3>
+      <p>Estima vytvára konzistentnú štruktúru oceňovania naprieč kanceláriou a zároveň necháva jednotlivým maklérom priestor na uplatnenie miestnej expertízy.</p>
+    </div>
+    <a class="cta" href="/">Štandardizujte proces oceňovania vo svojej kancelárii</a>
+  </div>
+
+  <div class="guide">
+    <div class="guide-head"><span class="guide-num">10</span><h2>Prečo záleží na počte dní na trhu</h2></div>
+    <p>Dĺžka inzercie nehnuteľnosti môže prezradiť užitočné informácie o jej pozícii na trhu. Dlhé obdobie inzercie môže naznačovať:</p>
+    <ul>
+      <li>nereálnu ponukovú cenu;</li>
+      <li>slabú prezentáciu;</li>
+      <li>nízky dopyt po danom type nehnuteľnosti;</li>
+      <li>právne alebo technické komplikácie;</li>
+      <li>nepresné informácie o nehnuteľnosti;</li>
+      <li>meniace sa trhové podmienky.</li>
+    </ul>
+    <p>Počet dní na trhu by sa nikdy nemal interpretovať izolovane. Niektoré výnimočné alebo drahé nehnuteľnosti prirodzene vyžadujú dlhší čas predaja. Ak však viacero podobných nehnuteľností zostáva dlho v ponuke, ich ponukové ceny nemusia zodpovedať dosiahnuteľným trhovým hodnotám.</p>
+    <div class="helps">
+      <h3>Ako pomáha Estima</h3>
+      <p>Estima sleduje, ako dlho sú porovnateľné nehnuteľnosti viditeľné, a upozorňuje na zmeny, ktoré môžu ovplyvniť ich relevantnosť.</p>
+      <p>Makléri tak vedia rozlíšiť čerstvú konkurenciu od inzerátov, ktoré už trh pravdepodobne odmietol.</p>
+    </div>
+    <a class="cta" href="/">Pridajte časovanie trhu do analýzy porovnateľných inzerátov</a>
+  </div>
+
+  <div class="guide">
+    <div class="guide-head"><span class="guide-num">11</span><h2>Čo o trhu hovoria zľavy z ceny</h2></div>
+    <p>Zľava z ceny je signál, že pôvodná ponuková cena nevyvolala očakávanú odozvu. Jedna zľava automaticky neznamená, že nová cena je správna. Vzorce naprieč viacerými inzerátmi však môžu naznačovať, že očakávania predávajúcich prevyšujú aktuálny dopyt kupujúcich.</p>
+    <p>Makléri by si mali všímať:</p>
+    <ul>
+      <li>pôvodnú ponukovú cenu;</li>
+      <li>aktuálnu ponukovú cenu;</li>
+      <li>výšku zľavy;</li>
+      <li>počet zliav;</li>
+      <li>čas medzi jednotlivými zmenami;</li>
+      <li>či podobné inzeráty sledujú rovnaký vzorec.</li>
+    </ul>
+    <p>Cenová história je obzvlášť užitočná, keď majiteľ argumentuje konkurenčným inzerátom ako dôkazom, že jeho nehnuteľnosť by mala byť inzerovaná drahšie.</p>
+    <div class="helps">
+      <h3>Ako pomáha Estima</h3>
+      <p>Estima dokáže zobraziť cenový vývoj porovnateľných nehnuteľností — jasnejší pohľad, než ponúka jediná snímka obrazovky z realitného portálu.</p>
+    </div>
+    <a class="cta" href="/">Využite cenovú históriu pri najbližšom ocenení</a>
+  </div>
+
+  <div class="guide">
+    <div class="guide-head"><span class="guide-num">12</span><h2>Ako lokalita a mikrolokalita ovplyvňujú hodnotu nehnuteľnosti</h2></div>
+    <p>Priemery na úrovni mesta a mestskej časti sú užitočné, ale kupujúci vnímajú nehnuteľnosť na úrovni ulice a susedstva. Faktory mikrolokality môžu zahŕňať:</p>
+    <ul>
+      <li>dostupnosť verejnej dopravy;</li>
+      <li>hluk a dopravu;</li>
+      <li>školy a škôlky;</li>
+      <li>parky a zeleň;</li>
+      <li>obchody a služby;</li>
+      <li>možnosti parkovania;</li>
+      <li>okolie budovy;</li>
+      <li>budúcu výstavbu;</li>
+      <li>výhľad a orientáciu;</li>
+      <li>pešiu dostupnosť dôležitých miest.</li>
+    </ul>
+    <p>Dve nehnuteľnosti s rovnakým PSČ môžu priťahovať odlišné skupiny kupujúcich a dosahovať rôzne ceny. Maklér by mal vysvetliť, ktoré faktory lokality vytvárajú skutočnú hodnotu pre kupujúceho a ktoré sú najmä marketingové tvrdenia.</p>
+    <div class="helps">
+      <h3>Ako pomáha Estima</h3>
+      <p>Estima spája analýzu na úrovni nehnuteľnosti s informáciami o miestnom trhu a pomáha maklérovi zasadiť nehnuteľnosť do jej skutočného konkurenčného prostredia.</p>
+    </div>
+    <a class="cta" href="/">Pridajte miestny kontext do svojho oceňovacieho reportu</a>
+  </div>
+
+  <div class="guide">
+    <div class="guide-head"><span class="guide-num">13</span><h2>Ako profesionálne prezentovať neistotu ocenenia</h2></div>
+    <p>Profesionálne ocenenie by nemalo predstierať, že neistota neexistuje. Neistota môže byť vyššia, keď:</p>
+    <ul>
+      <li>je k dispozícii veľmi málo porovnateľných nehnuteľností;</li>
+      <li>je nehnuteľnosť neobvyklá;</li>
+      <li>má miestny trh nízku aktivitu transakcií;</li>
+      <li>chýbajú dôležité informácie o nehnuteľnosti;</li>
+      <li>sa trhové podmienky rýchlo menia;</li>
+      <li>stav nehnuteľnosti nemožno riadne posúdiť.</li>
+    </ul>
+    <p>Vysvetlenie neistoty neoslabuje dôveryhodnosť makléra. Ukazuje, že odporúčanie je úprimné a podložené dôkazmi. Maklér by mal vysvetliť, čo je známe, čo je odhadované a čo by mohlo očakávaný výsledok zmeniť.</p>
+    <div class="helps">
+      <h3>Ako pomáha Estima</h3>
+      <p>Estima dokáže prezentovať cenové rozpätie spolu s kvalitou a počtom dostupných porovnateľných inzerátov.</p>
+      <p>Ľahšie tak vysvetlíte, prečo majú niektoré ocenenia úzke rozpätie, zatiaľ čo iné vyžadujú väčšiu opatrnosť.</p>
+    </div>
+    <a class="cta" href="/">Prezentujte dôkazy, nie falošnú presnosť</a>
+  </div>
+
+  <div class="guide">
+    <div class="guide-head"><span class="guide-num">14</span><h2>Ako upraviť ocenenie, keď sa trh zmení</h2></div>
+    <p>Ocenenie platí ku konkrétnemu okamihu. Prehodnotiť ho môže byť potrebné, keď:</p>
+    <ul>
+      <li>sa zmenia úrokové sadzby;</li>
+      <li>dopyt kupujúcich vzrastie alebo klesne;</li>
+      <li>na trh vstúpi viacero konkurenčných nehnuteľností;</li>
+      <li>porovnateľné inzeráty znížia ceny;</li>
+      <li>nehnuteľnosť zostáva nepredaná;</li>
+      <li>majiteľ nehnuteľnosť zrekonštruuje alebo zmení;</li>
+      <li>lokalitu ovplyvní miestny development.</li>
+    </ul>
+    <p>Makléri by sa mali s predávajúcim vopred dohodnúť, kedy sa cenová stratégia prehodnotí. Napríklad:</p>
+    <p class="quote">Po prvých troch týždňoch vyhodnotíme počet dopytov, obhliadok a spätnú väzbu kupujúcich. Ak bude odozva pod očakávaním, porovnáme nehnuteľnosť znova s najnovšími trhovými dôkazmi.</p>
+    <div class="helps">
+      <h3>Ako pomáha Estima</h3>
+      <p>Estima umožňuje maklérovi aktualizovať analýzu podľa aktuálnych inzerátov a trhových informácií namiesto spoliehania sa na pôvodné ocenenie počas celého predaja.</p>
+    </div>
+    <a class="cta" href="/">Udržte každé ocenenie v súlade s aktuálnym trhom</a>
+  </div>
+
+  <div class="guide">
+    <div class="guide-head"><span class="guide-num">15</span><h2>Ako nadviazať kontakt po náborovej prezentácii</h2></div>
+    <p>Mnohé príležitosti na zákazku sa stratia, pretože follow-up je všeobecný alebo príde neskoro. Po stretnutí pošlite majiteľovi:</p>
+    <ul>
+      <li>oceňovací report;</li>
+      <li>krátke zhrnutie odporúčanej cenovej stratégie;</li>
+      <li>kľúčové dôvody odporúčania;</li>
+      <li>navrhovaný marketingový plán;</li>
+      <li>jasné ďalšie kroky;</li>
+      <li>termín ďalšieho rozhovoru.</li>
+    </ul>
+    <p>Užitočná follow-up správa môže znieť:</p>
+    <p class="quote">Ďakujem za dnešné stretnutie. Na základe charakteristík nehnuteľnosti, aktuálnej konkurencie a preskúmaných porovnateľných nehnuteľností odporúčam vstúpiť na trh v cenovom rozpätí uvedenom v priloženom reporte. Táto pozícia nám umožní otestovať dopyt kupujúcich bez toho, aby sa nehnuteľnosť ocitla mimo rozpätia najsilnejších alternatív.</p>
+    <p>Report udržiava odporúčanie makléra na očiach, kým majiteľ porovnáva rôzne kancelárie.</p>
+    <div class="helps">
+      <h3>Ako pomáha Estima</h3>
+      <p>Estima dáva maklérovi profesionálny dokument, ktorý možno poslať hneď po stretnutí — posilní dojem z prezentácie a udrží kanceláriu v pamäti.</p>
+    </div>
+    <a class="cta" href="/">Urobte svoj follow-up presvedčivejším</a>
+  </div>
+
+  <div class="guide">
+    <div class="guide-head"><span class="guide-num">16</span><h2>Ako klientom vysvetliť automatizované ocenenie</h2></div>
+    <p>Niektorí majitelia sa môžu domnievať, že automatizované ocenenie znamená, že softvér nahradil expertízu makléra. Takto by zodpovedný proces oceňovania fungovať nemal.</p>
+    <p>Technológia dokáže:</p>
+    <ul>
+      <li>spracovať veľké množstvo dát z inzerátov;</li>
+      <li>vypočítať trhové ukazovatele;</li>
+      <li>identifikovať potenciálne relevantné porovnateľné inzeráty;</li>
+      <li>sledovať zmeny cien;</li>
+      <li>pripraviť konzistentné reporty.</li>
+    </ul>
+    <p>Maklér musí stále:</p>
+    <ul>
+      <li>overiť informácie o nehnuteľnosti;</li>
+      <li>posúdiť mikrolokalitu;</li>
+      <li>pochopiť situáciu predávajúceho;</li>
+      <li>vyhodnotiť neobvyklé vlastnosti;</li>
+      <li>skontrolovať vybrané porovnateľné inzeráty;</li>
+      <li>odporučiť finálnu cenovú stratégiu.</li>
+    </ul>
+    <p>Najsilnejší prístup kombinuje technológiu s miestnymi profesionálnymi znalosťami.</p>
+    <div class="helps">
+      <h3>Ako pomáha Estima</h3>
+      <p>Estima je navrhnutá ako nástroj na podporu rozhodovania realitných maklérov, nie ako ich náhrada.</p>
+      <p>Preberá opakujúcu sa prípravu dát, aby maklér mohol viac času venovať poradenstvu, získavaniu zákaziek a riadeniu transakcie.</p>
+    </div>
+    <a class="cta" href="/">Spojte svoju expertízu s lepšími trhovými dátami</a>
+  </div>
+
+  <div class="guide">
+    <div class="guide-head"><span class="guide-num">17</span><h2>Ako budovať dôveru bez sľubovania najvyššej ceny</h2></div>
+    <p>Niektorí makléri sa snažia získať zákazku najvyšším ocenením. Na začiatku to môže fungovať, neskôr však prináša problémy:</p>
+    <ul>
+      <li>obmedzený záujem kupujúcich;</li>
+      <li>opakované zľavy z ceny;</li>
+      <li>stratu dôvery majiteľa;</li>
+      <li>dlhší čas predaja;</li>
+      <li>nehnuteľnosť, ktorá na trhu „zostarne“.</li>
+    </ul>
+    <p>Silnejší obchodný prístup je vysvetliť stratégiu za odporúčaním. Majitelia by mali pochopiť, že najlepší maklér nie je nevyhnutne ten, kto navrhne najvyššiu cenu. Je to ten, kto poskytne najjasnejšie dôkazy, najsilnejší marketingový plán a najrealistickejšiu cestu k úspešnému predaju.</p>
+    <div class="helps">
+      <h3>Ako pomáha Estima</h3>
+      <p>Estima dáva maklérom nezávisle pôsobiaci dôkazový základ, ktorý podporuje úprimné cenové odporúčanie.</p>
+      <p>Maklér sa tak stavia do pozície dôveryhodného poradcu, nie niekoho, kto len hovorí to, čo chce majiteľ počuť.</p>
+    </div>
+    <a class="cta" href="/">Získavajte zákazky dôveryhodnosťou, nie nafúknutými sľubmi</a>
+  </div>
+
+  <div class="guide">
+    <div class="guide-head"><span class="guide-num">18</span><h2>Ako môže kancelária vytvoriť jednotný štandard oceňovania</h2></div>
+    <p>Keď každý maklér pripravuje ocenenia inak, kvalita výstupov kancelárie sa ťažko kontroluje. Jeden maklér môže používať detailnú analýzu porovnateľných inzerátov, iný sa spolieha najmä na intuíciu. Reporty môžu používať rôznu terminológiu, formáty a predpoklady.</p>
+    <p>Konzistentný interný štandard oceňovania by mal definovať:</p>
+    <ul>
+      <li>požadované informácie o nehnuteľnosti;</li>
+      <li>ako sa vyberajú porovnateľné inzeráty;</li>
+      <li>ako sa dokumentujú rozdiely;</li>
+      <li>ako sa prezentujú cenové rozpätia;</li>
+      <li>ako sa vysvetľuje neistota;</li>
+      <li>ktoré upozornenia sa uvádzajú;</li>
+      <li>kedy sa ocenenia aktualizujú.</li>
+    </ul>
+    <p>Konzistentnosť zvyšuje profesionalitu a uľahčuje zaškoľovanie nových maklérov.</p>
+    <div class="helps">
+      <h3>Ako pomáha Estima</h3>
+      <p>Estima dáva kanceláriám jeden opakovateľný rámec na prípravu a prezentáciu ocenení nehnuteľností.</p>
+      <p>Reporty môžu niesť branding a metodiku kancelárie, pričom makléri si ponechávajú kontrolu nad finálnym odporúčaním.</p>
+    </div>
+    <a class="cta" href="/">Vybudujte jednotný proces oceňovania naprieč tímom</a>
+  </div>
+
+  <div class="final">
+    <h2>Lepšie dáta. Silnejšie odporúčania. Istejší klienti.</h2>
+    <p>Estima pomáha realitným maklérom pripravovať ocenenia nehnuteľností, identifikovať porovnateľné inzeráty a prezentovať odporúčania prostredníctvom profesionálnych reportov pripravených pre klienta.</p>
+    <p>Trávte menej času manuálnym zberom informácií a viac času poradenstvom klientom, získavaním zákaziek a uzatváraním obchodov.</p>
+    <div class="btn-row">
+      <a class="btn btn-primary" href="/">Vytvorte svoj prvý report Estima</a>
+      <a class="btn btn-ghost" href="/sample">Pozrite si ukážkový oceňovací report</a>
+    </div>
+  </div>
+
+  <div class="disclaimer">
+    <strong>Upozornenie.</strong> Estima poskytuje trhové analýzy a informácie na podporu rozhodovania na základe dostupných údajov o nehnuteľnostiach. Výsledky nepredstavujú znalecký posudok a pred prezentovaním klientovi by ich mal posúdiť kvalifikovaný realitný maklér.
+  </div>
+
+</div>
+
+</body>
+</html>
