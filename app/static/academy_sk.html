@@ -81,6 +81,15 @@
   .lang-toggle .on { background: var(--steel-050); color: var(--ink); }
   .signin { display: inline-flex; align-items: center; border: 1px solid var(--line); border-radius: 999px; padding: 6px 14px; font-size: 13px; font-weight: 500; color: var(--body); }
   .signin:hover { background: var(--bg); border-color: #cbd5e1; }
+  /* Logged-in account control, injected by the auth script below to mirror the
+     app navbar (avatar + role badge → /profil, sign out). */
+  .acct { display: inline-flex; align-items: center; gap: 8px; }
+  .acct-link { display: inline-flex; align-items: center; gap: 6px; }
+  .acct-av { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; background: var(--navy); color: #fff; font-size: 12px; font-weight: 600; overflow: hidden; }
+  .acct-av img { width: 100%; height: 100%; object-fit: cover; }
+  .acct-badge { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; color: var(--steel-strong); border: 1px solid var(--steel-line); background: var(--steel-050); border-radius: 999px; padding: 2px 8px; }
+  .signout { display: inline-flex; align-items: center; border: 1px solid var(--line); border-radius: 999px; padding: 6px 14px; font-size: 13px; font-weight: 500; color: var(--body); background: none; cursor: pointer; font-family: inherit; }
+  .signout:hover { background: var(--bg); border-color: #cbd5e1; }
 
   /* ── buttons ────────────────────────────────────────────────────────── */
   .btn-row { display: flex; flex-wrap: wrap; align-items: center; margin: 0 0 -8px; }
@@ -786,6 +795,60 @@
     });
   }, { rootMargin: '-74px 0px -68% 0px', threshold: 0 });
   document.querySelectorAll('.guide[id]').forEach(function (g) { obs.observe(g); });
+})();
+</script>
+<script>
+/* Academy is served under estima.sk (same origin as the app), so this static
+   navbar can reflect the logged-in session: swap "Sign in" for the account
+   control when /api/auth/me says we're authenticated. Fails silent → stays
+   signed-out. WeasyPrint runs no JS and the header is .no-print, so the PDF
+   is unaffected. */
+(function () {
+  var box = document.querySelector('.header-right');
+  var signin = box && box.querySelector('.signin');
+  if (!signin) return;
+  var sk = (document.documentElement.lang || '').toLowerCase().indexOf('sk') === 0;
+  fetch('/api/auth/me', { credentials: 'same-origin' })
+    .then(function (r) { return r.ok ? r.json() : null; })
+    .then(function (d) {
+      if (!d || !d.authenticated || !d.user) return;
+      var u = d.user, name = (u.name || u.email || '').trim();
+      var acct = document.createElement('div');
+      acct.className = 'acct';
+      var prof = document.createElement('a');
+      prof.className = 'acct-link';
+      prof.href = '/profil';
+      prof.title = sk ? 'Profil' : 'Profile';
+      var av = document.createElement('span');
+      av.className = 'acct-av';
+      if (u.picture) {
+        var img = document.createElement('img');
+        img.src = u.picture; img.alt = ''; img.referrerPolicy = 'no-referrer';
+        av.appendChild(img);
+      } else {
+        av.textContent = (name.charAt(0) || '?').toUpperCase();
+      }
+      prof.appendChild(av);
+      if (u.role === 'admin' || u.plan === 'pro') {
+        var badge = document.createElement('span');
+        badge.className = 'acct-badge';
+        badge.textContent = u.role === 'admin' ? 'Admin' : 'Pro';
+        prof.appendChild(badge);
+      }
+      var out = document.createElement('button');
+      out.type = 'button';
+      out.className = 'signout';
+      out.textContent = sk ? 'Odhlásiť sa' : 'Sign out';
+      out.addEventListener('click', function () {
+        fetch('/api/auth/logout', { method: 'POST', credentials: 'same-origin' })
+          .then(function () { location.reload(); })
+          .catch(function () { location.reload(); });
+      });
+      acct.appendChild(prof);
+      acct.appendChild(out);
+      signin.replaceWith(acct);
+    })
+    .catch(function () {});
 })();
 </script>
 </body>
