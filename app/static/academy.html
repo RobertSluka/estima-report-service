@@ -3,8 +3,10 @@
   Estima Academy landing page.
 
   Served at GET /academy and converted to PDF at GET /academy/download, so the
-  stylesheet must work both on screen and in WeasyPrint 62.3 (no flex gap,
-  no 100vh; @page rules only apply in the PDF).
+  stylesheet must work both on screen and in WeasyPrint 62.3: no flex `gap`,
+  no `100vh`, no CSS grid. Multi-column layouts live in `@media screen` so the
+  PDF (print media) renders as a clean single-column document. @page rules and
+  `.print-only` apply only in the PDF; `.no-print` is hidden there.
 -->
 <html lang="en">
 <head>
@@ -14,215 +16,323 @@
 <style>
   @page {
     size: A4;
-    margin: 16mm 14mm 18mm 14mm;
-    @bottom-left {
-      content: "Estima Academy";
-      font-size: 7.5pt;
-      color: #9aa5b1;
-    }
-    @bottom-right {
-      content: "Page " counter(page) " / " counter(pages);
-      font-size: 7.5pt;
-      color: #9aa5b1;
-    }
+    margin: 15mm 14mm 18mm 14mm;
+    @bottom-left  { content: "Estima Academy"; font-size: 7.5pt; color: #94a3b8; }
+    @bottom-right { content: "Page " counter(page) " / " counter(pages); font-size: 7.5pt; color: #94a3b8; }
   }
 
   :root {
-    --ink:      #1d2733;
-    --ink-soft: #55616e;
-    --muted:    #8a95a1;
-    --line:     #e3e8ee;
-    --panel:    #f6f8fa;
-    --brand:    #123a5e;
-    --brand-2:  #1f6f8b;
-    --accent:   #c9a227;
-    --info-bg:  #e8f2f6;
+    --navy:#0f172a; --navy-800:#1e293b;
+    --ink:#0f172a; --body:#475569; --muted:#64748b; --faint:#94a3b8;
+    --line:#e2e8f0; --panel:#f1f5f9; --bg:#f8fafc; --white:#ffffff;
+    --steel:#5b7ba6; --steel-strong:#4a6890; --steel-050:#eef2f8; --steel-line:#dbe3ef;
+    --emerald-bg:#ecfdf5; --emerald:#059669;
+    --radius:12px; --radius-sm:10px;
+    --shadow:0 1px 2px rgba(15,23,42,.06);
+    --maxw:1120px; --readw:760px;
   }
 
   * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; scroll-padding-top: 72px; }
+  @media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+
   body {
-    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-    color: var(--ink);
-    font-size: 16px;
-    line-height: 1.6;
-    margin: 0;
-    background: #fff;
+    font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+                 "Helvetica Neue", Arial, sans-serif;
+    color: var(--body); background: var(--bg);
+    margin: 0; font-size: 16px; line-height: 1.65;
+    -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
   }
-  h1, h2, h3 { margin: 0; font-weight: 700; }
+  h1, h2, h3 { margin: 0; color: var(--ink); font-weight: 700; letter-spacing: -.01em; }
   p { margin: 0 0 12px; }
-  ul, ol { margin: 0 0 12px; padding-left: 22px; }
-  li { margin-bottom: 4px; }
-  a { color: var(--brand-2); text-decoration: none; }
+  ul, ol { margin: 0 0 14px; padding-left: 20px; }
+  li { margin-bottom: 5px; }
+  a { color: var(--steel-strong); text-decoration: none; }
+  :focus-visible { outline: 2px solid rgba(91,123,166,.65); outline-offset: 2px; border-radius: 4px; }
 
-  .wrap { max-width: 880px; margin: 0 auto; padding: 0 24px; }
+  .container { max-width: var(--maxw); margin: 0 auto; padding: 0 24px; }
+  .print-only { display: none; }
 
-  /* Hero */
-  .hero {
-    color: #fff;
-    background: linear-gradient(160deg, #0d2f4d 0%, #123a5e 45%, #1f6f8b 100%);
-    padding: 48px 0 56px;
+  .eyebrow {
+    display: flex; align-items: center;
+    font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--faint); margin: 0 0 14px;
   }
-  .brand-row { margin-bottom: 32px; }
-  .brand-row svg { vertical-align: middle; margin-right: 10px; }
-  .brand-cell { display: inline-block; vertical-align: middle; }
-  .brand-mark { font-size: 26px; font-weight: 800; letter-spacing: 1px; }
-  .brand-mark .dot { color: var(--accent); }
-  .brand-tag {
-    font-size: 11px; letter-spacing: 4px; text-transform: uppercase;
-    color: #b9d4e4; margin-top: 2px;
+  .eyebrow::before {
+    content: ""; width: 7px; height: 7px; border-radius: 50%;
+    border: 1.5px solid var(--steel); margin-right: 8px; flex: none;
   }
-  .lang-switch { float: right; font-size: 13px; color: #b9d4e4; margin-top: 8px; }
-  .lang-switch a { color: #fff; font-weight: 700; }
-  .lang-switch .active { color: var(--accent); }
-  .hero h1 { font-size: 38px; line-height: 1.2; max-width: 640px; }
-  .hero .lead {
-    font-size: 17px; color: #cfe3ee; max-width: 660px; margin-top: 18px;
-  }
-  .hero .btn-row { margin-top: 28px; }
 
+  /* ── site header (mirrors the app navbar) ───────────────────────────── */
+  .site-header {
+    position: sticky; top: 0; z-index: 30;
+    background: rgba(255,255,255,.9); backdrop-filter: saturate(180%) blur(8px);
+    border-bottom: 1px solid var(--line);
+  }
+  .header-inner { display: flex; align-items: center; height: 56px; }
+  .brand { display: inline-flex; align-items: center; }
+  .brand svg { width: 26px; height: 26px; color: var(--ink); }
+  .brand-word { margin-left: 8px; font-weight: 700; font-size: 15px; color: var(--ink); letter-spacing: -.02em; }
+  .brand-word span { color: var(--muted); font-weight: 600; }
+  .site-nav { display: none; }
+  .header-right { margin-left: auto; display: inline-flex; align-items: center; }
+  .lang-toggle { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; margin-right: 10px; }
+  .lang-toggle a, .lang-toggle span { font-size: 11px; font-weight: 600; padding: 4px 9px; color: var(--muted); }
+  .lang-toggle .on { background: var(--steel-050); color: var(--ink); }
+  .signin { display: inline-flex; align-items: center; border: 1px solid var(--line); border-radius: 999px; padding: 6px 14px; font-size: 13px; font-weight: 500; color: var(--body); }
+  .signin:hover { background: var(--bg); border-color: #cbd5e1; }
+
+  /* ── buttons ────────────────────────────────────────────────────────── */
+  .btn-row { display: flex; flex-wrap: wrap; align-items: center; margin: 0 0 -8px; }
   .btn {
-    display: inline-block;
-    border-radius: 999px;
-    padding: 11px 24px;
-    font-weight: 700;
-    font-size: 15px;
-    margin-right: 12px;
-    margin-bottom: 8px;
+    display: inline-flex; align-items: center; justify-content: center;
+    border-radius: var(--radius-sm); padding: 11px 20px;
+    font-size: 14px; font-weight: 600; border: 1px solid transparent;
+    margin: 0 8px 8px 0; transition: background-color .15s, border-color .15s, transform .15s;
   }
-  .btn-primary { background: var(--accent); color: #1d2733; }
-  .btn-ghost { border: 1.5px solid rgba(255,255,255,.6); color: #fff; }
+  .btn-primary { background: var(--navy); color: #fff; box-shadow: var(--shadow); }
+  .btn-primary:hover { background: var(--navy-800); }
+  .btn-outline { background: #fff; color: var(--ink); border-color: var(--line); box-shadow: var(--shadow); }
+  .btn-outline:hover { background: var(--bg); border-color: #cbd5e1; }
+  .btn svg { width: 15px; height: 15px; margin-left: 8px; }
 
-  /* Contents */
-  .toc { padding: 36px 0 8px; }
-  .toc h2 { font-size: 14px; letter-spacing: 3px; text-transform: uppercase; color: var(--muted); margin-bottom: 14px; }
-  .toc ol { column-count: 2; column-gap: 36px; font-size: 14.5px; color: var(--ink-soft); }
-  .toc li { margin-bottom: 6px; }
+  /* ── hero ───────────────────────────────────────────────────────────── */
+  .hero { background: var(--white); border-bottom: 1px solid var(--line); }
+  .hero-inner { padding: 46px 0 44px; }
+  .hero-brand { align-items: center; margin-bottom: 18px; }
+  .hero-brand svg { width: 30px; height: 30px; color: var(--ink); }
+  .hero-brand b { margin-left: 9px; font-size: 15px; color: var(--ink); }
+  .hero h1 { font-size: 34px; line-height: 1.14; max-width: 15ch; }
+  .hero .lead { font-size: 16px; color: var(--muted); max-width: 50ch; margin: 16px 0 26px; }
 
-  /* Guides */
-  .guide { padding: 28px 0 6px; border-top: 1px solid var(--line); }
-  .guide:first-of-type { border-top: 0; }
-  .guide-head { margin-bottom: 14px; }
-  .guide-num {
-    display: inline-block;
-    font-size: 13px; font-weight: 700; color: #fff;
-    background: var(--brand);
-    border-radius: 4px; padding: 2px 9px;
-    margin-right: 10px;
-    vertical-align: 3px;
-  }
-  .guide h2 { display: inline; font-size: 23px; color: var(--brand); }
-  .quote {
-    border-left: 3px solid var(--accent);
-    background: var(--panel);
-    padding: 10px 16px;
-    margin: 0 0 12px;
-    font-style: italic;
-    color: var(--ink-soft);
-  }
-  .subhead { font-size: 16px; color: var(--brand-2); margin: 14px 0 6px; }
+  /* product visual (mini valuation report) */
+  .pv { background: #fff; border: 1px solid var(--line); border-radius: 14px; box-shadow: 0 12px 30px -16px rgba(15,23,42,.28); overflow: hidden; }
+  .pv-top { display: flex; align-items: center; background: var(--navy); color: #fff; padding: 10px 14px; font-size: 12px; font-weight: 600; }
+  .pv-top .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--steel); margin-right: 8px; flex: none; }
+  .pv-tag { margin-left: auto; font-size: 10px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: #94a3b8; border: 1px solid rgba(255,255,255,.18); border-radius: 999px; padding: 2px 8px; }
+  .pv-body { padding: 16px 16px 18px; }
+  .pv-addr { font-size: 14px; font-weight: 700; color: var(--ink); }
+  .pv-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .pv-price { font-size: 24px; font-weight: 700; color: var(--ink); margin: 12px 0 2px; letter-spacing: -.02em; }
+  .pv-rl { display: flex; justify-content: space-between; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--faint); margin: 10px 0 6px; }
+  .pv-track { position: relative; height: 8px; border-radius: 999px; background: var(--panel); }
+  .pv-fill { position: absolute; top: 0; bottom: 0; left: 14%; right: 20%; border-radius: 999px; background: rgba(91,123,166,.35); }
+  .pv-knob { position: absolute; top: -3px; left: 52%; width: 14px; height: 14px; border-radius: 50%; background: #fff; border: 3px solid var(--navy); }
+  .pv-cap { font-size: 11px; color: var(--muted); margin-top: 8px; }
+  .pv-comps { margin-top: 14px; border-top: 1px solid var(--line); padding-top: 12px; }
+  .pv-comp { display: flex; align-items: center; padding: 5px 0; }
+  .pv-comp + .pv-comp { border-top: 1px solid var(--panel); }
+  .pv-c-a { font-size: 12.5px; font-weight: 600; color: var(--ink); }
+  .pv-c-s { font-size: 11px; color: var(--muted); }
+  .chip { margin-left: auto; font-size: 10px; font-weight: 600; border-radius: 999px; padding: 2px 9px; border: 1px solid; white-space: nowrap; }
+  .chip-fair  { color: #047857; background: #ecfdf5; border-color: #a7f3d0; }
+  .chip-over  { color: #b91c1c; background: #fef2f2; border-color: #fecaca; }
+  .chip-under { color: #1d4ed8; background: #eff6ff; border-color: #bfdbfe; }
 
-  .helps {
-    background: var(--info-bg);
-    border-left: 4px solid var(--brand-2);
-    border-radius: 0 8px 8px 0;
-    padding: 14px 18px 6px;
-    margin: 16px 0 14px;
-    page-break-inside: avoid;
-  }
-  .helps h3 { font-size: 15px; color: var(--brand-2); margin-bottom: 8px; }
-  .cta {
-    display: inline-block;
-    font-weight: 700; font-size: 14.5px;
-    color: var(--brand);
-    border: 1.5px solid var(--brand);
-    border-radius: 999px;
-    padding: 8px 20px;
-    margin-bottom: 22px;
-    page-break-inside: avoid;
-  }
-  .cta::after { content: " \2192"; color: var(--accent); }
+  /* ── overview ───────────────────────────────────────────────────────── */
+  .overview { padding: 40px 0 8px; }
+  .sec-title { font-size: 24px; line-height: 1.2; }
+  .sec-sub { font-size: 15px; color: var(--muted); margin: 6px 0 0; max-width: 60ch; }
+  .ov-grid { margin-top: 22px; }
+  .ov-card { border: 1px solid var(--line); background: #fff; border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow); margin-bottom: 14px; }
+  .ov-ic { display: inline-flex; align-items: center; justify-content: center; width: 38px; height: 38px; border-radius: 10px; background: var(--emerald-bg); color: var(--emerald); }
+  .ov-ic svg { width: 20px; height: 20px; }
+  .ov-card h3 { font-size: 15px; margin: 14px 0 4px; }
+  .ov-card p { font-size: 14px; color: var(--muted); margin: 0; line-height: 1.55; }
 
-  /* Final CTA */
-  .final {
-    color: #fff;
-    background: linear-gradient(160deg, #0d2f4d 0%, #123a5e 45%, #1f6f8b 100%);
-    border-radius: 12px;
-    padding: 36px 32px;
-    margin: 36px 0 28px;
-    page-break-inside: avoid;
-  }
-  .final h2 { font-size: 27px; line-height: 1.25; }
-  .final p { color: #cfe3ee; max-width: 640px; margin-top: 12px; }
-  .final .btn-row { margin-top: 20px; }
+  /* ── explore (categorised contents) ─────────────────────────────────── */
+  .explore { padding: 40px 0 8px; }
+  .cat-grid { margin-top: 22px; }
+  .cat { margin-bottom: 22px; }
+  .cat-title { display: flex; align-items: center; font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--steel-strong); margin-bottom: 10px; }
+  .cat-title::after { content: ""; flex: 1; height: 1px; background: var(--line); margin-left: 12px; }
+  .art-link { display: flex; align-items: center; padding: 11px 14px; border: 1px solid var(--line); background: #fff; border-radius: var(--radius-sm); margin-bottom: 8px; box-shadow: var(--shadow); transition: border-color .15s, box-shadow .15s, transform .15s; }
+  .art-link:hover { border-color: var(--steel); box-shadow: 0 6px 18px -10px rgba(15,23,42,.25); }
+  .art-n { flex: none; min-width: 24px; margin-right: 8px; font-size: 12px; font-weight: 700; color: var(--faint); font-variant-numeric: tabular-nums; }
+  .art-t { font-size: 14px; font-weight: 500; color: var(--ink); line-height: 1.35; }
+  .art-ar { flex: none; width: 16px; height: 16px; margin-left: auto; padding-left: 12px; color: var(--faint); transition: transform .15s, color .15s; }
+  .art-link:hover .art-ar { color: var(--steel-strong); transform: translateX(3px); }
 
-  .disclaimer {
-    background: var(--panel);
-    border: 1px dashed var(--line);
-    border-radius: 8px;
-    padding: 14px 18px;
-    font-size: 13.5px;
-    color: var(--muted);
-    margin-bottom: 48px;
-    page-break-inside: avoid;
-  }
-  .disclaimer strong { color: var(--ink-soft); }
+  /* ── reading layout ─────────────────────────────────────────────────── */
+  .reading { padding: 34px 0 8px; }
+  .guide-nav { display: none; }
+  .gn-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--ink); margin-bottom: 12px; }
+  .gn-cat { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: var(--faint); margin: 14px 0 4px; }
+  .gn-cat:first-child { margin-top: 0; }
+  .guide-nav a { display: block; font-size: 13px; line-height: 1.35; color: var(--muted); padding: 5px 10px; border-left: 2px solid transparent; border-radius: 0 6px 6px 0; }
+  .guide-nav a:hover { color: var(--ink); background: var(--bg); }
+  .guide-nav a.current { color: var(--ink); font-weight: 600; border-left-color: var(--steel); background: var(--steel-050); }
 
-  /* WeasyPrint renders with print media: keep self-referential UI out of the PDF. */
+  .mobile-toc { border: 1px solid var(--line); background: #fff; border-radius: var(--radius); box-shadow: var(--shadow); margin-bottom: 26px; }
+  .mobile-toc > summary { list-style: none; cursor: pointer; padding: 13px 16px; font-size: 14px; font-weight: 600; color: var(--ink); display: flex; align-items: center; }
+  .mobile-toc > summary::-webkit-details-marker { display: none; }
+  .mobile-toc > summary::after { content: "+"; margin-left: auto; color: var(--muted); font-weight: 400; font-size: 18px; }
+  .mobile-toc[open] > summary::after { content: "\2013"; }
+  .mobile-toc .mt-inner { padding: 4px 12px 14px; }
+  .mobile-toc .gn-cat { padding: 0 4px; }
+  .mobile-toc a { display: block; font-size: 13.5px; color: var(--body); padding: 7px 8px; border-radius: 6px; }
+  .mobile-toc a:hover { background: var(--bg); }
+
+  .articles { max-width: var(--readw); margin: 0 auto; }
+
+  .guide { padding: 30px 0; border-top: 1px solid var(--line); scroll-margin-top: 76px; }
+  .guide:first-child { border-top: 0; padding-top: 4px; }
+  .guide-head { margin-bottom: 12px; }
+  .guide-cat { display: block; font-size: 11px; font-weight: 600; letter-spacing: .09em; text-transform: uppercase; color: var(--steel-strong); margin-bottom: 8px; }
+  .guide h2 { font-size: 22px; line-height: 1.25; }
+  .guide-num { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; font-size: 13px; font-weight: 700; color: var(--steel-strong); background: var(--steel-050); border: 1px solid var(--steel-line); border-radius: 7px; margin-right: 10px; vertical-align: 3px; }
+  .guide p, .guide li { color: var(--body); }
+  .subhead { font-size: 15px; font-weight: 600; color: var(--ink); margin: 16px 0 4px; }
+
+  .quote { border-left: 3px solid var(--steel); background: var(--panel); padding: 12px 16px; margin: 0 0 14px; font-style: italic; color: var(--body); border-radius: 0 8px 8px 0; }
+
+  /* reusable product callout ("How Estima helps") */
+  .helps { background: var(--steel-050); border: 1px solid var(--steel-line); border-left: 3px solid var(--steel); border-radius: var(--radius-sm); padding: 15px 18px 5px; margin: 18px 0 16px; page-break-inside: avoid; }
+  .helps h3 { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: var(--steel-strong); margin-bottom: 8px; }
+  .helps p { font-size: 14.5px; color: var(--body); }
+
+  .cta { display: inline-flex; align-items: center; font-weight: 600; font-size: 14px; color: var(--ink); background: #fff; border: 1px solid var(--line); border-radius: 999px; padding: 8px 16px; margin: 2px 0 4px; box-shadow: var(--shadow); page-break-inside: avoid; transition: border-color .15s, background-color .15s; }
+  .cta:hover { border-color: #cbd5e1; background: var(--bg); }
+  .cta::after { content: " \2192"; margin-left: 7px; color: var(--steel-strong); }
+
+  /* ── closing CTA ────────────────────────────────────────────────────── */
+  .closing { padding: 10px 0 40px; }
+  .closing-inner { background: var(--navy); border-radius: 16px; padding: 40px 34px; }
+  .closing .eyebrow { color: #94a3b8; }
+  .closing .eyebrow::before { border-color: var(--steel); }
+  .closing h2 { color: #fff; font-size: 26px; line-height: 1.25; max-width: 22ch; }
+  .closing p { color: #cbd5e1; max-width: 56ch; margin: 14px 0 22px; }
+  .closing .btn-primary { background: #fff; color: var(--navy); }
+  .closing .btn-primary:hover { background: #e2e8f0; }
+  .closing .btn-outline { background: transparent; color: #fff; border-color: rgba(255,255,255,.28); box-shadow: none; }
+  .closing .btn-outline:hover { background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.45); }
+
+  .sources { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px 18px 8px; font-size: 13px; color: var(--body); margin: 0 0 14px; page-break-inside: avoid; }
+  .sources h3 { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: var(--steel-strong); margin-bottom: 8px; }
+  .sources ul { margin: 4px 0 8px; }
+  .sources li { margin-bottom: 5px; }
+  .sources .note { color: var(--muted); font-size: 12.5px; }
+
+  .disclaimer { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px 18px; font-size: 13px; color: var(--muted); margin: 0 0 48px; page-break-inside: avoid; }
+  .disclaimer strong { color: var(--body); }
+
+  /* ── responsive (screen only — WeasyPrint uses print media, stays stacked) ── */
+  @media screen and (min-width: 640px) {
+    .ov-grid { display: flex; flex-wrap: wrap; margin: 22px -7px 0; }
+    .ov-card { flex: 1 1 220px; margin: 0 7px 14px; }
+    .cat-grid { display: flex; flex-wrap: wrap; margin: 22px -10px 0; }
+    .cat { flex: 1 1 44%; margin: 0 10px 22px; min-width: 0; }
+  }
+  @media screen and (min-width: 768px) {
+    .site-nav { display: inline-flex; align-items: center; margin-left: 26px; }
+    .site-nav a { color: var(--muted); font-size: 14px; font-weight: 500; margin-right: 18px; }
+    .site-nav a:hover { color: var(--ink); }
+    .site-nav a.active { color: var(--ink); font-weight: 600; }
+    .header-inner { justify-content: flex-start; }
+    .hero h1 { font-size: 40px; }
+  }
+  @media screen and (min-width: 1024px) {
+    .hero-inner { display: flex; align-items: center; }
+    .hero-copy { flex: 1 1 0; min-width: 0; }
+    .hero-visual { flex: 0 0 380px; margin-left: 52px; }
+    .reading-inner { display: flex; align-items: flex-start; }
+    .guide-nav { display: block; flex: 0 0 232px; margin-right: 40px; position: sticky; top: 74px; }
+    .mobile-toc { display: none; }
+    .articles { flex: 1 1 0; min-width: 0; margin: 0; max-width: var(--readw); }
+  }
+
   @media print {
-    .no-print { display: none; }
+    .no-print { display: none !important; }
+    .print-only { display: flex !important; }
+    * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    body { background: #fff; font-size: 12.5px; line-height: 1.5; }
+    .container { max-width: none; padding: 0; }
+    .hero { border: 0; }
+    .hero-inner { padding: 0 0 14px; }
+    .hero h1 { font-size: 25px; max-width: none; }
+    .hero .lead { font-size: 13px; max-width: none; margin: 10px 0 16px; }
+    .hero-visual { margin-top: 16px; }
+    .pv { box-shadow: none; }
+    .overview, .explore, .reading, .closing { padding: 16px 0 0; }
+    .sec-title { font-size: 18px; }
+    .ov-card, .art-link, .cta, .mobile-toc { box-shadow: none; }
+    .guide { padding: 14px 0; }
+    .guide h2 { font-size: 17px; }
+    .articles { max-width: none; }
+    .closing-inner { padding: 26px 24px; }
+    .closing h2 { font-size: 20px; }
   }
 </style>
 </head>
 <body>
-
-<div class="hero">
-  <div class="wrap">
-    <div class="lang-switch no-print"><a href="/academy?lang=sk">SK</a> · <span class="active">EN</span></div>
-    <div class="brand-row">
-      <svg width="40" height="40" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 42v-8M13 42V27M19 42V14l9-8 9 8v12M37 32v7h-8" stroke="#F4F6F8" stroke-width="3" fill="none"/><path d="M27 45h11" stroke="#91A6C2" stroke-width="3" fill="none"/></svg>
-      <div class="brand-cell">
-        <div class="brand-mark">Estima<span class="dot">.</span></div>
-        <div class="brand-tag">Estima Academy</div>
+<header class="site-header no-print">
+  <div class="container header-inner">
+    <a class="brand" href="/" aria-label="Estima">
+      <svg viewBox="0 0 48 48" fill="none" aria-hidden="true"><path d="M7 42v-8M13 42V27M19 42V14l9-8 9 8v12M37 32v7h-8" stroke="currentColor" stroke-width="3"/><path d="M27 45h11" stroke="#5b7ba6" stroke-width="3"/></svg><span class="brand-word">Estima<span>.sk</span></span>
+    </a>
+    <nav class="site-nav" aria-label="Primary">
+      <a href="/engine">Estima Engine™</a><a href="/trh">Market</a><a href="/cennik">Pricing</a><a href="/kupa-alebo-prenajom">Buy vs Rent</a><a href="/kontakt">Contact</a><a href="/academy?lang=en" class="active" aria-current="page">Academy</a>
+    </nav>
+    <div class="header-right">
+      <div class="lang-toggle" role="group" aria-label="Language"><span class="on">EN</span><a href="/academy?lang=sk">SK</a></div>
+      <a class="signin" href="/prihlasenie">Sign in</a>
+    </div>
+  </div>
+</header>
+<main>
+<section class="hero">
+  <div class="container hero-inner">
+    <div class="hero-copy">
+      <div class="hero-brand print-only"><svg viewBox="0 0 48 48" fill="none" aria-hidden="true"><path d="M7 42v-8M13 42V27M19 42V14l9-8 9 8v12M37 32v7h-8" stroke="currentColor" stroke-width="3"/><path d="M27 45h11" stroke="#5b7ba6" stroke-width="3"/></svg><b>Estima Academy</b></div>
+      <p class="eyebrow">Estima Academy</p>
+      <h1>Make every valuation easier to explain</h1>
+      <p class="lead">Practical guidance for property valuation, comparable analysis and pricing conversations &mdash; so you can defend every recommendation with evidence and win the listing.</p>
+      <div class="btn-row">
+        <a class="btn btn-primary" href="/">Create your first Estima report</a>
+        <a class="btn btn-outline no-print" href="/academy/download?lang=en">Download guide as PDF</a>
       </div>
     </div>
-    <h1>Make every valuation easier to explain</h1>
-    <p class="lead">Successful estate agents do more than estimate a property&rsquo;s value. They need to explain their recommendation, defend it with evidence and build enough confidence for the owner to act.</p>
-    <p class="lead">Estima Academy provides practical guidance for property valuation, comparable analysis, pricing conversations and listing presentations. The goal is not to replace professional experience. It is to help agents support that experience with clearer data, stronger reports and more persuasive client communication.</p>
-    <div class="btn-row">
-      <a class="btn btn-primary" href="/">Create your first Estima report</a>
-      <a class="btn btn-ghost no-print" href="/academy/download?lang=en">Download this guide as PDF</a>
-    </div>
+    <div class="hero-visual" aria-hidden="true"><div class="pv" role="img" aria-label="Sample Estima valuation report preview">
+  <div class="pv-top"><span class="dot"></span>Valuation report<span class="pv-tag">Sample</span></div>
+  <div class="pv-body">
+    <div class="pv-addr">3-room apartment · Bratislava</div>
+    <div class="pv-sub">74 m² · 4th floor · good condition</div>
+    <div class="pv-price">€228,000</div>
+    <div class="pv-rl"><span>Competitive</span><span>Market</span><span>Ambitious</span></div>
+    <div class="pv-track"><span class="pv-fill"></span><span class="pv-knob"></span></div>
+    <div class="pv-cap">Estimated range €214,000 – €242,000</div>
+    <div class="pv-comps"><div class="pv-comp"><div><div class="pv-c-a">Mýtna 12</div><div class="pv-c-s">71 m² · €221,000</div></div><span class="chip chip-fair">Fair</span></div><div class="pv-comp"><div><div class="pv-c-a">Karadžičova 8</div><div class="pv-c-s">76 m² · €256,000</div></div><span class="chip chip-over">Overpriced</span></div><div class="pv-comp"><div><div class="pv-c-a">Špitálska 5</div><div class="pv-c-s">69 m² · €205,000</div></div><span class="chip chip-under">Underpriced</span></div></div>
   </div>
-</div>
-
-<div class="wrap">
-
-  <div class="toc">
-    <h2>What&rsquo;s inside</h2>
-    <ol>
-      <li>How to Prepare a Data-Supported Property Valuation</li>
-      <li>How to Select Genuinely Comparable Properties</li>
-      <li>Asking Price Versus Probable Selling Price</li>
-      <li>How to Explain an Estima Price Range to a Seller</li>
-      <li>How to Respond When an Owner Expects an Unrealistic Price</li>
-      <li>How Property Condition and Photographs Affect Valuation</li>
-      <li>How to Use an Estima Report During a Listing Presentation</li>
-      <li>How to Win More Exclusive Listings With Better Valuation Reports</li>
-      <li>The Most Common Mistakes in Property Valuation</li>
-      <li>Why Days on Market Matter</li>
-      <li>What Price Reductions Tell Us About the Market</li>
-      <li>How Location and Micro-Location Influence Property Value</li>
-      <li>How to Present Valuation Uncertainty Professionally</li>
-      <li>How to Adjust a Valuation When the Market Changes</li>
-      <li>How to Follow Up After a Listing Presentation</li>
-      <li>How to Explain Automated Valuation to Clients</li>
-      <li>How to Build Trust Without Promising the Highest Price</li>
-      <li>How Agencies Can Create a Consistent Valuation Standard</li>
-    </ol>
+</div></div>
   </div>
-
-  <div class="guide">
-    <div class="guide-head"><span class="guide-num">1</span><h2>How to Prepare a Data-Supported Property Valuation</h2></div>
+</section>
+<section class="overview">
+  <div class="container">
+    <h2 class="sec-title">What you'll learn</h2>
+    <p class="sec-sub">Three habits behind a valuation an owner understands and trusts.</p>
+    <div class="ov-grid"><div class="ov-card"><span class="ov-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 13l3.5-3.5"/><path d="M4 17a8 8 0 1 1 16 0"/></svg></span><h3>Build a defensible valuation</h3><p>Turn property facts, market data and comparables into an evidence-based price range.</p></div><div class="ov-card"><span class="ov-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l9 5-9 5-9-5 9-5z"/><path d="M3 13l9 5 9-5"/></svg></span><h3>Select relevant comparables</h3><p>Choose the listings that genuinely match the property &mdash; and explain the differences.</p></div><div class="ov-card"><span class="ov-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H8l-4 4V5a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2z"/></svg></span><h3>Present with confidence</h3><p>Lead the pricing conversation with a clear, professional report the owner trusts.</p></div></div>
+  </div>
+</section>
+<section class="explore">
+  <div class="container">
+    <h2 class="sec-title">Explore the guide</h2>
+    <p class="sec-sub">Eighteen short articles, grouped by where they help most in your workflow.</p>
+    <div class="cat-grid"><div class="cat"><h3 class="cat-title">Valuation foundations</h3><a class="art-link" href="#guide-1"><span class="art-n">01</span><span class="art-t">How to Prepare a Data-Supported Property Valuation</span><svg class="art-ar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h13"/><path d="M12 5l7 7-7 7"/></svg></a><a class="art-link" href="#guide-2"><span class="art-n">02</span><span class="art-t">How to Select Genuinely Comparable Properties</span><svg class="art-ar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h13"/><path d="M12 5l7 7-7 7"/></svg></a><a class="art-link" href="#guide-3"><span class="art-n">03</span><span class="art-t">Asking Price Versus Probable Selling Price</span><svg class="art-ar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h13"/><path d="M12 5l7 7-7 7"/></svg></a><a class="art-link" href="#guide-4"><span class="art-n">04</span><span class="art-t">How to Explain an Estima Price Range to a Seller</span><svg class="art-ar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h13"/><path d="M12 5l7 7-7 7"/></svg></a><a class="art-link" href="#guide-9"><span class="art-n">09</span><span class="art-t">The Most Common Mistakes in Property Valuation</span><svg class="art-ar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h13"/><path d="M12 5l7 7-7 7"/></svg></a></div><div class="cat"><h3 class="cat-title">Property &amp; market signals</h3><a class="art-link" href="#guide-6"><span class="art-n">06</span><span class="art-t">How Property Condition and Photographs Affect Valuation</span><svg class="art-ar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h13"/><path d="M12 5l7 7-7 7"/></svg></a><a class="art-link" href="#guide-10"><span class="art-n">10</span><span class="art-t">Why Days on Market Matter</span><svg class="art-ar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h13"/><path d="M12 5l7 7-7 7"/></svg></a><a class="art-link" href="#guide-11"><span class="art-n">11</span><span class="art-t">What Price Reductions Tell Us About the Market</span><svg class="art-ar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h13"/><path d="M12 5l7 7-7 7"/></svg></a><a class="art-link" href="#guide-12"><span class="art-n">12</span><span class="art-t">How Location and Micro-Location Influence Property Value</span><svg class="art-ar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h13"/><path d="M12 5l7 7-7 7"/></svg></a><a class="art-link" href="#guide-14"><span class="art-n">14</span><span class="art-t">How to Adjust a Valuation When the Market Changes</span><svg class="art-ar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h13"/><path d="M12 5l7 7-7 7"/></svg></a></div><div class="cat"><h3 class="cat-title">Client communication</h3><a class="art-link" href="#guide-5"><span class="art-n">05</span><span class="art-t">How to Respond When an Owner Expects an Unrealistic Price</span><svg class="art-ar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h13"/><path d="M12 5l7 7-7 7"/></svg></a><a class="art-link" href="#guide-13"><span class="art-n">13</span><span class="art-t">How to Present Valuation Uncertainty Professionally</span><svg class="art-ar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h13"/><path d="M12 5l7 7-7 7"/></svg></a><a class="art-link" href="#guide-16"><span class="art-n">16</span><span class="art-t">How to Explain Automated Valuation to Clients</span><svg class="art-ar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h13"/><path d="M12 5l7 7-7 7"/></svg></a><a class="art-link" href="#guide-17"><span class="art-n">17</span><span class="art-t">How to Build Trust Without Promising the Highest Price</span><svg class="art-ar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h13"/><path d="M12 5l7 7-7 7"/></svg></a></div><div class="cat"><h3 class="cat-title">Listing presentations &amp; agency process</h3><a class="art-link" href="#guide-7"><span class="art-n">07</span><span class="art-t">How to Use an Estima Report During a Listing Presentation</span><svg class="art-ar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h13"/><path d="M12 5l7 7-7 7"/></svg></a><a class="art-link" href="#guide-8"><span class="art-n">08</span><span class="art-t">How to Win More Exclusive Listings With Better Valuation Reports</span><svg class="art-ar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h13"/><path d="M12 5l7 7-7 7"/></svg></a><a class="art-link" href="#guide-15"><span class="art-n">15</span><span class="art-t">How to Follow Up After a Listing Presentation</span><svg class="art-ar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h13"/><path d="M12 5l7 7-7 7"/></svg></a><a class="art-link" href="#guide-18"><span class="art-n">18</span><span class="art-t">How Agencies Can Create a Consistent Valuation Standard</span><svg class="art-ar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h13"/><path d="M12 5l7 7-7 7"/></svg></a></div></div>
+  </div>
+</section>
+<section class="reading">
+  <div class="container reading-inner">
+    <aside class="guide-nav no-print" aria-label="Guide contents">
+      <div class="gn-title">Guide contents</div>
+      <nav><div class="gn-cat">Valuation foundations</div><a href="#guide-1">1 · How to Prepare a Data-Supported Property Valuation</a><a href="#guide-2">2 · How to Select Genuinely Comparable Properties</a><a href="#guide-3">3 · Asking Price Versus Probable Selling Price</a><a href="#guide-4">4 · How to Explain an Estima Price Range to a Seller</a><a href="#guide-9">9 · The Most Common Mistakes in Property Valuation</a><div class="gn-cat">Property &amp; market signals</div><a href="#guide-6">6 · How Property Condition and Photographs Affect Valuation</a><a href="#guide-10">10 · Why Days on Market Matter</a><a href="#guide-11">11 · What Price Reductions Tell Us About the Market</a><a href="#guide-12">12 · How Location and Micro-Location Influence Property Value</a><a href="#guide-14">14 · How to Adjust a Valuation When the Market Changes</a><div class="gn-cat">Client communication</div><a href="#guide-5">5 · How to Respond When an Owner Expects an Unrealistic Price</a><a href="#guide-13">13 · How to Present Valuation Uncertainty Professionally</a><a href="#guide-16">16 · How to Explain Automated Valuation to Clients</a><a href="#guide-17">17 · How to Build Trust Without Promising the Highest Price</a><div class="gn-cat">Listing presentations &amp; agency process</div><a href="#guide-7">7 · How to Use an Estima Report During a Listing Presentation</a><a href="#guide-8">8 · How to Win More Exclusive Listings With Better Valuation Reports</a><a href="#guide-15">15 · How to Follow Up After a Listing Presentation</a><a href="#guide-18">18 · How Agencies Can Create a Consistent Valuation Standard</a></nav>
+    </aside>
+    <details class="mobile-toc no-print">
+      <summary>Guide contents</summary>
+      <nav class="mt-inner"><div class="gn-cat">Valuation foundations</div><a href="#guide-1">1 · How to Prepare a Data-Supported Property Valuation</a><a href="#guide-2">2 · How to Select Genuinely Comparable Properties</a><a href="#guide-3">3 · Asking Price Versus Probable Selling Price</a><a href="#guide-4">4 · How to Explain an Estima Price Range to a Seller</a><a href="#guide-9">9 · The Most Common Mistakes in Property Valuation</a><div class="gn-cat">Property &amp; market signals</div><a href="#guide-6">6 · How Property Condition and Photographs Affect Valuation</a><a href="#guide-10">10 · Why Days on Market Matter</a><a href="#guide-11">11 · What Price Reductions Tell Us About the Market</a><a href="#guide-12">12 · How Location and Micro-Location Influence Property Value</a><a href="#guide-14">14 · How to Adjust a Valuation When the Market Changes</a><div class="gn-cat">Client communication</div><a href="#guide-5">5 · How to Respond When an Owner Expects an Unrealistic Price</a><a href="#guide-13">13 · How to Present Valuation Uncertainty Professionally</a><a href="#guide-16">16 · How to Explain Automated Valuation to Clients</a><a href="#guide-17">17 · How to Build Trust Without Promising the Highest Price</a><div class="gn-cat">Listing presentations &amp; agency process</div><a href="#guide-7">7 · How to Use an Estima Report During a Listing Presentation</a><a href="#guide-8">8 · How to Win More Exclusive Listings With Better Valuation Reports</a><a href="#guide-15">15 · How to Follow Up After a Listing Presentation</a><a href="#guide-18">18 · How Agencies Can Create a Consistent Valuation Standard</a></nav>
+    </details>
+    <div class="articles">
+  <div class="guide" id="guide-1">
+    <div class="guide-head"><span class="guide-cat">Valuation foundations</span><h2><span class="guide-num">1</span>How to Prepare a Data-Supported Property Valuation</h2></div>
     <p>A strong property valuation should not rely on one average price per square metre. Two apartments in the same district can have significantly different values because of their condition, floor, layout, building quality, orientation, location and current market competition.</p>
     <p>A data-supported valuation should include:</p>
     <ul>
@@ -243,8 +353,8 @@
     <a class="cta" href="/">Create a valuation report with Estima</a>
   </div>
 
-  <div class="guide">
-    <div class="guide-head"><span class="guide-num">2</span><h2>How to Select Genuinely Comparable Properties</h2></div>
+  <div class="guide" id="guide-2">
+    <div class="guide-head"><span class="guide-cat">Valuation foundations</span><h2><span class="guide-num">2</span>How to Select Genuinely Comparable Properties</h2></div>
     <p>A comparable property is not simply another apartment located nearby. The strongest comparables usually share several characteristics with the property being valued:</p>
     <ul>
       <li>property type;</li>
@@ -268,8 +378,8 @@
     <a class="cta" href="/">Find stronger comparables with Estima</a>
   </div>
 
-  <div class="guide">
-    <div class="guide-head"><span class="guide-num">3</span><h2>Asking Price Versus Probable Selling Price</h2></div>
+  <div class="guide" id="guide-3">
+    <div class="guide-head"><span class="guide-cat">Valuation foundations</span><h2><span class="guide-num">3</span>Asking Price Versus Probable Selling Price</h2></div>
     <p>The asking price represents what the owner hopes to receive. The probable selling price represents what the market is currently likely to accept. These numbers are often different.</p>
     <p>A property may be advertised above market value because:</p>
     <ul>
@@ -289,8 +399,8 @@
     <a class="cta" href="/">Compare the asking price with the estimated market range</a>
   </div>
 
-  <div class="guide">
-    <div class="guide-head"><span class="guide-num">4</span><h2>How to Explain an Estima Price Range to a Seller</h2></div>
+  <div class="guide" id="guide-4">
+    <div class="guide-head"><span class="guide-cat">Valuation foundations</span><h2><span class="guide-num">4</span>How to Explain an Estima Price Range to a Seller</h2></div>
     <p>A price range is often more credible than one exact number. The market value of a property is not fixed to the nearest euro. It depends on buyer demand, property presentation, negotiation and changes in competing supply.</p>
     <p>When presenting the Estima range, explain three possible positions:</p>
     <p class="subhead">Competitive price</p>
@@ -308,8 +418,8 @@
     <a class="cta" href="/">Present your pricing recommendation with confidence</a>
   </div>
 
-  <div class="guide">
-    <div class="guide-head"><span class="guide-num">5</span><h2>How to Respond When an Owner Expects an Unrealistic Price</h2></div>
+  <div class="guide" id="guide-5">
+    <div class="guide-head"><span class="guide-cat">Client communication</span><h2><span class="guide-num">5</span>How to Respond When an Owner Expects an Unrealistic Price</h2></div>
     <p>Telling an owner that their price expectation is unrealistic can immediately create resistance.</p>
     <p>A better approach is to avoid saying:</p>
     <p class="quote">Your property is not worth that much.</p>
@@ -332,8 +442,8 @@
     <a class="cta" href="/">Turn difficult pricing conversations into evidence-based decisions</a>
   </div>
 
-  <div class="guide">
-    <div class="guide-head"><span class="guide-num">6</span><h2>How Property Condition and Photographs Affect Valuation</h2></div>
+  <div class="guide" id="guide-6">
+    <div class="guide-head"><span class="guide-cat">Property &amp; market signals</span><h2><span class="guide-num">6</span>How Property Condition and Photographs Affect Valuation</h2></div>
     <p>Property condition can significantly influence buyer interest, expected renovation costs and the final achievable price. Important factors include:</p>
     <ul>
       <li>kitchen and bathroom condition;</li>
@@ -361,8 +471,8 @@
     <a class="cta" href="/">Include property condition in your valuation analysis</a>
   </div>
 
-  <div class="guide">
-    <div class="guide-head"><span class="guide-num">7</span><h2>How to Use an Estima Report During a Listing Presentation</h2></div>
+  <div class="guide" id="guide-7">
+    <div class="guide-head"><span class="guide-cat">Listing presentations &amp; agency process</span><h2><span class="guide-num">7</span>How to Use an Estima Report During a Listing Presentation</h2></div>
     <p>A valuation report should support the conversation, not replace it. Begin the presentation by asking about the owner&rsquo;s objectives:</p>
     <ul>
       <li>Why are they considering selling?</li>
@@ -390,8 +500,8 @@
     <a class="cta" href="/">Strengthen your next listing presentation</a>
   </div>
 
-  <div class="guide">
-    <div class="guide-head"><span class="guide-num">8</span><h2>How to Win More Exclusive Listings With Better Valuation Reports</h2></div>
+  <div class="guide" id="guide-8">
+    <div class="guide-head"><span class="guide-cat">Listing presentations &amp; agency process</span><h2><span class="guide-num">8</span>How to Win More Exclusive Listings With Better Valuation Reports</h2></div>
     <p>Owners often speak with several estate agents before deciding whom to appoint. Many agents provide only a verbal price estimate or a short email. A structured valuation report creates a stronger professional impression.</p>
     <p>A good report demonstrates that the agent has:</p>
     <ul>
@@ -410,8 +520,8 @@
     <a class="cta" href="/">Differentiate your agency with professional property reports</a>
   </div>
 
-  <div class="guide">
-    <div class="guide-head"><span class="guide-num">9</span><h2>The Most Common Mistakes in Property Valuation</h2></div>
+  <div class="guide" id="guide-9">
+    <div class="guide-head"><span class="guide-cat">Valuation foundations</span><h2><span class="guide-num">9</span>The Most Common Mistakes in Property Valuation</h2></div>
     <p>Even experienced agents can produce weaker valuations when the process is rushed or inconsistent. Common mistakes include:</p>
     <ul>
       <li>relying only on average price per square metre;</li>
@@ -432,8 +542,8 @@
     <a class="cta" href="/">Standardise your agency&rsquo;s valuation process</a>
   </div>
 
-  <div class="guide">
-    <div class="guide-head"><span class="guide-num">10</span><h2>Why Days on Market Matter</h2></div>
+  <div class="guide" id="guide-10">
+    <div class="guide-head"><span class="guide-cat">Property &amp; market signals</span><h2><span class="guide-num">10</span>Why Days on Market Matter</h2></div>
     <p>The length of time a property has been advertised can reveal useful information about its position in the market. A long advertising period may indicate:</p>
     <ul>
       <li>an unrealistic asking price;</li>
@@ -452,8 +562,8 @@
     <a class="cta" href="/">Add market timing to your comparable analysis</a>
   </div>
 
-  <div class="guide">
-    <div class="guide-head"><span class="guide-num">11</span><h2>What Price Reductions Tell Us About the Market</h2></div>
+  <div class="guide" id="guide-11">
+    <div class="guide-head"><span class="guide-cat">Property &amp; market signals</span><h2><span class="guide-num">11</span>What Price Reductions Tell Us About the Market</h2></div>
     <p>A price reduction is a signal that the original asking price did not generate the expected response. One reduction does not automatically mean that the new price is correct. However, patterns across several listings can indicate that seller expectations are above current buyer demand.</p>
     <p>Agents should look at:</p>
     <ul>
@@ -472,8 +582,8 @@
     <a class="cta" href="/">Use price history in your next valuation</a>
   </div>
 
-  <div class="guide">
-    <div class="guide-head"><span class="guide-num">12</span><h2>How Location and Micro-Location Influence Property Value</h2></div>
+  <div class="guide" id="guide-12">
+    <div class="guide-head"><span class="guide-cat">Property &amp; market signals</span><h2><span class="guide-num">12</span>How Location and Micro-Location Influence Property Value</h2></div>
     <p>City-level and district-level averages are useful, but buyers experience property at the street and neighbourhood level. Micro-location factors can include:</p>
     <ul>
       <li>access to public transport;</li>
@@ -495,8 +605,8 @@
     <a class="cta" href="/">Add local context to your valuation report</a>
   </div>
 
-  <div class="guide">
-    <div class="guide-head"><span class="guide-num">13</span><h2>How to Present Valuation Uncertainty Professionally</h2></div>
+  <div class="guide" id="guide-13">
+    <div class="guide-head"><span class="guide-cat">Client communication</span><h2><span class="guide-num">13</span>How to Present Valuation Uncertainty Professionally</h2></div>
     <p>A professional valuation should not pretend that uncertainty does not exist. Uncertainty may be higher when:</p>
     <ul>
       <li>very few comparable properties are available;</li>
@@ -515,8 +625,8 @@
     <a class="cta" href="/">Present evidence, not false precision</a>
   </div>
 
-  <div class="guide">
-    <div class="guide-head"><span class="guide-num">14</span><h2>How to Adjust a Valuation When the Market Changes</h2></div>
+  <div class="guide" id="guide-14">
+    <div class="guide-head"><span class="guide-cat">Property &amp; market signals</span><h2><span class="guide-num">14</span>How to Adjust a Valuation When the Market Changes</h2></div>
     <p>A valuation is valid for a specific moment in time. It may need to be reviewed when:</p>
     <ul>
       <li>interest rates change;</li>
@@ -536,8 +646,8 @@
     <a class="cta" href="/">Keep every valuation aligned with the current market</a>
   </div>
 
-  <div class="guide">
-    <div class="guide-head"><span class="guide-num">15</span><h2>How to Follow Up After a Listing Presentation</h2></div>
+  <div class="guide" id="guide-15">
+    <div class="guide-head"><span class="guide-cat">Listing presentations &amp; agency process</span><h2><span class="guide-num">15</span>How to Follow Up After a Listing Presentation</h2></div>
     <p>Many listing opportunities are lost because the follow-up is generic or arrives too late. After the meeting, send the owner:</p>
     <ul>
       <li>the valuation report;</li>
@@ -557,8 +667,8 @@
     <a class="cta" href="/">Make your follow-up more persuasive</a>
   </div>
 
-  <div class="guide">
-    <div class="guide-head"><span class="guide-num">16</span><h2>How to Explain Automated Valuation to Clients</h2></div>
+  <div class="guide" id="guide-16">
+    <div class="guide-head"><span class="guide-cat">Client communication</span><h2><span class="guide-num">16</span>How to Explain Automated Valuation to Clients</h2></div>
     <p>Some owners may assume that automated valuation means that software has replaced the agent&rsquo;s expertise. That is not how a responsible valuation process should work.</p>
     <p>Technology can:</p>
     <ul>
@@ -586,8 +696,8 @@
     <a class="cta" href="/">Combine your expertise with better market data</a>
   </div>
 
-  <div class="guide">
-    <div class="guide-head"><span class="guide-num">17</span><h2>How to Build Trust Without Promising the Highest Price</h2></div>
+  <div class="guide" id="guide-17">
+    <div class="guide-head"><span class="guide-cat">Client communication</span><h2><span class="guide-num">17</span>How to Build Trust Without Promising the Highest Price</h2></div>
     <p>Some agents attempt to win a listing by providing the highest valuation. This may work initially, but it can create problems later:</p>
     <ul>
       <li>limited buyer interest;</li>
@@ -605,8 +715,8 @@
     <a class="cta" href="/">Win listings through credibility, not inflated promises</a>
   </div>
 
-  <div class="guide">
-    <div class="guide-head"><span class="guide-num">18</span><h2>How Agencies Can Create a Consistent Valuation Standard</h2></div>
+  <div class="guide" id="guide-18">
+    <div class="guide-head"><span class="guide-cat">Listing presentations &amp; agency process</span><h2><span class="guide-num">18</span>How Agencies Can Create a Consistent Valuation Standard</h2></div>
     <p>When every agent prepares valuations differently, the quality of the agency&rsquo;s output becomes difficult to control. One agent may use detailed comparable analysis, while another may rely mostly on intuition. Reports may use different terminology, formats and assumptions.</p>
     <p>A consistent internal valuation standard should define:</p>
     <ul>
@@ -627,21 +737,56 @@
     <a class="cta" href="/">Build a consistent valuation process across your team</a>
   </div>
 
-  <div class="final">
-    <h2>Better data. Stronger recommendations. More confident clients.</h2>
-    <p>Estima helps estate agents prepare property valuations, identify comparable listings and present their recommendations through professional client-ready reports.</p>
-    <p>Spend less time collecting information manually and more time advising clients, winning listings and closing transactions.</p>
-    <div class="btn-row">
-      <a class="btn btn-primary" href="/">Create your first Estima report</a>
-      <a class="btn btn-ghost" href="/sample">View a sample valuation report</a>
+    </div><!-- /.articles -->
+  </div>
+</section>
+
+<section class="closing">
+  <div class="container">
+    <div class="closing-inner">
+      <p class="eyebrow">Put the guide into practice</p>
+      <h2>Turn your valuation into a report the owner can understand.</h2>
+      <p>Combine comparable properties, market context and a clear valuation range in one professional Estima report.</p>
+      <div class="btn-row">
+        <a class="btn btn-primary" href="/">Create an Estima report</a>
+        <a class="btn btn-outline no-print" href="/academy/download?lang=en">Download the Academy PDF</a>
+      </div>
     </div>
   </div>
+</section>
 
-  <div class="disclaimer">
-    <strong>Disclaimer.</strong> Estima provides market analysis and decision-support information based on available property data. The results do not represent a certified expert valuation and should be reviewed by a qualified estate agent before being presented to a client.
+<div class="container">
+  <div class="sources">
+    <h3>Data sources</h3>
+    <p>The indicative price levels used in Estima&rsquo;s Slovak market tools are drawn from published references:</p>
+    <ul>
+      <li><a href="https://nbs.sk/en/statistics/selected-macroeconomics-indicators/residential-property-prices/residential-property-prices-by-regions/">National Bank of Slovakia</a> &mdash; residential property prices by region (kraj averages).</li>
+      <li><a href="https://www.realitnaunia.sk/realitny-barometer">Realitn&aacute; &uacute;nia SR &mdash; Realitn&yacute; barometer</a> &mdash; average asking prices in the regional capitals.</li>
+      <li>Public property-portal market overviews &mdash; indicative price levels for individual city parts.</li>
+    </ul>
+    <p class="note">City-part and district figures are approximate and intended for orientation only. They are not a certified valuation.</p>
   </div>
-
+  <div class="disclaimer"><strong>Disclaimer.</strong> Estima provides market analysis and decision-support information based on available property data. The results do not represent a certified expert valuation and should be reviewed by a qualified estate agent before being presented to a client.</div>
 </div>
+</main>
 
+<script>
+(function () {
+  var links = Array.prototype.slice.call(
+    document.querySelectorAll('.guide-nav a[href^="#guide-"]'));
+  if (!links.length || !('IntersectionObserver' in window)) return;
+  var map = {};
+  links.forEach(function (a) { map[a.getAttribute('href').slice(1)] = a; });
+  var obs = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (!e.isIntersecting) return;
+      links.forEach(function (a) { a.classList.remove('current'); a.removeAttribute('aria-current'); });
+      var a = map[e.target.id];
+      if (a) { a.classList.add('current'); a.setAttribute('aria-current', 'true'); }
+    });
+  }, { rootMargin: '-74px 0px -68% 0px', threshold: 0 });
+  document.querySelectorAll('.guide[id]').forEach(function (g) { obs.observe(g); });
+})();
+</script>
 </body>
 </html>
