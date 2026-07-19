@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<!--
+  Estima Academy landing page.
+
+  Served at GET /academy and converted to PDF at GET /academy/download, so the
+  stylesheet must work both on screen and in WeasyPrint 62.3 (no flex gap,
+  no 100vh; @page rules only apply in the PDF).
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Estima Academy — Make every valuation easier to explain</title>
+<style>
+  @page {
+    size: A4;
+    margin: 16mm 14mm 18mm 14mm;
+    @bottom-left {
+      content: "Estima Academy";
+      font-size: 7.5pt;
+      color: #9aa5b1;
+    }
+    @bottom-right {
+      content: "Page " counter(page) " / " counter(pages);
+      font-size: 7.5pt;
+      color: #9aa5b1;
+    }
+  }
+
+  :root {
+    --ink:      #1d2733;
+    --ink-soft: #55616e;
+    --muted:    #8a95a1;
+    --line:     #e3e8ee;
+    --panel:    #f6f8fa;
+    --brand:    #123a5e;
+    --brand-2:  #1f6f8b;
+    --accent:   #c9a227;
+    --info-bg:  #e8f2f6;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    color: var(--ink);
+    font-size: 16px;
+    line-height: 1.6;
+    margin: 0;
+    background: #fff;
+  }
+  h1, h2, h3 { margin: 0; font-weight: 700; }
+  p { margin: 0 0 12px; }
+  ul, ol { margin: 0 0 12px; padding-left: 22px; }
+  li { margin-bottom: 4px; }
+  a { color: var(--brand-2); text-decoration: none; }
+
+  .wrap { max-width: 880px; margin: 0 auto; padding: 0 24px; }
+
+  /* Hero */
+  .hero {
+    color: #fff;
+    background: linear-gradient(160deg, #0d2f4d 0%, #123a5e 45%, #1f6f8b 100%);
+    padding: 48px 0 56px;
+  }
+  .brand-row { margin-bottom: 32px; }
+  .brand-row svg { vertical-align: middle; margin-right: 10px; }
+  .brand-cell { display: inline-block; vertical-align: middle; }
+  .brand-mark { font-size: 26px; font-weight: 800; letter-spacing: 1px; }
+  .brand-mark .dot { color: var(--accent); }
+  .brand-tag {
+    font-size: 11px; letter-spacing: 4px; text-transform: uppercase;
+    color: #b9d4e4; margin-top: 2px;
+  }
+  .hero h1 { font-size: 38px; line-height: 1.2; max-width: 640px; }
+  .hero .lead {
+    font-size: 17px; color: #cfe3ee; max-width: 660px; margin-top: 18px;
+  }
+  .hero .btn-row { margin-top: 28px; }
+
+  .btn {
+    display: inline-block;
+    border-radius: 999px;
+    padding: 11px 24px;
+    font-weight: 700;
+    font-size: 15px;
+    margin-right: 12px;
+    margin-bottom: 8px;
+  }
+  .btn-primary { background: var(--accent); color: #1d2733; }
+  .btn-ghost { border: 1.5px solid rgba(255,255,255,.6); color: #fff; }
+
+  /* Contents */
+  .toc { padding: 36px 0 8px; }
+  .toc h2 { font-size: 14px; letter-spacing: 3px; text-transform: uppercase; color: var(--muted); margin-bottom: 14px; }
+  .toc ol { column-count: 2; column-gap: 36px; font-size: 14.5px; color: var(--ink-soft); }
+  .toc li { margin-bottom: 6px; }
+
+  /* Guides */
+  .guide { padding: 28px 0 6px; border-top: 1px solid var(--line); }
+  .guide:first-of-type { border-top: 0; }
+  .guide-head { margin-bottom: 14px; }
+  .guide-num {
+    display: inline-block;
+    font-size: 13px; font-weight: 700; color: #fff;
+    background: var(--brand);
+    border-radius: 4px; padding: 2px 9px;
+    margin-right: 10px;
+    vertical-align: 3px;
+  }
+  .guide h2 { display: inline; font-size: 23px; color: var(--brand); }
+  .quote {
+    border-left: 3px solid var(--accent);
+    background: var(--panel);
+    padding: 10px 16px;
+    margin: 0 0 12px;
+    font-style: italic;
+    color: var(--ink-soft);
+  }
+  .subhead { font-size: 16px; color: var(--brand-2); margin: 14px 0 6px; }
+
+  .helps {
+    background: var(--info-bg);
+    border-left: 4px solid var(--brand-2);
+    border-radius: 0 8px 8px 0;
+    padding: 14px 18px 6px;
+    margin: 16px 0 14px;
+    page-break-inside: avoid;
+  }
+  .helps h3 { font-size: 15px; color: var(--brand-2); margin-bottom: 8px; }
+  .cta {
+    display: inline-block;
+    font-weight: 700; font-size: 14.5px;
+    color: var(--brand);
+    border: 1.5px solid var(--brand);
+    border-radius: 999px;
+    padding: 8px 20px;
+    margin-bottom: 22px;
+    page-break-inside: avoid;
+  }
+  .cta::after { content: " \2192"; color: var(--accent); }
+
+  /* Final CTA */
+  .final {
+    color: #fff;
+    background: linear-gradient(160deg, #0d2f4d 0%, #123a5e 45%, #1f6f8b 100%);
+    border-radius: 12px;
+    padding: 36px 32px;
+    margin: 36px 0 28px;
+    page-break-inside: avoid;
+  }
+  .final h2 { font-size: 27px; line-height: 1.25; }
+  .final p { color: #cfe3ee; max-width: 640px; margin-top: 12px; }
+  .final .btn-row { margin-top: 20px; }
+
+  .disclaimer {
+    background: var(--panel);
+    border: 1px dashed var(--line);
+    border-radius: 8px;
+    padding: 14px 18px;
+    font-size: 13.5px;
+    color: var(--muted);
+    margin-bottom: 48px;
+    page-break-inside: avoid;
+  }
+  .disclaimer strong { color: var(--ink-soft); }
+
+  /* WeasyPrint renders with print media: keep self-referential UI out of the PDF. */
+  @media print {
+    .no-print { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="wrap">
+    <div class="brand-row">
+      <svg width="40" height="40" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 42v-8M13 42V27M19 42V14l9-8 9 8v12M37 32v7h-8" stroke="#F4F6F8" stroke-width="3" fill="none"/><path d="M27 45h11" stroke="#91A6C2" stroke-width="3" fill="none"/></svg>
+      <div class="brand-cell">
+        <div class="brand-mark">Estima<span class="dot">.</span></div>
+        <div class="brand-tag">Estima Academy</div>
+      </div>
+    </div>
+    <h1>Make every valuation easier to explain</h1>
+    <p class="lead">Successful estate agents do more than estimate a property&rsquo;s value. They need to explain their recommendation, defend it with evidence and build enough confidence for the owner to act.</p>
+    <p class="lead">Estima Academy provides practical guidance for property valuation, comparable analysis, pricing conversations and listing presentations. The goal is not to replace professional experience. It is to help agents support that experience with clearer data, stronger reports and more persuasive client communication.</p>
+    <div class="btn-row">
+      <a class="btn btn-primary" href="/">Create your first Estima report</a>
+      <a class="btn btn-ghost no-print" href="/academy/download">Download this guide as PDF</a>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <div class="toc">
+    <h2>What&rsquo;s inside</h2>
+    <ol>
+      <li>How to Prepare a Data-Supported Property Valuation</li>
+      <li>How to Select Genuinely Comparable Properties</li>
+      <li>Asking Price Versus Probable Selling Price</li>
+      <li>How to Explain an Estima Price Range to a Seller</li>
+      <li>How to Respond When an Owner Expects an Unrealistic Price</li>
+      <li>How Property Condition and Photographs Affect Valuation</li>
+      <li>How to Use an Estima Report During a Listing Presentation</li>
+      <li>How to Win More Exclusive Listings With Better Valuation Reports</li>
+      <li>The Most Common Mistakes in Property Valuation</li>
+      <li>Why Days on Market Matter</li>
+      <li>What Price Reductions Tell Us About the Market</li>
+      <li>How Location and Micro-Location Influence Property Value</li>
+      <li>How to Present Valuation Uncertainty Professionally</li>
+      <li>How to Adjust a Valuation When the Market Changes</li>
+      <li>How to Follow Up After a Listing Presentation</li>
+      <li>How to Explain Automated Valuation to Clients</li>
+      <li>How to Build Trust Without Promising the Highest Price</li>
+      <li>How Agencies Can Create a Consistent Valuation Standard</li>
+    </ol>
+  </div>
+
+  <div class="guide">
+    <div class="guide-head"><span class="guide-num">1</span><h2>How to Prepare a Data-Supported Property Valuation</h2></div>
+    <p>A strong property valuation should not rely on one average price per square metre. Two apartments in the same district can have significantly different values because of their condition, floor, layout, building quality, orientation, location and current market competition.</p>
+    <p>A data-supported valuation should include:</p>
+    <ul>
+      <li>the property&rsquo;s key characteristics;</li>
+      <li>similar properties currently on the market;</li>
+      <li>recent price changes;</li>
+      <li>local price per square metre;</li>
+      <li>differences between the subject property and its comparables;</li>
+      <li>current supply and demand;</li>
+      <li>an estimated price range rather than one unexplained number.</li>
+    </ul>
+    <p>The agent&rsquo;s experience remains essential. Data provides evidence, while the agent interprets the context.</p>
+    <div class="helps">
+      <h3>How Estima helps</h3>
+      <p>Estima collects the relevant property information, identifies comparable listings and presents the analysis in a client-friendly valuation report.</p>
+      <p>Instead of manually combining information from several property portals and spreadsheets, the agent receives a structured starting point that can be reviewed and adjusted using professional judgment.</p>
+    </div>
+    <a class="cta" href="/">Create a valuation report with Estima</a>
+  </div>
+
+  <div class="guide">
+    <div class="guide-head"><span class="guide-num">2</span><h2>How to Select Genuinely Comparable Properties</h2></div>
+    <p>A comparable property is not simply another apartment located nearby. The strongest comparables usually share several characteristics with the property being valued:</p>
+    <ul>
+      <li>property type;</li>
+      <li>location and micro-location;</li>
+      <li>usable area;</li>
+      <li>number of rooms;</li>
+      <li>ownership type;</li>
+      <li>floor and presence of an elevator;</li>
+      <li>building condition;</li>
+      <li>apartment condition;</li>
+      <li>balcony, terrace, parking or cellar;</li>
+      <li>approximate listing period.</li>
+    </ul>
+    <p>A fully renovated apartment should not be compared directly with an apartment requiring complete reconstruction without adjusting for the difference. Similarly, two apartments located only one kilometre apart may belong to very different micro-markets.</p>
+    <p>The purpose of comparable analysis is not to find identical properties. Identical properties rarely exist. The purpose is to identify the most relevant available evidence and explain the differences.</p>
+    <div class="helps">
+      <h3>How Estima helps</h3>
+      <p>Estima ranks potential comparables based on similarity and allows the agent to review which properties should be included in the final report.</p>
+      <p>This reduces the time spent searching manually while keeping the final decision in the agent&rsquo;s hands.</p>
+    </div>
+    <a class="cta" href="/">Find stronger comparables with Estima</a>
+  </div>
+
+  <div class="guide">
+    <div class="guide-head"><span class="guide-num">3</span><h2>Asking Price Versus Probable Selling Price</h2></div>
+    <p>The asking price represents what the owner hopes to receive. The probable selling price represents what the market is currently likely to accept. These numbers are often different.</p>
+    <p>A property may be advertised above market value because:</p>
+    <ul>
+      <li>the owner expects room for negotiation;</li>
+      <li>the asking price is based on emotional attachment;</li>
+      <li>the owner is comparing the property with unsuitable listings;</li>
+      <li>the property has remained on the market while conditions changed;</li>
+      <li>competing properties have reduced their prices.</li>
+    </ul>
+    <p>Agents should therefore avoid presenting current asking prices as confirmed market values. A credible valuation should consider the property&rsquo;s characteristics, competition, days on market and visible price reductions.</p>
+    <p>Where verified transaction data is unavailable, the agent should clearly state that listing prices are being used as market evidence rather than completed sale prices.</p>
+    <div class="helps">
+      <h3>How Estima helps</h3>
+      <p>Estima separates the advertised price from the estimated market range and shows the evidence behind the recommendation.</p>
+      <p>This helps the agent explain why simply copying the highest nearby listing price may lead to an unrealistic valuation.</p>
+    </div>
+    <a class="cta" href="/">Compare the asking price with the estimated market range</a>
+  </div>
+
+  <div class="guide">
+    <div class="guide-head"><span class="guide-num">4</span><h2>How to Explain an Estima Price Range to a Seller</h2></div>
+    <p>A price range is often more credible than one exact number. The market value of a property is not fixed to the nearest euro. It depends on buyer demand, property presentation, negotiation and changes in competing supply.</p>
+    <p>When presenting the Estima range, explain three possible positions:</p>
+    <p class="subhead">Competitive price</p>
+    <p>A price near the lower part of the range may generate more interest and increase the likelihood of receiving several enquiries or offers.</p>
+    <p class="subhead">Balanced market price</p>
+    <p>A price near the centre of the range represents a reasonable balance between attracting demand and protecting the owner&rsquo;s value.</p>
+    <p class="subhead">Aspirational price</p>
+    <p>A price near or above the upper end of the range may still be tested, but the owner should understand the possibility of a longer selling period and future price reductions.</p>
+    <p>The agent should recommend a strategy, not just present a number.</p>
+    <div class="helps">
+      <h3>How Estima helps</h3>
+      <p>The Estima report gives the seller a visual explanation of the price range, comparable properties and relevant market conditions.</p>
+      <p>This turns the pricing conversation from a personal disagreement into a professional discussion supported by evidence.</p>
+    </div>
+    <a class="cta" href="/">Present your pricing recommendation with confidence</a>
+  </div>
+
+  <div class="guide">
+    <div class="guide-head"><span class="guide-num">5</span><h2>How to Respond When an Owner Expects an Unrealistic Price</h2></div>
+    <p>Telling an owner that their price expectation is unrealistic can immediately create resistance.</p>
+    <p>A better approach is to avoid saying:</p>
+    <p class="quote">Your property is not worth that much.</p>
+    <p>Instead, say:</p>
+    <p class="quote">Let us look at how buyers are likely to compare your property with the alternatives currently available.</p>
+    <p>Begin with the owner&rsquo;s priorities. Ask whether they value the highest possible price, a predictable sale or a faster transaction. Then present:</p>
+    <ul>
+      <li>similar active properties;</li>
+      <li>how long they have been advertised;</li>
+      <li>recent price reductions;</li>
+      <li>differences in condition and location;</li>
+      <li>the level of competition at the proposed price.</li>
+    </ul>
+    <p>The goal is not to win an argument. The goal is to help the owner understand the consequences of each pricing decision.</p>
+    <div class="helps">
+      <h3>How Estima helps</h3>
+      <p>An Estima report allows the agent to support the recommendation with neutral market evidence.</p>
+      <p>The owner is less likely to interpret the valuation as an attempt to secure a quick sale when the reasoning is clearly documented.</p>
+    </div>
+    <a class="cta" href="/">Turn difficult pricing conversations into evidence-based decisions</a>
+  </div>
+
+  <div class="guide">
+    <div class="guide-head"><span class="guide-num">6</span><h2>How Property Condition and Photographs Affect Valuation</h2></div>
+    <p>Property condition can significantly influence buyer interest, expected renovation costs and the final achievable price. Important factors include:</p>
+    <ul>
+      <li>kitchen and bathroom condition;</li>
+      <li>flooring and windows;</li>
+      <li>electrical and plumbing systems;</li>
+      <li>natural light;</li>
+      <li>visible maintenance issues;</li>
+      <li>quality of renovation;</li>
+      <li>consistency of materials and finishes;</li>
+      <li>condition of the building and common areas.</li>
+    </ul>
+    <p>Photographs also influence how buyers perceive the property before arranging a viewing. Dark, unclear or incomplete photographs may reduce engagement even when the property itself is attractive. High-quality photographs cannot fix an unsuitable price, but they can improve the quality and quantity of initial enquiries.</p>
+    <p>Agents should distinguish between:</p>
+    <ul>
+      <li>the physical condition of the property;</li>
+      <li>the quality of its presentation;</li>
+      <li>the market value of completed improvements.</li>
+    </ul>
+    <p>Not every renovation increases the property&rsquo;s value by the full amount spent.</p>
+    <div class="helps">
+      <h3>How Estima helps</h3>
+      <p>Estima can document the property&rsquo;s visible condition and incorporate relevant differences when comparing it with competing listings.</p>
+      <p>This gives agents an additional structure for explaining why two apparently similar properties may require different pricing.</p>
+    </div>
+    <a class="cta" href="/">Include property condition in your valuation analysis</a>
+  </div>
+
+  <div class="guide">
+    <div class="guide-head"><span class="guide-num">7</span><h2>How to Use an Estima Report During a Listing Presentation</h2></div>
+    <p>A valuation report should support the conversation, not replace it. Begin the presentation by asking about the owner&rsquo;s objectives:</p>
+    <ul>
+      <li>Why are they considering selling?</li>
+      <li>What is their preferred timeline?</li>
+      <li>Have they already received other valuations?</li>
+      <li>What price do they currently expect?</li>
+      <li>What matters most to them when selecting an agent?</li>
+    </ul>
+    <p>After understanding the owner&rsquo;s position, introduce the report. A useful presentation order is:</p>
+    <ol>
+      <li>property summary;</li>
+      <li>current local market conditions;</li>
+      <li>comparable properties;</li>
+      <li>differences between the comparables and the subject property;</li>
+      <li>estimated price range;</li>
+      <li>recommended listing strategy;</li>
+      <li>proposed next steps.</li>
+    </ol>
+    <p>Do not spend the entire meeting reading the report page by page. Use it to answer questions and reinforce the recommendation.</p>
+    <div class="helps">
+      <h3>How Estima helps</h3>
+      <p>The Estima report gives the agent a professional visual document that can be presented during the meeting and shared with the owner afterwards.</p>
+      <p>It makes the valuation feel structured, transparent and prepared specifically for the property.</p>
+    </div>
+    <a class="cta" href="/">Strengthen your next listing presentation</a>
+  </div>
+
+  <div class="guide">
+    <div class="guide-head"><span class="guide-num">8</span><h2>How to Win More Exclusive Listings With Better Valuation Reports</h2></div>
+    <p>Owners often speak with several estate agents before deciding whom to appoint. Many agents provide only a verbal price estimate or a short email. A structured valuation report creates a stronger professional impression.</p>
+    <p>A good report demonstrates that the agent has:</p>
+    <ul>
+      <li>researched the property;</li>
+      <li>reviewed relevant competition;</li>
+      <li>considered market conditions;</li>
+      <li>prepared a clear pricing strategy;</li>
+      <li>invested effort before requesting the listing.</li>
+    </ul>
+    <p>The report should not be used as a guarantee that the property will sell for a specific amount. It should demonstrate the quality of the agent&rsquo;s process.</p>
+    <div class="helps">
+      <h3>How Estima helps</h3>
+      <p>Estima allows agents to prepare branded, professional reports without manually building every chart, table and property comparison.</p>
+      <p>This helps smaller agencies provide a level of presentation normally associated with larger firms and valuation departments.</p>
+    </div>
+    <a class="cta" href="/">Differentiate your agency with professional property reports</a>
+  </div>
+
+  <div class="guide">
+    <div class="guide-head"><span class="guide-num">9</span><h2>The Most Common Mistakes in Property Valuation</h2></div>
+    <p>Even experienced agents can produce weaker valuations when the process is rushed or inconsistent. Common mistakes include:</p>
+    <ul>
+      <li>relying only on average price per square metre;</li>
+      <li>selecting properties that are nearby but not genuinely comparable;</li>
+      <li>ignoring property condition;</li>
+      <li>comparing different ownership types;</li>
+      <li>using only the most expensive listings;</li>
+      <li>ignoring listings that have remained unsold for a long period;</li>
+      <li>treating an asking price as a completed sale price;</li>
+      <li>presenting one exact value without explaining uncertainty;</li>
+      <li>failing to update the valuation when the market changes.</li>
+    </ul>
+    <p>A reliable valuation process should be repeatable. Another team member reviewing the same property should be able to understand how the recommendation was produced.</p>
+    <div class="helps">
+      <h3>How Estima helps</h3>
+      <p>Estima creates a consistent valuation structure across the agency while allowing individual agents to apply their own local expertise.</p>
+    </div>
+    <a class="cta" href="/">Standardise your agency&rsquo;s valuation process</a>
+  </div>
+
+  <div class="guide">
+    <div class="guide-head"><span class="guide-num">10</span><h2>Why Days on Market Matter</h2></div>
+    <p>The length of time a property has been advertised can reveal useful information about its position in the market. A long advertising period may indicate:</p>
+    <ul>
+      <li>an unrealistic asking price;</li>
+      <li>poor presentation;</li>
+      <li>weak demand for the property type;</li>
+      <li>legal or technical complications;</li>
+      <li>inaccurate property information;</li>
+      <li>changing market conditions.</li>
+    </ul>
+    <p>Days on market should never be interpreted in isolation. Some unique or expensive properties naturally require longer selling periods. However, when several similar properties remain available for a long time, their asking prices may not represent achievable market values.</p>
+    <div class="helps">
+      <h3>How Estima helps</h3>
+      <p>Estima tracks how long comparable properties have been visible and highlights changes that may affect their relevance.</p>
+      <p>This helps agents distinguish between fresh competition and listings that may already have been rejected by the market.</p>
+    </div>
+    <a class="cta" href="/">Add market timing to your comparable analysis</a>
+  </div>
+
+  <div class="guide">
+    <div class="guide-head"><span class="guide-num">11</span><h2>What Price Reductions Tell Us About the Market</h2></div>
+    <p>A price reduction is a signal that the original asking price did not generate the expected response. One reduction does not automatically mean that the new price is correct. However, patterns across several listings can indicate that seller expectations are above current buyer demand.</p>
+    <p>Agents should look at:</p>
+    <ul>
+      <li>the original asking price;</li>
+      <li>the current asking price;</li>
+      <li>the size of the reduction;</li>
+      <li>the number of reductions;</li>
+      <li>the time between each change;</li>
+      <li>whether similar listings are following the same pattern.</li>
+    </ul>
+    <p>Price history is particularly useful when an owner uses a competing listing as proof that their property should be listed at a higher price.</p>
+    <div class="helps">
+      <h3>How Estima helps</h3>
+      <p>Estima can show the price development of comparable properties, giving the agent a clearer view than a single screenshot from a property portal.</p>
+    </div>
+    <a class="cta" href="/">Use price history in your next valuation</a>
+  </div>
+
+  <div class="guide">
+    <div class="guide-head"><span class="guide-num">12</span><h2>How Location and Micro-Location Influence Property Value</h2></div>
+    <p>City-level and district-level averages are useful, but buyers experience property at the street and neighbourhood level. Micro-location factors can include:</p>
+    <ul>
+      <li>access to public transport;</li>
+      <li>noise and traffic;</li>
+      <li>schools and childcare;</li>
+      <li>parks and green space;</li>
+      <li>shops and services;</li>
+      <li>parking availability;</li>
+      <li>building surroundings;</li>
+      <li>future construction;</li>
+      <li>views and orientation;</li>
+      <li>walking distance to important destinations.</li>
+    </ul>
+    <p>Two properties in the same postal code can attract different buyer groups and achieve different prices. The agent should explain which location factors create real buyer value and which are mainly marketing claims.</p>
+    <div class="helps">
+      <h3>How Estima helps</h3>
+      <p>Estima combines property-level analysis with local market information, helping the agent place the property within its actual competitive environment.</p>
+    </div>
+    <a class="cta" href="/">Add local context to your valuation report</a>
+  </div>
+
+  <div class="guide">
+    <div class="guide-head"><span class="guide-num">13</span><h2>How to Present Valuation Uncertainty Professionally</h2></div>
+    <p>A professional valuation should not pretend that uncertainty does not exist. Uncertainty may be higher when:</p>
+    <ul>
+      <li>very few comparable properties are available;</li>
+      <li>the property is unusual;</li>
+      <li>the local market has low transaction activity;</li>
+      <li>important property information is missing;</li>
+      <li>market conditions are changing quickly;</li>
+      <li>the property&rsquo;s condition cannot be assessed properly.</li>
+    </ul>
+    <p>Explaining uncertainty does not weaken the agent&rsquo;s credibility. It shows that the recommendation is honest and evidence-based. The agent should explain what is known, what is estimated and what could change the expected outcome.</p>
+    <div class="helps">
+      <h3>How Estima helps</h3>
+      <p>Estima can present a price range together with the quality and quantity of available comparables.</p>
+      <p>This makes it easier to explain why some valuations have a narrow range while others require more caution.</p>
+    </div>
+    <a class="cta" href="/">Present evidence, not false precision</a>
+  </div>
+
+  <div class="guide">
+    <div class="guide-head"><span class="guide-num">14</span><h2>How to Adjust a Valuation When the Market Changes</h2></div>
+    <p>A valuation is valid for a specific moment in time. It may need to be reviewed when:</p>
+    <ul>
+      <li>interest rates change;</li>
+      <li>buyer demand increases or declines;</li>
+      <li>several competing properties enter the market;</li>
+      <li>comparable listings reduce their prices;</li>
+      <li>the property remains unsold;</li>
+      <li>the owner renovates or changes the property;</li>
+      <li>local development affects the area.</li>
+    </ul>
+    <p>Agents should agree with the seller in advance when the pricing strategy will be reviewed. For example:</p>
+    <p class="quote">We will evaluate the number of enquiries, viewings and buyer feedback after the first three weeks. If the response is below expectations, we will compare the property again with the latest market evidence.</p>
+    <div class="helps">
+      <h3>How Estima helps</h3>
+      <p>Estima allows the agent to update the analysis using current listings and market information instead of relying on the original valuation throughout the entire sales process.</p>
+    </div>
+    <a class="cta" href="/">Keep every valuation aligned with the current market</a>
+  </div>
+
+  <div class="guide">
+    <div class="guide-head"><span class="guide-num">15</span><h2>How to Follow Up After a Listing Presentation</h2></div>
+    <p>Many listing opportunities are lost because the follow-up is generic or arrives too late. After the meeting, send the owner:</p>
+    <ul>
+      <li>the valuation report;</li>
+      <li>a short summary of the recommended price strategy;</li>
+      <li>the key reasons behind the recommendation;</li>
+      <li>the proposed marketing plan;</li>
+      <li>clear next steps;</li>
+      <li>a date for the next conversation.</li>
+    </ul>
+    <p>A useful follow-up message could say:</p>
+    <p class="quote">Thank you for meeting with me today. Based on the property characteristics, current competition and the comparable properties reviewed, I recommend entering the market within the price range shown in the attached report. This position should allow us to test buyer demand without placing the property outside the range of the strongest alternatives.</p>
+    <p>The report keeps the agent&rsquo;s recommendation visible while the owner compares different agencies.</p>
+    <div class="helps">
+      <h3>How Estima helps</h3>
+      <p>Estima gives the agent a professional document that can be sent immediately after the meeting, reinforcing the quality of the presentation and keeping the agency memorable.</p>
+    </div>
+    <a class="cta" href="/">Make your follow-up more persuasive</a>
+  </div>
+
+  <div class="guide">
+    <div class="guide-head"><span class="guide-num">16</span><h2>How to Explain Automated Valuation to Clients</h2></div>
+    <p>Some owners may assume that automated valuation means that software has replaced the agent&rsquo;s expertise. That is not how a responsible valuation process should work.</p>
+    <p>Technology can:</p>
+    <ul>
+      <li>process large amounts of listing data;</li>
+      <li>calculate market indicators;</li>
+      <li>identify potentially relevant comparables;</li>
+      <li>track price changes;</li>
+      <li>prepare consistent reports.</li>
+    </ul>
+    <p>The agent must still:</p>
+    <ul>
+      <li>verify the property information;</li>
+      <li>assess the micro-location;</li>
+      <li>understand the seller&rsquo;s situation;</li>
+      <li>evaluate unusual features;</li>
+      <li>review the selected comparables;</li>
+      <li>recommend the final pricing strategy.</li>
+    </ul>
+    <p>The strongest approach combines technology with local professional knowledge.</p>
+    <div class="helps">
+      <h3>How Estima helps</h3>
+      <p>Estima is designed as a decision-support tool for estate agents, not as a replacement for them.</p>
+      <p>It handles repetitive data preparation so the agent can spend more time advising the client, winning the listing and managing the transaction.</p>
+    </div>
+    <a class="cta" href="/">Combine your expertise with better market data</a>
+  </div>
+
+  <div class="guide">
+    <div class="guide-head"><span class="guide-num">17</span><h2>How to Build Trust Without Promising the Highest Price</h2></div>
+    <p>Some agents attempt to win a listing by providing the highest valuation. This may work initially, but it can create problems later:</p>
+    <ul>
+      <li>limited buyer interest;</li>
+      <li>repeated price reductions;</li>
+      <li>loss of owner trust;</li>
+      <li>a longer selling period;</li>
+      <li>a property becoming stale on the market.</li>
+    </ul>
+    <p>A stronger sales approach is to explain the strategy behind the recommendation. Owners should understand that the best agent is not necessarily the one who suggests the highest price. It is the one who provides the clearest evidence, strongest marketing plan and most realistic route to a successful sale.</p>
+    <div class="helps">
+      <h3>How Estima helps</h3>
+      <p>Estima gives agents an independent-looking evidence base that supports an honest pricing recommendation.</p>
+      <p>This helps position the agent as a trusted adviser rather than someone simply saying what the owner wants to hear.</p>
+    </div>
+    <a class="cta" href="/">Win listings through credibility, not inflated promises</a>
+  </div>
+
+  <div class="guide">
+    <div class="guide-head"><span class="guide-num">18</span><h2>How Agencies Can Create a Consistent Valuation Standard</h2></div>
+    <p>When every agent prepares valuations differently, the quality of the agency&rsquo;s output becomes difficult to control. One agent may use detailed comparable analysis, while another may rely mostly on intuition. Reports may use different terminology, formats and assumptions.</p>
+    <p>A consistent internal valuation standard should define:</p>
+    <ul>
+      <li>the required property information;</li>
+      <li>how comparables are selected;</li>
+      <li>how differences are documented;</li>
+      <li>how price ranges are presented;</li>
+      <li>how uncertainty is explained;</li>
+      <li>which disclaimers are included;</li>
+      <li>when valuations should be updated.</li>
+    </ul>
+    <p>Consistency improves professionalism and makes it easier to train new agents.</p>
+    <div class="helps">
+      <h3>How Estima helps</h3>
+      <p>Estima gives agencies one repeatable framework for preparing and presenting property valuations.</p>
+      <p>Reports can follow the agency&rsquo;s branding and methodology while agents retain control over the final recommendation.</p>
+    </div>
+    <a class="cta" href="/">Build a consistent valuation process across your team</a>
+  </div>
+
+  <div class="final">
+    <h2>Better data. Stronger recommendations. More confident clients.</h2>
+    <p>Estima helps estate agents prepare property valuations, identify comparable listings and present their recommendations through professional client-ready reports.</p>
+    <p>Spend less time collecting information manually and more time advising clients, winning listings and closing transactions.</p>
+    <div class="btn-row">
+      <a class="btn btn-primary" href="/">Create your first Estima report</a>
+      <a class="btn btn-ghost" href="/sample">View a sample valuation report</a>
+    </div>
+  </div>
+
+  <div class="disclaimer">
+    <strong>Disclaimer.</strong> Estima provides market analysis and decision-support information based on available property data. The results do not represent a certified expert valuation and should be reviewed by a qualified estate agent before being presented to a client.
+  </div>
+
+</div>
+
+</body>
+</html>
