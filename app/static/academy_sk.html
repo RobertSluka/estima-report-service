@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <!--
-  Estima Academy landing page — Slovak version of academy.html.
+  Estima Academy landing page.
 
-  Served at GET /academy?lang=sk (and by default when DEFAULT_LANGUAGE=sk,
-  e.g. the estima.sk deployment); converted to PDF at GET /academy/download.
-  Keep structure and CSS identical to academy.html — only strings differ.
-  Terminology follows app/templates/estima/sk/report.html (ponuková cena,
-  porovnateľné inzeráty, dní na trhu, …).
+  Served at GET /academy and converted to PDF at GET /academy/download, so the
+  stylesheet must work both on screen and in WeasyPrint 62.3: no flex `gap`,
+  no `100vh`, no CSS grid. Multi-column layouts live in `@media screen` so the
+  PDF (print media) renders as a clean single-column document. @page rules and
+  `.print-only` apply only in the PDF; `.no-print` is hidden there.
 -->
 <html lang="sk">
 <head>
@@ -16,215 +16,323 @@
 <style>
   @page {
     size: A4;
-    margin: 16mm 14mm 18mm 14mm;
-    @bottom-left {
-      content: "Estima Academy";
-      font-size: 7.5pt;
-      color: #9aa5b1;
-    }
-    @bottom-right {
-      content: "Strana " counter(page) " / " counter(pages);
-      font-size: 7.5pt;
-      color: #9aa5b1;
-    }
+    margin: 15mm 14mm 18mm 14mm;
+    @bottom-left  { content: "Estima Academy"; font-size: 7.5pt; color: #94a3b8; }
+    @bottom-right { content: "Page " counter(page) " / " counter(pages); font-size: 7.5pt; color: #94a3b8; }
   }
 
   :root {
-    --ink:      #1d2733;
-    --ink-soft: #55616e;
-    --muted:    #8a95a1;
-    --line:     #e3e8ee;
-    --panel:    #f6f8fa;
-    --brand:    #123a5e;
-    --brand-2:  #1f6f8b;
-    --accent:   #c9a227;
-    --info-bg:  #e8f2f6;
+    --navy:#0f172a; --navy-800:#1e293b;
+    --ink:#0f172a; --body:#475569; --muted:#64748b; --faint:#94a3b8;
+    --line:#e2e8f0; --panel:#f1f5f9; --bg:#f8fafc; --white:#ffffff;
+    --steel:#5b7ba6; --steel-strong:#4a6890; --steel-050:#eef2f8; --steel-line:#dbe3ef;
+    --emerald-bg:#ecfdf5; --emerald:#059669;
+    --radius:12px; --radius-sm:10px;
+    --shadow:0 1px 2px rgba(15,23,42,.06);
+    --maxw:1120px; --readw:760px;
   }
 
   * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; scroll-padding-top: 72px; }
+  @media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+
   body {
-    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-    color: var(--ink);
-    font-size: 16px;
-    line-height: 1.6;
-    margin: 0;
-    background: #fff;
+    font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+                 "Helvetica Neue", Arial, sans-serif;
+    color: var(--body); background: var(--bg);
+    margin: 0; font-size: 16px; line-height: 1.65;
+    -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
   }
-  h1, h2, h3 { margin: 0; font-weight: 700; }
+  h1, h2, h3 { margin: 0; color: var(--ink); font-weight: 700; letter-spacing: -.01em; }
   p { margin: 0 0 12px; }
-  ul, ol { margin: 0 0 12px; padding-left: 22px; }
-  li { margin-bottom: 4px; }
-  a { color: var(--brand-2); text-decoration: none; }
+  ul, ol { margin: 0 0 14px; padding-left: 20px; }
+  li { margin-bottom: 5px; }
+  a { color: var(--steel-strong); text-decoration: none; }
+  :focus-visible { outline: 2px solid rgba(91,123,166,.65); outline-offset: 2px; border-radius: 4px; }
 
-  .wrap { max-width: 880px; margin: 0 auto; padding: 0 24px; }
+  .container { max-width: var(--maxw); margin: 0 auto; padding: 0 24px; }
+  .print-only { display: none; }
 
-  /* Hero */
-  .hero {
-    color: #fff;
-    background: linear-gradient(160deg, #0d2f4d 0%, #123a5e 45%, #1f6f8b 100%);
-    padding: 48px 0 56px;
+  .eyebrow {
+    display: flex; align-items: center;
+    font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--faint); margin: 0 0 14px;
   }
-  .brand-row { margin-bottom: 32px; }
-  .brand-row svg { vertical-align: middle; margin-right: 10px; }
-  .brand-cell { display: inline-block; vertical-align: middle; }
-  .brand-mark { font-size: 26px; font-weight: 800; letter-spacing: 1px; }
-  .brand-mark .dot { color: var(--accent); }
-  .brand-tag {
-    font-size: 11px; letter-spacing: 4px; text-transform: uppercase;
-    color: #b9d4e4; margin-top: 2px;
+  .eyebrow::before {
+    content: ""; width: 7px; height: 7px; border-radius: 50%;
+    border: 1.5px solid var(--steel); margin-right: 8px; flex: none;
   }
-  .lang-switch { float: right; font-size: 13px; color: #b9d4e4; margin-top: 8px; }
-  .lang-switch a { color: #fff; font-weight: 700; }
-  .lang-switch .active { color: var(--accent); }
-  .hero h1 { font-size: 38px; line-height: 1.2; max-width: 640px; }
-  .hero .lead {
-    font-size: 17px; color: #cfe3ee; max-width: 660px; margin-top: 18px;
-  }
-  .hero .btn-row { margin-top: 28px; }
 
+  /* ── site header (mirrors the app navbar) ───────────────────────────── */
+  .site-header {
+    position: sticky; top: 0; z-index: 30;
+    background: rgba(255,255,255,.9); backdrop-filter: saturate(180%) blur(8px);
+    border-bottom: 1px solid var(--line);
+  }
+  .header-inner { display: flex; align-items: center; height: 56px; }
+  .brand { display: inline-flex; align-items: center; }
+  .brand svg { width: 26px; height: 26px; color: var(--ink); }
+  .brand-word { margin-left: 8px; font-weight: 700; font-size: 15px; color: var(--ink); letter-spacing: -.02em; }
+  .brand-word span { color: var(--muted); font-weight: 600; }
+  .site-nav { display: none; }
+  .header-right { margin-left: auto; display: inline-flex; align-items: center; }
+  .lang-toggle { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; margin-right: 10px; }
+  .lang-toggle a, .lang-toggle span { font-size: 11px; font-weight: 600; padding: 4px 9px; color: var(--muted); }
+  .lang-toggle .on { background: var(--steel-050); color: var(--ink); }
+  .signin { display: inline-flex; align-items: center; border: 1px solid var(--line); border-radius: 999px; padding: 6px 14px; font-size: 13px; font-weight: 500; color: var(--body); }
+  .signin:hover { background: var(--bg); border-color: #cbd5e1; }
+
+  /* ── buttons ────────────────────────────────────────────────────────── */
+  .btn-row { display: flex; flex-wrap: wrap; align-items: center; margin: 0 0 -8px; }
   .btn {
-    display: inline-block;
-    border-radius: 999px;
-    padding: 11px 24px;
-    font-weight: 700;
-    font-size: 15px;
-    margin-right: 12px;
-    margin-bottom: 8px;
+    display: inline-flex; align-items: center; justify-content: center;
+    border-radius: var(--radius-sm); padding: 11px 20px;
+    font-size: 14px; font-weight: 600; border: 1px solid transparent;
+    margin: 0 8px 8px 0; transition: background-color .15s, border-color .15s, transform .15s;
   }
-  .btn-primary { background: var(--accent); color: #1d2733; }
-  .btn-ghost { border: 1.5px solid rgba(255,255,255,.6); color: #fff; }
+  .btn-primary { background: var(--navy); color: #fff; box-shadow: var(--shadow); }
+  .btn-primary:hover { background: var(--navy-800); }
+  .btn-outline { background: #fff; color: var(--ink); border-color: var(--line); box-shadow: var(--shadow); }
+  .btn-outline:hover { background: var(--bg); border-color: #cbd5e1; }
+  .btn svg { width: 15px; height: 15px; margin-left: 8px; }
 
-  /* Contents */
-  .toc { padding: 36px 0 8px; }
-  .toc h2 { font-size: 14px; letter-spacing: 3px; text-transform: uppercase; color: var(--muted); margin-bottom: 14px; }
-  .toc ol { column-count: 2; column-gap: 36px; font-size: 14.5px; color: var(--ink-soft); }
-  .toc li { margin-bottom: 6px; }
+  /* ── hero ───────────────────────────────────────────────────────────── */
+  .hero { background: var(--white); border-bottom: 1px solid var(--line); }
+  .hero-inner { padding: 46px 0 44px; }
+  .hero-brand { align-items: center; margin-bottom: 18px; }
+  .hero-brand svg { width: 30px; height: 30px; color: var(--ink); }
+  .hero-brand b { margin-left: 9px; font-size: 15px; color: var(--ink); }
+  .hero h1 { font-size: 34px; line-height: 1.14; max-width: 15ch; }
+  .hero .lead { font-size: 16px; color: var(--muted); max-width: 50ch; margin: 16px 0 26px; }
 
-  /* Guides */
-  .guide { padding: 28px 0 6px; border-top: 1px solid var(--line); }
-  .guide:first-of-type { border-top: 0; }
-  .guide-head { margin-bottom: 14px; }
-  .guide-num {
-    display: inline-block;
-    font-size: 13px; font-weight: 700; color: #fff;
-    background: var(--brand);
-    border-radius: 4px; padding: 2px 9px;
-    margin-right: 10px;
-    vertical-align: 3px;
-  }
-  .guide h2 { display: inline; font-size: 23px; color: var(--brand); }
-  .quote {
-    border-left: 3px solid var(--accent);
-    background: var(--panel);
-    padding: 10px 16px;
-    margin: 0 0 12px;
-    font-style: italic;
-    color: var(--ink-soft);
-  }
-  .subhead { font-size: 16px; color: var(--brand-2); margin: 14px 0 6px; }
+  /* product visual (mini valuation report) */
+  .pv { background: #fff; border: 1px solid var(--line); border-radius: 14px; box-shadow: 0 12px 30px -16px rgba(15,23,42,.28); overflow: hidden; }
+  .pv-top { display: flex; align-items: center; background: var(--navy); color: #fff; padding: 10px 14px; font-size: 12px; font-weight: 600; }
+  .pv-top .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--steel); margin-right: 8px; flex: none; }
+  .pv-tag { margin-left: auto; font-size: 10px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: #94a3b8; border: 1px solid rgba(255,255,255,.18); border-radius: 999px; padding: 2px 8px; }
+  .pv-body { padding: 16px 16px 18px; }
+  .pv-addr { font-size: 14px; font-weight: 700; color: var(--ink); }
+  .pv-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .pv-price { font-size: 24px; font-weight: 700; color: var(--ink); margin: 12px 0 2px; letter-spacing: -.02em; }
+  .pv-rl { display: flex; justify-content: space-between; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--faint); margin: 10px 0 6px; }
+  .pv-track { position: relative; height: 8px; border-radius: 999px; background: var(--panel); }
+  .pv-fill { position: absolute; top: 0; bottom: 0; left: 14%; right: 20%; border-radius: 999px; background: rgba(91,123,166,.35); }
+  .pv-knob { position: absolute; top: -3px; left: 52%; width: 14px; height: 14px; border-radius: 50%; background: #fff; border: 3px solid var(--navy); }
+  .pv-cap { font-size: 11px; color: var(--muted); margin-top: 8px; }
+  .pv-comps { margin-top: 14px; border-top: 1px solid var(--line); padding-top: 12px; }
+  .pv-comp { display: flex; align-items: center; padding: 5px 0; }
+  .pv-comp + .pv-comp { border-top: 1px solid var(--panel); }
+  .pv-c-a { font-size: 12.5px; font-weight: 600; color: var(--ink); }
+  .pv-c-s { font-size: 11px; color: var(--muted); }
+  .chip { margin-left: auto; font-size: 10px; font-weight: 600; border-radius: 999px; padding: 2px 9px; border: 1px solid; white-space: nowrap; }
+  .chip-fair  { color: #047857; background: #ecfdf5; border-color: #a7f3d0; }
+  .chip-over  { color: #b91c1c; background: #fef2f2; border-color: #fecaca; }
+  .chip-under { color: #1d4ed8; background: #eff6ff; border-color: #bfdbfe; }
 
-  .helps {
-    background: var(--info-bg);
-    border-left: 4px solid var(--brand-2);
-    border-radius: 0 8px 8px 0;
-    padding: 14px 18px 6px;
-    margin: 16px 0 14px;
-    page-break-inside: avoid;
-  }
-  .helps h3 { font-size: 15px; color: var(--brand-2); margin-bottom: 8px; }
-  .cta {
-    display: inline-block;
-    font-weight: 700; font-size: 14.5px;
-    color: var(--brand);
-    border: 1.5px solid var(--brand);
-    border-radius: 999px;
-    padding: 8px 20px;
-    margin-bottom: 22px;
-    page-break-inside: avoid;
-  }
-  .cta::after { content: " \2192"; color: var(--accent); }
+  /* ── overview ───────────────────────────────────────────────────────── */
+  .overview { padding: 40px 0 8px; }
+  .sec-title { font-size: 24px; line-height: 1.2; }
+  .sec-sub { font-size: 15px; color: var(--muted); margin: 6px 0 0; max-width: 60ch; }
+  .ov-grid { margin-top: 22px; }
+  .ov-card { border: 1px solid var(--line); background: #fff; border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow); margin-bottom: 14px; }
+  .ov-ic { display: inline-flex; align-items: center; justify-content: center; width: 38px; height: 38px; border-radius: 10px; background: var(--emerald-bg); color: var(--emerald); }
+  .ov-ic svg { width: 20px; height: 20px; }
+  .ov-card h3 { font-size: 15px; margin: 14px 0 4px; }
+  .ov-card p { font-size: 14px; color: var(--muted); margin: 0; line-height: 1.55; }
 
-  /* Final CTA */
-  .final {
-    color: #fff;
-    background: linear-gradient(160deg, #0d2f4d 0%, #123a5e 45%, #1f6f8b 100%);
-    border-radius: 12px;
-    padding: 36px 32px;
-    margin: 36px 0 28px;
-    page-break-inside: avoid;
-  }
-  .final h2 { font-size: 27px; line-height: 1.25; }
-  .final p { color: #cfe3ee; max-width: 640px; margin-top: 12px; }
-  .final .btn-row { margin-top: 20px; }
+  /* ── explore (categorised contents) ─────────────────────────────────── */
+  .explore { padding: 40px 0 8px; }
+  .cat-grid { margin-top: 22px; }
+  .cat { margin-bottom: 22px; }
+  .cat-title { display: flex; align-items: center; font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--steel-strong); margin-bottom: 10px; }
+  .cat-title::after { content: ""; flex: 1; height: 1px; background: var(--line); margin-left: 12px; }
+  .art-link { display: flex; align-items: center; padding: 11px 14px; border: 1px solid var(--line); background: #fff; border-radius: var(--radius-sm); margin-bottom: 8px; box-shadow: var(--shadow); transition: border-color .15s, box-shadow .15s, transform .15s; }
+  .art-link:hover { border-color: var(--steel); box-shadow: 0 6px 18px -10px rgba(15,23,42,.25); }
+  .art-n { flex: none; min-width: 24px; margin-right: 8px; font-size: 12px; font-weight: 700; color: var(--faint); font-variant-numeric: tabular-nums; }
+  .art-t { font-size: 14px; font-weight: 500; color: var(--ink); line-height: 1.35; }
+  .art-ar { flex: none; width: 16px; height: 16px; margin-left: auto; padding-left: 12px; color: var(--faint); transition: transform .15s, color .15s; }
+  .art-link:hover .art-ar { color: var(--steel-strong); transform: translateX(3px); }
 
-  .disclaimer {
-    background: var(--panel);
-    border: 1px dashed var(--line);
-    border-radius: 8px;
-    padding: 14px 18px;
-    font-size: 13.5px;
-    color: var(--muted);
-    margin-bottom: 48px;
-    page-break-inside: avoid;
-  }
-  .disclaimer strong { color: var(--ink-soft); }
+  /* ── reading layout ─────────────────────────────────────────────────── */
+  .reading { padding: 34px 0 8px; }
+  .guide-nav { display: none; }
+  .gn-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--ink); margin-bottom: 12px; }
+  .gn-cat { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: var(--faint); margin: 14px 0 4px; }
+  .gn-cat:first-child { margin-top: 0; }
+  .guide-nav a { display: block; font-size: 13px; line-height: 1.35; color: var(--muted); padding: 5px 10px; border-left: 2px solid transparent; border-radius: 0 6px 6px 0; }
+  .guide-nav a:hover { color: var(--ink); background: var(--bg); }
+  .guide-nav a.current { color: var(--ink); font-weight: 600; border-left-color: var(--steel); background: var(--steel-050); }
 
-  /* WeasyPrint renders with print media: keep self-referential UI out of the PDF. */
+  .mobile-toc { border: 1px solid var(--line); background: #fff; border-radius: var(--radius); box-shadow: var(--shadow); margin-bottom: 26px; }
+  .mobile-toc > summary { list-style: none; cursor: pointer; padding: 13px 16px; font-size: 14px; font-weight: 600; color: var(--ink); display: flex; align-items: center; }
+  .mobile-toc > summary::-webkit-details-marker { display: none; }
+  .mobile-toc > summary::after { content: "+"; margin-left: auto; color: var(--muted); font-weight: 400; font-size: 18px; }
+  .mobile-toc[open] > summary::after { content: "\2013"; }
+  .mobile-toc .mt-inner { padding: 4px 12px 14px; }
+  .mobile-toc .gn-cat { padding: 0 4px; }
+  .mobile-toc a { display: block; font-size: 13.5px; color: var(--body); padding: 7px 8px; border-radius: 6px; }
+  .mobile-toc a:hover { background: var(--bg); }
+
+  .articles { max-width: var(--readw); margin: 0 auto; }
+
+  .guide { padding: 30px 0; border-top: 1px solid var(--line); scroll-margin-top: 76px; }
+  .guide:first-child { border-top: 0; padding-top: 4px; }
+  .guide-head { margin-bottom: 12px; }
+  .guide-cat { display: block; font-size: 11px; font-weight: 600; letter-spacing: .09em; text-transform: uppercase; color: var(--steel-strong); margin-bottom: 8px; }
+  .guide h2 { font-size: 22px; line-height: 1.25; }
+  .guide-num { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; font-size: 13px; font-weight: 700; color: var(--steel-strong); background: var(--steel-050); border: 1px solid var(--steel-line); border-radius: 7px; margin-right: 10px; vertical-align: 3px; }
+  .guide p, .guide li { color: var(--body); }
+  .subhead { font-size: 15px; font-weight: 600; color: var(--ink); margin: 16px 0 4px; }
+
+  .quote { border-left: 3px solid var(--steel); background: var(--panel); padding: 12px 16px; margin: 0 0 14px; font-style: italic; color: var(--body); border-radius: 0 8px 8px 0; }
+
+  /* reusable product callout ("How Estima helps") */
+  .helps { background: var(--steel-050); border: 1px solid var(--steel-line); border-left: 3px solid var(--steel); border-radius: var(--radius-sm); padding: 15px 18px 5px; margin: 18px 0 16px; page-break-inside: avoid; }
+  .helps h3 { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: var(--steel-strong); margin-bottom: 8px; }
+  .helps p { font-size: 14.5px; color: var(--body); }
+
+  .cta { display: inline-flex; align-items: center; font-weight: 600; font-size: 14px; color: var(--ink); background: #fff; border: 1px solid var(--line); border-radius: 999px; padding: 8px 16px; margin: 2px 0 4px; box-shadow: var(--shadow); page-break-inside: avoid; transition: border-color .15s, background-color .15s; }
+  .cta:hover { border-color: #cbd5e1; background: var(--bg); }
+  .cta::after { content: " \2192"; margin-left: 7px; color: var(--steel-strong); }
+
+  /* ── closing CTA ────────────────────────────────────────────────────── */
+  .closing { padding: 10px 0 40px; }
+  .closing-inner { background: var(--navy); border-radius: 16px; padding: 40px 34px; }
+  .closing .eyebrow { color: #94a3b8; }
+  .closing .eyebrow::before { border-color: var(--steel); }
+  .closing h2 { color: #fff; font-size: 26px; line-height: 1.25; max-width: 22ch; }
+  .closing p { color: #cbd5e1; max-width: 56ch; margin: 14px 0 22px; }
+  .closing .btn-primary { background: #fff; color: var(--navy); }
+  .closing .btn-primary:hover { background: #e2e8f0; }
+  .closing .btn-outline { background: transparent; color: #fff; border-color: rgba(255,255,255,.28); box-shadow: none; }
+  .closing .btn-outline:hover { background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.45); }
+
+  .sources { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px 18px 8px; font-size: 13px; color: var(--body); margin: 0 0 14px; page-break-inside: avoid; }
+  .sources h3 { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: var(--steel-strong); margin-bottom: 8px; }
+  .sources ul { margin: 4px 0 8px; }
+  .sources li { margin-bottom: 5px; }
+  .sources .note { color: var(--muted); font-size: 12.5px; }
+
+  .disclaimer { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px 18px; font-size: 13px; color: var(--muted); margin: 0 0 48px; page-break-inside: avoid; }
+  .disclaimer strong { color: var(--body); }
+
+  /* ── responsive (screen only — WeasyPrint uses print media, stays stacked) ── */
+  @media screen and (min-width: 640px) {
+    .ov-grid { display: flex; flex-wrap: wrap; margin: 22px -7px 0; }
+    .ov-card { flex: 1 1 220px; margin: 0 7px 14px; }
+    .cat-grid { display: flex; flex-wrap: wrap; margin: 22px -10px 0; }
+    .cat { flex: 1 1 44%; margin: 0 10px 22px; min-width: 0; }
+  }
+  @media screen and (min-width: 768px) {
+    .site-nav { display: inline-flex; align-items: center; margin-left: 26px; }
+    .site-nav a { color: var(--muted); font-size: 14px; font-weight: 500; margin-right: 18px; }
+    .site-nav a:hover { color: var(--ink); }
+    .site-nav a.active { color: var(--ink); font-weight: 600; }
+    .header-inner { justify-content: flex-start; }
+    .hero h1 { font-size: 40px; }
+  }
+  @media screen and (min-width: 1024px) {
+    .hero-inner { display: flex; align-items: center; }
+    .hero-copy { flex: 1 1 0; min-width: 0; }
+    .hero-visual { flex: 0 0 380px; margin-left: 52px; }
+    .reading-inner { display: flex; align-items: flex-start; }
+    .guide-nav { display: block; flex: 0 0 232px; margin-right: 40px; position: sticky; top: 74px; }
+    .mobile-toc { display: none; }
+    .articles { flex: 1 1 0; min-width: 0; margin: 0; max-width: var(--readw); }
+  }
+
   @media print {
-    .no-print { display: none; }
+    .no-print { display: none !important; }
+    .print-only { display: flex !important; }
+    * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    body { background: #fff; font-size: 12.5px; line-height: 1.5; }
+    .container { max-width: none; padding: 0; }
+    .hero { border: 0; }
+    .hero-inner { padding: 0 0 14px; }
+    .hero h1 { font-size: 25px; max-width: none; }
+    .hero .lead { font-size: 13px; max-width: none; margin: 10px 0 16px; }
+    .hero-visual { margin-top: 16px; }
+    .pv { box-shadow: none; }
+    .overview, .explore, .reading, .closing { padding: 16px 0 0; }
+    .sec-title { font-size: 18px; }
+    .ov-card, .art-link, .cta, .mobile-toc { box-shadow: none; }
+    .guide { padding: 14px 0; }
+    .guide h2 { font-size: 17px; }
+    .articles { max-width: none; }
+    .closing-inner { padding: 26px 24px; }
+    .closing h2 { font-size: 20px; }
   }
 </style>
 </head>
 <body>
-
-<div class="hero">
-  <div class="wrap">
-    <div class="lang-switch no-print"><span class="active">SK</span> · <a href="/academy?lang=en">EN</a></div>
-    <div class="brand-row">
-      <svg width="40" height="40" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 42v-8M13 42V27M19 42V14l9-8 9 8v12M37 32v7h-8" stroke="#F4F6F8" stroke-width="3" fill="none"/><path d="M27 45h11" stroke="#91A6C2" stroke-width="3" fill="none"/></svg>
-      <div class="brand-cell">
-        <div class="brand-mark">Estima<span class="dot">.</span></div>
-        <div class="brand-tag">Estima Academy</div>
+<header class="site-header no-print">
+  <div class="container header-inner">
+    <a class="brand" href="/" aria-label="Estima">
+      <svg viewBox="0 0 48 48" fill="none" aria-hidden="true"><path d="M7 42v-8M13 42V27M19 42V14l9-8 9 8v12M37 32v7h-8" stroke="currentColor" stroke-width="3"/><path d="M27 45h11" stroke="#5b7ba6" stroke-width="3"/></svg><span class="brand-word">Estima<span>.sk</span></span>
+    </a>
+    <nav class="site-nav" aria-label="Primary">
+      <a href="/engine">Estima Engine™</a><a href="/trh">Trh</a><a href="/cennik">Cenník</a><a href="/kupa-alebo-prenajom">Kúpa vs nájom</a><a href="/kontakt">Kontakt</a><a href="/academy?lang=sk" class="active" aria-current="page">Academy</a>
+    </nav>
+    <div class="header-right">
+      <div class="lang-toggle" role="group" aria-label="Language"><a href="/academy?lang=en">EN</a><span class="on">SK</span></div>
+      <a class="signin" href="/prihlasenie">Prihlásiť sa</a>
+    </div>
+  </div>
+</header>
+<main>
+<section class="hero">
+  <div class="container hero-inner">
+    <div class="hero-copy">
+      <div class="hero-brand print-only"><svg viewBox="0 0 48 48" fill="none" aria-hidden="true"><path d="M7 42v-8M13 42V27M19 42V14l9-8 9 8v12M37 32v7h-8" stroke="currentColor" stroke-width="3"/><path d="M27 45h11" stroke="#5b7ba6" stroke-width="3"/></svg><b>Estima Academy</b></div>
+      <p class="eyebrow">Estima Academy</p>
+      <h1>Aby sa každé ocenenie ľahšie vysvetľovalo</h1>
+      <p class="lead">Praktické návody pre oceňovanie nehnuteľností, analýzu porovnateľných inzerátov a cenové rozhovory &mdash; aby ste každé odporúčanie obhájili dôkazmi a získali zákazku.</p>
+      <div class="btn-row">
+        <a class="btn btn-primary" href="/">Vytvorte svoj prvý report Estima</a>
+        <a class="btn btn-outline no-print" href="/academy/download?lang=sk">Stiahnuť príručku ako PDF</a>
       </div>
     </div>
-    <h1>Aby sa každé ocenenie ľahšie vysvetľovalo</h1>
-    <p class="lead">Úspešní realitní makléri robia viac než len odhad hodnoty nehnuteľnosti. Svoje odporúčanie musia vedieť vysvetliť, podložiť dôkazmi a vybudovať u majiteľa dostatočnú dôveru na to, aby konal.</p>
-    <p class="lead">Estima Academy prináša praktické návody pre oceňovanie nehnuteľností, analýzu porovnateľných inzerátov, cenové rozhovory a náborové prezentácie. Cieľom nie je nahradiť profesionálne skúsenosti. Cieľom je pomôcť maklérom podporiť tieto skúsenosti jasnejšími dátami, silnejšími reportmi a presvedčivejšou komunikáciou s klientom.</p>
-    <div class="btn-row">
-      <a class="btn btn-primary" href="/">Vytvorte svoj prvý report Estima</a>
-      <a class="btn btn-ghost no-print" href="/academy/download?lang=sk">Stiahnuť túto príručku ako PDF</a>
-    </div>
+    <div class="hero-visual" aria-hidden="true"><div class="pv" role="img" aria-label="Ukážka oceňovacieho reportu Estima">
+  <div class="pv-top"><span class="dot"></span>Oceňovací report<span class="pv-tag">Ukážka</span></div>
+  <div class="pv-body">
+    <div class="pv-addr">3-izbový byt · Bratislava</div>
+    <div class="pv-sub">74 m² · 4. poschodie · dobrý stav</div>
+    <div class="pv-price">228 000 €</div>
+    <div class="pv-rl"><span>Konkurenčná</span><span>Trhová</span><span>Ambiciózna</span></div>
+    <div class="pv-track"><span class="pv-fill"></span><span class="pv-knob"></span></div>
+    <div class="pv-cap">Odhadované rozpätie 214 000 – 242 000 €</div>
+    <div class="pv-comps"><div class="pv-comp"><div><div class="pv-c-a">Mýtna 12</div><div class="pv-c-s">71 m² · 221 000 €</div></div><span class="chip chip-fair">Férová</span></div><div class="pv-comp"><div><div class="pv-c-a">Karadžičova 8</div><div class="pv-c-s">76 m² · 256 000 €</div></div><span class="chip chip-over">Nadhodnotená</span></div><div class="pv-comp"><div><div class="pv-c-a">Špitálska 5</div><div class="pv-c-s">69 m² · 205 000 €</div></div><span class="chip chip-under">Podhodnotená</span></div></div>
   </div>
-</div>
-
-<div class="wrap">
-
-  <div class="toc">
-    <h2>Čo nájdete vo vnútri</h2>
-    <ol>
-      <li>Ako pripraviť ocenenie nehnuteľnosti podložené dátami</li>
-      <li>Ako vybrať skutočne porovnateľné nehnuteľnosti</li>
-      <li>Ponuková cena verzus pravdepodobná predajná cena</li>
-      <li>Ako predávajúcemu vysvetliť cenové rozpätie Estima</li>
-      <li>Ako reagovať, keď majiteľ očakáva nereálnu cenu</li>
-      <li>Ako stav nehnuteľnosti a fotografie ovplyvňujú ocenenie</li>
-      <li>Ako využiť report Estima počas náborovej prezentácie</li>
-      <li>Ako získať viac exkluzívnych zákaziek vďaka lepším reportom</li>
-      <li>Najčastejšie chyby pri oceňovaní nehnuteľností</li>
-      <li>Prečo záleží na počte dní na trhu</li>
-      <li>Čo o trhu hovoria zľavy z ceny</li>
-      <li>Ako lokalita a mikrolokalita ovplyvňujú hodnotu nehnuteľnosti</li>
-      <li>Ako profesionálne prezentovať neistotu ocenenia</li>
-      <li>Ako upraviť ocenenie, keď sa trh zmení</li>
-      <li>Ako nadviazať kontakt po náborovej prezentácii</li>
-      <li>Ako klientom vysvetliť automatizované ocenenie</li>
-      <li>Ako budovať dôveru bez sľubovania najvyššej ceny</li>
-      <li>Ako môže kancelária vytvoriť jednotný štandard oceňovania</li>
-    </ol>
+</div></div>
   </div>
-
-  <div class="guide">
-    <div class="guide-head"><span class="guide-num">1</span><h2>Ako pripraviť ocenenie nehnuteľnosti podložené dátami</h2></div>
+</section>
+<section class="overview">
+  <div class="container">
+    <h2 class="sec-title">Čo sa naučíte</h2>
+    <p class="sec-sub">Tri návyky, ktoré stoja za ocenením, ktorému majiteľ rozumie a dôveruje.</p>
+    <div class="ov-grid"><div class="ov-card"><span class="ov-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 13l3.5-3.5"/><path d="M4 17a8 8 0 1 1 16 0"/></svg></span><h3>Postavte obhájiteľné ocenenie</h3><p>Premeňte fakty o nehnuteľnosti, trhové dáta a porovnateľné inzeráty na cenové rozpätie podložené dôkazmi.</p></div><div class="ov-card"><span class="ov-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l9 5-9 5-9-5 9-5z"/><path d="M3 13l9 5 9-5"/></svg></span><h3>Vyberte relevantné porovnateľné inzeráty</h3><p>Vyberte inzeráty, ktoré nehnuteľnosti skutočne zodpovedajú &mdash; a vysvetlite rozdiely.</p></div><div class="ov-card"><span class="ov-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H8l-4 4V5a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2z"/></svg></span><h3>Prezentujte s istotou</h3><p>Veďte cenový rozhovor jasným, profesionálnym reportom, ktorému majiteľ dôveruje.</p></div></div>
+  </div>
+</section>
+<section class="explore">
+  <div class="container">
+    <h2 class="sec-title">Preskúmajte príručku</h2>
+    <p class="sec-sub">Osemnásť krátkych článkov, zoradených podľa toho, kde vám v práci pomôžu najviac.</p>
+    <div class="cat-grid"><div class="cat"><h3 class="cat-title">Základy oceňovania</h3><a class="art-link" href="#guide-1"><span class="art-n">01</span><span class="art-t">Ako pripraviť ocenenie nehnuteľnosti podložené dátami</span><svg class="art-ar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h13"/><path d="M12 5l7 7-7 7"/></svg></a><a class="art-link" href="#guide-2"><span class="art-n">02</span><span class="art-t">Ako vybrať skutočne porovnateľné nehnuteľnosti</span><svg class="art-ar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h13"/><path d="M12 5l7 7-7 7"/></svg></a><a class="art-link" href="#guide-3"><span class="art-n">03</span><span class="art-t">Ponuková cena verzus pravdepodobná predajná cena</span><svg class="art-ar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h13"/><path d="M12 5l7 7-7 7"/></svg></a><a class="art-link" href="#guide-4"><span class="art-n">04</span><span class="art-t">Ako predávajúcemu vysvetliť cenové rozpätie Estima</span><svg class="art-ar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h13"/><path d="M12 5l7 7-7 7"/></svg></a><a class="art-link" href="#guide-9"><span class="art-n">09</span><span class="art-t">Najčastejšie chyby pri oceňovaní nehnuteľností</span><svg class="art-ar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h13"/><path d="M12 5l7 7-7 7"/></svg></a></div><div class="cat"><h3 class="cat-title">Signály nehnuteľnosti a trhu</h3><a class="art-link" href="#guide-6"><span class="art-n">06</span><span class="art-t">Ako stav nehnuteľnosti a fotografie ovplyvňujú ocenenie</span><svg class="art-ar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h13"/><path d="M12 5l7 7-7 7"/></svg></a><a class="art-link" href="#guide-10"><span class="art-n">10</span><span class="art-t">Prečo záleží na počte dní na trhu</span><svg class="art-ar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h13"/><path d="M12 5l7 7-7 7"/></svg></a><a class="art-link" href="#guide-11"><span class="art-n">11</span><span class="art-t">Čo o trhu hovoria zľavy z ceny</span><svg class="art-ar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h13"/><path d="M12 5l7 7-7 7"/></svg></a><a class="art-link" href="#guide-12"><span class="art-n">12</span><span class="art-t">Ako lokalita a mikrolokalita ovplyvňujú hodnotu nehnuteľnosti</span><svg class="art-ar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h13"/><path d="M12 5l7 7-7 7"/></svg></a><a class="art-link" href="#guide-14"><span class="art-n">14</span><span class="art-t">Ako upraviť ocenenie, keď sa trh zmení</span><svg class="art-ar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h13"/><path d="M12 5l7 7-7 7"/></svg></a></div><div class="cat"><h3 class="cat-title">Komunikácia s klientom</h3><a class="art-link" href="#guide-5"><span class="art-n">05</span><span class="art-t">Ako reagovať, keď majiteľ očakáva nereálnu cenu</span><svg class="art-ar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h13"/><path d="M12 5l7 7-7 7"/></svg></a><a class="art-link" href="#guide-13"><span class="art-n">13</span><span class="art-t">Ako profesionálne prezentovať neistotu ocenenia</span><svg class="art-ar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h13"/><path d="M12 5l7 7-7 7"/></svg></a><a class="art-link" href="#guide-16"><span class="art-n">16</span><span class="art-t">Ako klientom vysvetliť automatizované ocenenie</span><svg class="art-ar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h13"/><path d="M12 5l7 7-7 7"/></svg></a><a class="art-link" href="#guide-17"><span class="art-n">17</span><span class="art-t">Ako budovať dôveru bez sľubovania najvyššej ceny</span><svg class="art-ar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h13"/><path d="M12 5l7 7-7 7"/></svg></a></div><div class="cat"><h3 class="cat-title">Náborové prezentácie a proces kancelárie</h3><a class="art-link" href="#guide-7"><span class="art-n">07</span><span class="art-t">Ako využiť report Estima počas náborovej prezentácie</span><svg class="art-ar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h13"/><path d="M12 5l7 7-7 7"/></svg></a><a class="art-link" href="#guide-8"><span class="art-n">08</span><span class="art-t">Ako získať viac exkluzívnych zákaziek vďaka lepším oceňovacím reportom</span><svg class="art-ar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h13"/><path d="M12 5l7 7-7 7"/></svg></a><a class="art-link" href="#guide-15"><span class="art-n">15</span><span class="art-t">Ako nadviazať kontakt po náborovej prezentácii</span><svg class="art-ar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h13"/><path d="M12 5l7 7-7 7"/></svg></a><a class="art-link" href="#guide-18"><span class="art-n">18</span><span class="art-t">Ako môže kancelária vytvoriť jednotný štandard oceňovania</span><svg class="art-ar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h13"/><path d="M12 5l7 7-7 7"/></svg></a></div></div>
+  </div>
+</section>
+<section class="reading">
+  <div class="container reading-inner">
+    <aside class="guide-nav no-print" aria-label="Obsah príručky">
+      <div class="gn-title">Obsah príručky</div>
+      <nav><div class="gn-cat">Základy oceňovania</div><a href="#guide-1">1 · Ako pripraviť ocenenie nehnuteľnosti podložené dátami</a><a href="#guide-2">2 · Ako vybrať skutočne porovnateľné nehnuteľnosti</a><a href="#guide-3">3 · Ponuková cena verzus pravdepodobná predajná cena</a><a href="#guide-4">4 · Ako predávajúcemu vysvetliť cenové rozpätie Estima</a><a href="#guide-9">9 · Najčastejšie chyby pri oceňovaní nehnuteľností</a><div class="gn-cat">Signály nehnuteľnosti a trhu</div><a href="#guide-6">6 · Ako stav nehnuteľnosti a fotografie ovplyvňujú ocenenie</a><a href="#guide-10">10 · Prečo záleží na počte dní na trhu</a><a href="#guide-11">11 · Čo o trhu hovoria zľavy z ceny</a><a href="#guide-12">12 · Ako lokalita a mikrolokalita ovplyvňujú hodnotu nehnuteľnosti</a><a href="#guide-14">14 · Ako upraviť ocenenie, keď sa trh zmení</a><div class="gn-cat">Komunikácia s klientom</div><a href="#guide-5">5 · Ako reagovať, keď majiteľ očakáva nereálnu cenu</a><a href="#guide-13">13 · Ako profesionálne prezentovať neistotu ocenenia</a><a href="#guide-16">16 · Ako klientom vysvetliť automatizované ocenenie</a><a href="#guide-17">17 · Ako budovať dôveru bez sľubovania najvyššej ceny</a><div class="gn-cat">Náborové prezentácie a proces kancelárie</div><a href="#guide-7">7 · Ako využiť report Estima počas náborovej prezentácie</a><a href="#guide-8">8 · Ako získať viac exkluzívnych zákaziek vďaka lepším oceňovacím reportom</a><a href="#guide-15">15 · Ako nadviazať kontakt po náborovej prezentácii</a><a href="#guide-18">18 · Ako môže kancelária vytvoriť jednotný štandard oceňovania</a></nav>
+    </aside>
+    <details class="mobile-toc no-print">
+      <summary>Obsah príručky</summary>
+      <nav class="mt-inner"><div class="gn-cat">Základy oceňovania</div><a href="#guide-1">1 · Ako pripraviť ocenenie nehnuteľnosti podložené dátami</a><a href="#guide-2">2 · Ako vybrať skutočne porovnateľné nehnuteľnosti</a><a href="#guide-3">3 · Ponuková cena verzus pravdepodobná predajná cena</a><a href="#guide-4">4 · Ako predávajúcemu vysvetliť cenové rozpätie Estima</a><a href="#guide-9">9 · Najčastejšie chyby pri oceňovaní nehnuteľností</a><div class="gn-cat">Signály nehnuteľnosti a trhu</div><a href="#guide-6">6 · Ako stav nehnuteľnosti a fotografie ovplyvňujú ocenenie</a><a href="#guide-10">10 · Prečo záleží na počte dní na trhu</a><a href="#guide-11">11 · Čo o trhu hovoria zľavy z ceny</a><a href="#guide-12">12 · Ako lokalita a mikrolokalita ovplyvňujú hodnotu nehnuteľnosti</a><a href="#guide-14">14 · Ako upraviť ocenenie, keď sa trh zmení</a><div class="gn-cat">Komunikácia s klientom</div><a href="#guide-5">5 · Ako reagovať, keď majiteľ očakáva nereálnu cenu</a><a href="#guide-13">13 · Ako profesionálne prezentovať neistotu ocenenia</a><a href="#guide-16">16 · Ako klientom vysvetliť automatizované ocenenie</a><a href="#guide-17">17 · Ako budovať dôveru bez sľubovania najvyššej ceny</a><div class="gn-cat">Náborové prezentácie a proces kancelárie</div><a href="#guide-7">7 · Ako využiť report Estima počas náborovej prezentácie</a><a href="#guide-8">8 · Ako získať viac exkluzívnych zákaziek vďaka lepším oceňovacím reportom</a><a href="#guide-15">15 · Ako nadviazať kontakt po náborovej prezentácii</a><a href="#guide-18">18 · Ako môže kancelária vytvoriť jednotný štandard oceňovania</a></nav>
+    </details>
+    <div class="articles">
+  <div class="guide" id="guide-1">
+    <div class="guide-head"><span class="guide-cat">Základy oceňovania</span><h2><span class="guide-num">1</span>Ako pripraviť ocenenie nehnuteľnosti podložené dátami</h2></div>
     <p>Kvalitné ocenenie nehnuteľnosti by sa nemalo opierať o jedinú priemernú cenu za meter štvorcový. Dva byty v tej istej mestskej časti môžu mať výrazne odlišnú hodnotu — kvôli stavu, podlažiu, dispozícii, kvalite budovy, orientácii, polohe a aktuálnej konkurencii na trhu.</p>
     <p>Ocenenie podložené dátami by malo obsahovať:</p>
     <ul>
@@ -245,8 +353,8 @@
     <a class="cta" href="/">Vytvorte oceňovací report s Estimou</a>
   </div>
 
-  <div class="guide">
-    <div class="guide-head"><span class="guide-num">2</span><h2>Ako vybrať skutočne porovnateľné nehnuteľnosti</h2></div>
+  <div class="guide" id="guide-2">
+    <div class="guide-head"><span class="guide-cat">Základy oceňovania</span><h2><span class="guide-num">2</span>Ako vybrať skutočne porovnateľné nehnuteľnosti</h2></div>
     <p>Porovnateľná nehnuteľnosť nie je jednoducho ďalší byt v okolí. Najsilnejšie porovnateľné inzeráty zvyčajne zdieľajú s oceňovanou nehnuteľnosťou viacero charakteristík:</p>
     <ul>
       <li>typ nehnuteľnosti;</li>
@@ -270,8 +378,8 @@
     <a class="cta" href="/">Nájdite silnejšie porovnateľné inzeráty s Estimou</a>
   </div>
 
-  <div class="guide">
-    <div class="guide-head"><span class="guide-num">3</span><h2>Ponuková cena verzus pravdepodobná predajná cena</h2></div>
+  <div class="guide" id="guide-3">
+    <div class="guide-head"><span class="guide-cat">Základy oceňovania</span><h2><span class="guide-num">3</span>Ponuková cena verzus pravdepodobná predajná cena</h2></div>
     <p>Ponuková cena vyjadruje, čo majiteľ dúfa, že dostane. Pravdepodobná predajná cena vyjadruje, čo je trh aktuálne ochotný akceptovať. Tieto čísla sa často líšia.</p>
     <p>Nehnuteľnosť môže byť inzerovaná nad trhovou hodnotou, pretože:</p>
     <ul>
@@ -291,8 +399,8 @@
     <a class="cta" href="/">Porovnajte ponukovú cenu s odhadovaným trhovým rozpätím</a>
   </div>
 
-  <div class="guide">
-    <div class="guide-head"><span class="guide-num">4</span><h2>Ako predávajúcemu vysvetliť cenové rozpätie Estima</h2></div>
+  <div class="guide" id="guide-4">
+    <div class="guide-head"><span class="guide-cat">Základy oceňovania</span><h2><span class="guide-num">4</span>Ako predávajúcemu vysvetliť cenové rozpätie Estima</h2></div>
     <p>Cenové rozpätie je často dôveryhodnejšie než jedno presné číslo. Trhová hodnota nehnuteľnosti nie je fixná na euro presne. Závisí od dopytu kupujúcich, prezentácie nehnuteľnosti, vyjednávania a zmien v konkurenčnej ponuke.</p>
     <p>Pri prezentovaní rozpätia Estima vysvetlite tri možné pozície:</p>
     <p class="subhead">Konkurencieschopná cena</p>
@@ -310,8 +418,8 @@
     <a class="cta" href="/">Prezentujte svoje cenové odporúčanie s istotou</a>
   </div>
 
-  <div class="guide">
-    <div class="guide-head"><span class="guide-num">5</span><h2>Ako reagovať, keď majiteľ očakáva nereálnu cenu</h2></div>
+  <div class="guide" id="guide-5">
+    <div class="guide-head"><span class="guide-cat">Komunikácia s klientom</span><h2><span class="guide-num">5</span>Ako reagovať, keď majiteľ očakáva nereálnu cenu</h2></div>
     <p>Povedať majiteľovi, že jeho cenové očakávanie je nereálne, môže okamžite vyvolať odpor.</p>
     <p>Lepší prístup je vyhnúť sa vete:</p>
     <p class="quote">Vaša nehnuteľnosť toľko nestojí.</p>
@@ -334,8 +442,8 @@
     <a class="cta" href="/">Zmeňte náročné cenové rozhovory na rozhodnutia podložené dôkazmi</a>
   </div>
 
-  <div class="guide">
-    <div class="guide-head"><span class="guide-num">6</span><h2>Ako stav nehnuteľnosti a fotografie ovplyvňujú ocenenie</h2></div>
+  <div class="guide" id="guide-6">
+    <div class="guide-head"><span class="guide-cat">Signály nehnuteľnosti a trhu</span><h2><span class="guide-num">6</span>Ako stav nehnuteľnosti a fotografie ovplyvňujú ocenenie</h2></div>
     <p>Stav nehnuteľnosti môže výrazne ovplyvniť záujem kupujúcich, očakávané náklady na rekonštrukciu aj konečnú dosiahnuteľnú cenu. Dôležité faktory zahŕňajú:</p>
     <ul>
       <li>stav kuchyne a kúpeľne;</li>
@@ -363,8 +471,8 @@
     <a class="cta" href="/">Zahrňte stav nehnuteľnosti do svojej analýzy ocenenia</a>
   </div>
 
-  <div class="guide">
-    <div class="guide-head"><span class="guide-num">7</span><h2>Ako využiť report Estima počas náborovej prezentácie</h2></div>
+  <div class="guide" id="guide-7">
+    <div class="guide-head"><span class="guide-cat">Náborové prezentácie a proces kancelárie</span><h2><span class="guide-num">7</span>Ako využiť report Estima počas náborovej prezentácie</h2></div>
     <p>Oceňovací report má rozhovor podporiť, nie nahradiť. Prezentáciu začnite otázkami na ciele majiteľa:</p>
     <ul>
       <li>Prečo uvažuje o predaji?</li>
@@ -392,8 +500,8 @@
     <a class="cta" href="/">Posilnite svoju najbližšiu náborovú prezentáciu</a>
   </div>
 
-  <div class="guide">
-    <div class="guide-head"><span class="guide-num">8</span><h2>Ako získať viac exkluzívnych zákaziek vďaka lepším oceňovacím reportom</h2></div>
+  <div class="guide" id="guide-8">
+    <div class="guide-head"><span class="guide-cat">Náborové prezentácie a proces kancelárie</span><h2><span class="guide-num">8</span>Ako získať viac exkluzívnych zákaziek vďaka lepším oceňovacím reportom</h2></div>
     <p>Majitelia sa pred rozhodnutím, koho poveria predajom, často rozprávajú s viacerými maklérmi. Mnohí makléri poskytnú len ústny odhad ceny alebo krátky e-mail. Štruktúrovaný oceňovací report vytvára silnejší profesionálny dojem.</p>
     <p>Dobrý report ukazuje, že maklér:</p>
     <ul>
@@ -412,8 +520,8 @@
     <a class="cta" href="/">Odlíšte svoju kanceláriu profesionálnymi reportmi</a>
   </div>
 
-  <div class="guide">
-    <div class="guide-head"><span class="guide-num">9</span><h2>Najčastejšie chyby pri oceňovaní nehnuteľností</h2></div>
+  <div class="guide" id="guide-9">
+    <div class="guide-head"><span class="guide-cat">Základy oceňovania</span><h2><span class="guide-num">9</span>Najčastejšie chyby pri oceňovaní nehnuteľností</h2></div>
     <p>Aj skúsení makléri môžu pri unáhlenom alebo nekonzistentnom postupe pripraviť slabšie ocenenie. Medzi časté chyby patrí:</p>
     <ul>
       <li>spoliehanie sa iba na priemernú cenu za meter štvorcový;</li>
@@ -434,8 +542,8 @@
     <a class="cta" href="/">Štandardizujte proces oceňovania vo svojej kancelárii</a>
   </div>
 
-  <div class="guide">
-    <div class="guide-head"><span class="guide-num">10</span><h2>Prečo záleží na počte dní na trhu</h2></div>
+  <div class="guide" id="guide-10">
+    <div class="guide-head"><span class="guide-cat">Signály nehnuteľnosti a trhu</span><h2><span class="guide-num">10</span>Prečo záleží na počte dní na trhu</h2></div>
     <p>Dĺžka inzercie nehnuteľnosti môže prezradiť užitočné informácie o jej pozícii na trhu. Dlhé obdobie inzercie môže naznačovať:</p>
     <ul>
       <li>nereálnu ponukovú cenu;</li>
@@ -454,8 +562,8 @@
     <a class="cta" href="/">Pridajte časovanie trhu do analýzy porovnateľných inzerátov</a>
   </div>
 
-  <div class="guide">
-    <div class="guide-head"><span class="guide-num">11</span><h2>Čo o trhu hovoria zľavy z ceny</h2></div>
+  <div class="guide" id="guide-11">
+    <div class="guide-head"><span class="guide-cat">Signály nehnuteľnosti a trhu</span><h2><span class="guide-num">11</span>Čo o trhu hovoria zľavy z ceny</h2></div>
     <p>Zľava z ceny je signál, že pôvodná ponuková cena nevyvolala očakávanú odozvu. Jedna zľava automaticky neznamená, že nová cena je správna. Vzorce naprieč viacerými inzerátmi však môžu naznačovať, že očakávania predávajúcich prevyšujú aktuálny dopyt kupujúcich.</p>
     <p>Makléri by si mali všímať:</p>
     <ul>
@@ -474,8 +582,8 @@
     <a class="cta" href="/">Využite cenovú históriu pri najbližšom ocenení</a>
   </div>
 
-  <div class="guide">
-    <div class="guide-head"><span class="guide-num">12</span><h2>Ako lokalita a mikrolokalita ovplyvňujú hodnotu nehnuteľnosti</h2></div>
+  <div class="guide" id="guide-12">
+    <div class="guide-head"><span class="guide-cat">Signály nehnuteľnosti a trhu</span><h2><span class="guide-num">12</span>Ako lokalita a mikrolokalita ovplyvňujú hodnotu nehnuteľnosti</h2></div>
     <p>Priemery na úrovni mesta a mestskej časti sú užitočné, ale kupujúci vnímajú nehnuteľnosť na úrovni ulice a susedstva. Faktory mikrolokality môžu zahŕňať:</p>
     <ul>
       <li>dostupnosť verejnej dopravy;</li>
@@ -497,8 +605,8 @@
     <a class="cta" href="/">Pridajte miestny kontext do svojho oceňovacieho reportu</a>
   </div>
 
-  <div class="guide">
-    <div class="guide-head"><span class="guide-num">13</span><h2>Ako profesionálne prezentovať neistotu ocenenia</h2></div>
+  <div class="guide" id="guide-13">
+    <div class="guide-head"><span class="guide-cat">Komunikácia s klientom</span><h2><span class="guide-num">13</span>Ako profesionálne prezentovať neistotu ocenenia</h2></div>
     <p>Profesionálne ocenenie by nemalo predstierať, že neistota neexistuje. Neistota môže byť vyššia, keď:</p>
     <ul>
       <li>je k dispozícii veľmi málo porovnateľných nehnuteľností;</li>
@@ -517,8 +625,8 @@
     <a class="cta" href="/">Prezentujte dôkazy, nie falošnú presnosť</a>
   </div>
 
-  <div class="guide">
-    <div class="guide-head"><span class="guide-num">14</span><h2>Ako upraviť ocenenie, keď sa trh zmení</h2></div>
+  <div class="guide" id="guide-14">
+    <div class="guide-head"><span class="guide-cat">Signály nehnuteľnosti a trhu</span><h2><span class="guide-num">14</span>Ako upraviť ocenenie, keď sa trh zmení</h2></div>
     <p>Ocenenie platí ku konkrétnemu okamihu. Prehodnotiť ho môže byť potrebné, keď:</p>
     <ul>
       <li>sa zmenia úrokové sadzby;</li>
@@ -538,8 +646,8 @@
     <a class="cta" href="/">Udržte každé ocenenie v súlade s aktuálnym trhom</a>
   </div>
 
-  <div class="guide">
-    <div class="guide-head"><span class="guide-num">15</span><h2>Ako nadviazať kontakt po náborovej prezentácii</h2></div>
+  <div class="guide" id="guide-15">
+    <div class="guide-head"><span class="guide-cat">Náborové prezentácie a proces kancelárie</span><h2><span class="guide-num">15</span>Ako nadviazať kontakt po náborovej prezentácii</h2></div>
     <p>Mnohé príležitosti na zákazku sa stratia, pretože follow-up je všeobecný alebo príde neskoro. Po stretnutí pošlite majiteľovi:</p>
     <ul>
       <li>oceňovací report;</li>
@@ -559,8 +667,8 @@
     <a class="cta" href="/">Urobte svoj follow-up presvedčivejším</a>
   </div>
 
-  <div class="guide">
-    <div class="guide-head"><span class="guide-num">16</span><h2>Ako klientom vysvetliť automatizované ocenenie</h2></div>
+  <div class="guide" id="guide-16">
+    <div class="guide-head"><span class="guide-cat">Komunikácia s klientom</span><h2><span class="guide-num">16</span>Ako klientom vysvetliť automatizované ocenenie</h2></div>
     <p>Niektorí majitelia sa môžu domnievať, že automatizované ocenenie znamená, že softvér nahradil expertízu makléra. Takto by zodpovedný proces oceňovania fungovať nemal.</p>
     <p>Technológia dokáže:</p>
     <ul>
@@ -588,8 +696,8 @@
     <a class="cta" href="/">Spojte svoju expertízu s lepšími trhovými dátami</a>
   </div>
 
-  <div class="guide">
-    <div class="guide-head"><span class="guide-num">17</span><h2>Ako budovať dôveru bez sľubovania najvyššej ceny</h2></div>
+  <div class="guide" id="guide-17">
+    <div class="guide-head"><span class="guide-cat">Komunikácia s klientom</span><h2><span class="guide-num">17</span>Ako budovať dôveru bez sľubovania najvyššej ceny</h2></div>
     <p>Niektorí makléri sa snažia získať zákazku najvyšším ocenením. Na začiatku to môže fungovať, neskôr však prináša problémy:</p>
     <ul>
       <li>obmedzený záujem kupujúcich;</li>
@@ -607,8 +715,8 @@
     <a class="cta" href="/">Získavajte zákazky dôveryhodnosťou, nie nafúknutými sľubmi</a>
   </div>
 
-  <div class="guide">
-    <div class="guide-head"><span class="guide-num">18</span><h2>Ako môže kancelária vytvoriť jednotný štandard oceňovania</h2></div>
+  <div class="guide" id="guide-18">
+    <div class="guide-head"><span class="guide-cat">Náborové prezentácie a proces kancelárie</span><h2><span class="guide-num">18</span>Ako môže kancelária vytvoriť jednotný štandard oceňovania</h2></div>
     <p>Keď každý maklér pripravuje ocenenia inak, kvalita výstupov kancelárie sa ťažko kontroluje. Jeden maklér môže používať detailnú analýzu porovnateľných inzerátov, iný sa spolieha najmä na intuíciu. Reporty môžu používať rôznu terminológiu, formáty a predpoklady.</p>
     <p>Konzistentný interný štandard oceňovania by mal definovať:</p>
     <ul>
@@ -629,21 +737,56 @@
     <a class="cta" href="/">Vybudujte jednotný proces oceňovania naprieč tímom</a>
   </div>
 
-  <div class="final">
-    <h2>Lepšie dáta. Silnejšie odporúčania. Istejší klienti.</h2>
-    <p>Estima pomáha realitným maklérom pripravovať ocenenia nehnuteľností, identifikovať porovnateľné inzeráty a prezentovať odporúčania prostredníctvom profesionálnych reportov pripravených pre klienta.</p>
-    <p>Trávte menej času manuálnym zberom informácií a viac času poradenstvom klientom, získavaním zákaziek a uzatváraním obchodov.</p>
-    <div class="btn-row">
-      <a class="btn btn-primary" href="/">Vytvorte svoj prvý report Estima</a>
-      <a class="btn btn-ghost" href="/sample">Pozrite si ukážkový oceňovací report</a>
+    </div><!-- /.articles -->
+  </div>
+</section>
+
+<section class="closing">
+  <div class="container">
+    <div class="closing-inner">
+      <p class="eyebrow">Preveďte príručku do praxe</p>
+      <h2>Premeňte svoje ocenenie na report, ktorému majiteľ rozumie.</h2>
+      <p>Spojte porovnateľné nehnuteľnosti, trhový kontext a jasné cenové rozpätie do jedného profesionálneho reportu Estima.</p>
+      <div class="btn-row">
+        <a class="btn btn-primary" href="/">Vytvorte report Estima</a>
+        <a class="btn btn-outline no-print" href="/academy/download?lang=sk">Stiahnuť PDF akadémie</a>
+      </div>
     </div>
   </div>
+</section>
 
-  <div class="disclaimer">
-    <strong>Upozornenie.</strong> Estima poskytuje trhové analýzy a informácie na podporu rozhodovania na základe dostupných údajov o nehnuteľnostiach. Výsledky nepredstavujú znalecký posudok a pred prezentovaním klientovi by ich mal posúdiť kvalifikovaný realitný maklér.
+<div class="container">
+  <div class="sources">
+    <h3>Zdroje dát</h3>
+    <p>Orientačné cenové hladiny použité v nástrojoch Estima pre slovenský trh vychádzajú z publikovaných zdrojov:</p>
+    <ul>
+      <li><a href="https://nbs.sk/en/statistics/selected-macroeconomics-indicators/residential-property-prices/residential-property-prices-by-regions/">Národná banka Slovenska</a> &mdash; ceny nehnuteľností na bývanie podľa krajov.</li>
+      <li><a href="https://www.realitnaunia.sk/realitny-barometer">Realitná únia SR &mdash; Realitný barometer</a> &mdash; priemerné ponukové ceny v krajských mestách.</li>
+      <li>Prehľady z realitných portálov &mdash; orientačné cenové hladiny pre jednotlivé mestské časti.</li>
+    </ul>
+    <p class="note">Cenové hladiny mestských častí a okresov sú približné a slúžia len na orientáciu. Nie sú znaleckým posudkom.</p>
   </div>
-
+  <div class="disclaimer"><strong>Upozornenie.</strong> Estima poskytuje trhovú analýzu a informácie na podporu rozhodovania na základe dostupných dát o nehnuteľnostiach. Výsledky nepredstavujú znalecký posudok a pred prezentovaním klientovi by ich mal skontrolovať kvalifikovaný realitný maklér.</div>
 </div>
+</main>
 
+<script>
+(function () {
+  var links = Array.prototype.slice.call(
+    document.querySelectorAll('.guide-nav a[href^="#guide-"]'));
+  if (!links.length || !('IntersectionObserver' in window)) return;
+  var map = {};
+  links.forEach(function (a) { map[a.getAttribute('href').slice(1)] = a; });
+  var obs = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (!e.isIntersecting) return;
+      links.forEach(function (a) { a.classList.remove('current'); a.removeAttribute('aria-current'); });
+      var a = map[e.target.id];
+      if (a) { a.classList.add('current'); a.setAttribute('aria-current', 'true'); }
+    });
+  }, { rootMargin: '-74px 0px -68% 0px', threshold: 0 });
+  document.querySelectorAll('.guide[id]').forEach(function (g) { obs.observe(g); });
+})();
+</script>
 </body>
 </html>
