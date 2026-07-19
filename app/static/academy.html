@@ -71,6 +71,9 @@
     font-size: 11px; letter-spacing: 4px; text-transform: uppercase;
     color: #b9d4e4; margin-top: 2px;
   }
+  .lang-switch { float: right; font-size: 13px; color: #b9d4e4; margin-top: 8px; }
+  .lang-switch a { color: #fff; font-weight: 700; }
+  .lang-switch .active { color: var(--accent); }
   .hero h1 { font-size: 38px; line-height: 1.2; max-width: 640px; }
   .hero .lead {
     font-size: 17px; color: #cfe3ee; max-width: 660px; margin-top: 18px;
@@ -174,6 +177,7 @@
 
 <div class="hero">
   <div class="wrap">
+    <div class="lang-switch no-print"><a href="/academy?lang=sk">SK</a> · <span class="active">EN</span></div>
     <div class="brand-row">
       <svg width="40" height="40" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 42v-8M13 42V27M19 42V14l9-8 9 8v12M37 32v7h-8" stroke="#F4F6F8" stroke-width="3" fill="none"/><path d="M27 45h11" stroke="#91A6C2" stroke-width="3" fill="none"/></svg>
       <div class="brand-cell">
@@ -186,7 +190,7 @@
     <p class="lead">Estima Academy provides practical guidance for property valuation, comparable analysis, pricing conversations and listing presentations. The goal is not to replace professional experience. It is to help agents support that experience with clearer data, stronger reports and more persuasive client communication.</p>
     <div class="btn-row">
       <a class="btn btn-primary" href="/">Create your first Estima report</a>
-      <a class="btn btn-ghost no-print" href="/academy/download">Download this guide as PDF</a>
+      <a class="btn btn-ghost no-print" href="/academy/download?lang=en">Download this guide as PDF</a>
     </div>
   </div>
 </div>

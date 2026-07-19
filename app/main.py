@@ -119,30 +119,52 @@ def sample_payload():
     return JSONResponse(json.loads(settings.SAMPLE_PATH.read_text(encoding="utf-8")))
 
 
-# Academy PDF cache: {academy.html mtime: pdf bytes} — regenerated only when
-# the source page changes, so repeated downloads don't re-run WeasyPrint.
-_academy_pdf_cache: dict[float, bytes] = {}
+# The Academy page ships in these languages; the filename per language is
+# academy.html (en) / academy_<lang>.html (others).
+ACADEMY_LANGUAGES = ("en", "sk")
+
+# Academy PDF cache: {(lang, source mtime): pdf bytes} — regenerated only when
+# that language's source page changes, so repeated downloads don't re-run
+# WeasyPrint.
+_academy_pdf_cache: dict[tuple[str, float], bytes] = {}
 
 
-def _academy_page_path() -> Path:
-    page = settings.STATIC_DIR / "academy.html"
+def _resolve_academy_language(lang: Optional[str]) -> str:
+    """Requested language → service default → English, restricted to shipped pages."""
+    for candidate in (lang, settings.DEFAULT_LANGUAGE, "en"):
+        if candidate and candidate.lower() in ACADEMY_LANGUAGES:
+            return candidate.lower()
+    return "en"
+
+
+def _academy_page_path(language: str) -> Path:
+    filename = "academy.html" if language == "en" else f"academy_{language}.html"
+    page = settings.STATIC_DIR / filename
     if not page.is_file():
         raise HTTPException(status_code=404, detail="Academy page not found")
     return page
 
 
 @app.get("/academy", tags=["academy"])
-def academy_page():
-    """Serve the Estima Academy landing page (valuation guidance for agents)."""
-    return FileResponse(str(_academy_page_path()), media_type="text/html")
+def academy_page(lang: Optional[str] = None):
+    """Serve the Estima Academy landing page (valuation guidance for agents).
+
+    Language follows ``?lang=`` (en/sk), otherwise the service default; unknown
+    values fall back to English.
+    """
+    language = _resolve_academy_language(lang)
+    return FileResponse(
+        str(_academy_page_path(language)), media_type="text/html"
+    )
 
 
 @app.get("/academy/download", tags=["academy"])
-def academy_download() -> Response:
-    """Download the Estima Academy landing page as a PDF."""
-    page = _academy_page_path()
-    mtime = page.stat().st_mtime
-    pdf_bytes = _academy_pdf_cache.get(mtime)
+def academy_download(lang: Optional[str] = None) -> Response:
+    """Download the Estima Academy landing page as a PDF (see /academy for lang)."""
+    language = _resolve_academy_language(lang)
+    page = _academy_page_path(language)
+    cache_key = (language, page.stat().st_mtime)
+    pdf_bytes = _academy_pdf_cache.get(cache_key)
     if pdf_bytes is None:
         try:
             from app.services.pdf import html_to_pdf
@@ -161,13 +183,16 @@ def academy_download() -> Response:
             raise HTTPException(
                 status_code=503, detail=f"PDF engine unavailable: {exc}"
             ) from exc
-        _academy_pdf_cache.clear()
-        _academy_pdf_cache[mtime] = pdf_bytes
+        # Drop only this language's stale entry; keep the other language cached.
+        for key in [k for k in _academy_pdf_cache if k[0] == language]:
+            del _academy_pdf_cache[key]
+        _academy_pdf_cache[cache_key] = pdf_bytes
+    filename = f"estima-academy-{language}.pdf"
     return Response(
         content=pdf_bytes,
         media_type="application/pdf",
         headers={
-            "Content-Disposition": 'attachment; filename="estima-academy.pdf"'
+            "Content-Disposition": f'attachment; filename="{filename}"'
         },
     )
 
