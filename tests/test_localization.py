@@ -42,6 +42,15 @@ def test_build_filters_localizes_labels():
     assert sk["similarity_band"](95) == "Veľmi vysoká"
     assert sk["investor_attractiveness"](7) == "Silná"
     assert sk["benchmark_type_label"]("realized_sale") == "Realizované predajné ceny"
+
+    cs = build_filters("cs")
+    assert cs["yesno"](True) == "Ano"
+    assert cs["yesno"](False) == "Ne"
+    assert cs["verdict_label"](100, 120) == "Pod tržní cenou"
+    assert cs["confidence_label"](0.9) == "Vysoká"
+    assert cs["similarity_band"](95) == "Velmi vysoká"
+    assert cs["investor_attractiveness"](7) == "Silná"
+    assert cs["benchmark_type_label"]("realized_sale") == "Realizované prodejní ceny"
     # Unknown language falls back to English labels.
     assert build_filters("de")["yesno"](True) == "Yes"
 

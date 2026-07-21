@@ -54,6 +54,26 @@ _LABELS = {
             "rent_monthly": "Nájomné za m²/mesiac",
         },
     },
+    "cs": {
+        "underpriced": "Pod tržní cenou",
+        "overpriced": "Nad tržní cenou",
+        "fairly_priced": "Přiměřená cena",
+        "very_high": "Velmi vysoká",
+        "high": "Vysoká",
+        "medium": "Střední",
+        "low": "Nízká",
+        "strong": "Silná",
+        "average": "Průměrná",
+        "weak": "Slabá",
+        "yes": "Ano",
+        "no": "Ne",
+        "benchmark_types": {
+            "listing_asking": "Nabídkové ceny inzerátů",
+            "realized_sale": "Realizované prodejní ceny",
+            "newbuild_asking": "Nabídkové ceny novostaveb",
+            "rent_monthly": "Nájemné za m²/měsíc",
+        },
+    },
 }
 
 
@@ -68,6 +88,8 @@ _MONTHS = {
            "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
     "sk": ["jan", "feb", "mar", "apr", "máj", "jún",
            "júl", "aug", "sep", "okt", "nov", "dec"],
+    "cs": ["led", "úno", "bře", "dub", "kvě", "čvn",
+           "čvc", "srp", "zář", "říj", "lis", "pro"],
 }
 
 

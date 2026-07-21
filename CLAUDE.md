@@ -41,7 +41,7 @@ No database. Artifacts are written to `reports/<report_id>/`
 - `app/services/generator.py` — orchestrates the pipeline; on PDF failure the
   report directory is discarded so no orphan "completed" reports exist
 - `app/services/formatting.py` — Jinja2 filters (money, area, percent, …);
-  label-emitting filters are per-language (`build_filters(language)`, en + sk),
+  label-emitting filters are per-language (`build_filters(language)`, en + sk + cs),
   bound by the renderer to the *resolved* template language so fallback never
   mixes languages
 - `app/static/index.html` — minimal UI served at `GET /` (path via `STATIC_DIR`)
@@ -50,7 +50,7 @@ No database. Artifacts are written to `reports/<report_id>/`
 - `app/templates/estima/` — the production report design, ported from
   estima-backend/estima-sk-backend so all Estima products emit the same
   document: shared `base.html` + per-language `report.html` string dicts
-  (sk, en). The estima.sk deployment runs with `DEFAULT_TEMPLATE=estima`.
+  (sk, cs, en). The estima.sk deployment runs with `DEFAULT_TEMPLATE=estima`.
   Keep wording aligned with the backends' `i18n.py` when strings change.
 - `samples/sample_evaluation.json` — canonical working payload example
 - `scripts/render_local.py` — render the sample without a server
