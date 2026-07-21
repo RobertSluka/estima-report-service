@@ -261,10 +261,12 @@
   .map-box {
     height: 55mm; border-radius: 8px; overflow: hidden;
     border: 1px solid var(--line); background: var(--panel);
-    display: flex; align-items: center; justify-content: center; color: var(--muted);
+    text-align: center; line-height: 55mm; color: var(--muted);
     font-size: 9pt; margin-bottom: 12pt;
   }
-  .map-box img { width: 100%; height: 100%; object-fit: cover; }
+  /* Block layout, not flex: WeasyPrint 62.3 silently drops an <img> that is a
+     direct flex item (blanking the map). line-height centers the text fallback. */
+  .map-box img { display: block; width: 100%; height: 55mm; object-fit: cover; }
 
   .poi-grid { font-size: 0; margin-right: -10pt; }
   .poi {
@@ -582,13 +584,28 @@
   </div>
 
   {% if location_facilities.facilities %}
-  {% set poi_keys = {"groceries": "poi_grocery", "grocery": "poi_grocery",
-                     "health": "poi_healthcare", "healthcare": "poi_healthcare"} %}
+  {# Map the category label a caller sends (short keys, or the backend's English
+     display labels with/without a radius suffix) to a localized poi_* key. An
+     unmapped category falls back to its raw text via T.get below, never blank. #}
+  {% set poi_keys = {
+      "transport": "poi_transport", "Transit": "poi_transport",
+      "Public transport": "poi_transport", "Public transport (500 m)": "poi_transport",
+      "grocery": "poi_grocery", "groceries": "poi_grocery", "Grocery": "poi_grocery",
+      "Groceries": "poi_grocery", "Groceries (500 m)": "poi_grocery",
+      "school": "poi_schools", "schools": "poi_schools", "School": "poi_schools",
+      "Schools": "poi_schools", "Schools (1 km)": "poi_schools",
+      "park": "poi_parks", "parks": "poi_parks", "Park": "poi_parks",
+      "Parks": "poi_parks", "Parks (1 km)": "poi_parks",
+      "restaurants": "poi_restaurants", "Restaurants": "poi_restaurants",
+      "Restaurants (1 km)": "poi_restaurants",
+      "health": "poi_healthcare", "healthcare": "poi_healthcare", "Health": "poi_healthcare",
+      "Healthcare": "poi_healthcare", "Healthcare (1 km)": "poi_healthcare",
+      "Doctors / pharmacies": "poi_healthcare"} %}
   <div class="poi-grid">
     {% for f in location_facilities.facilities %}
     <div class="poi"><div class="poi-inner">
       <div class="n">{{ f.count | dash }}</div>
-      <div class="l">{{ T[poi_keys.get(f.category, "poi_" ~ f.category)] | dash(f.category) }}</div>
+      <div class="l">{{ T.get(poi_keys.get(f.category, ""), f.category) | dash }}</div>
       <div class="r">{% if f.nearest_distance_km is not none %}{{ T.nearest_label }} {{ f.nearest_distance_km | distance }}{% endif %}</div>
     </div></div>
     {% endfor %}
@@ -605,7 +622,7 @@
       <div class="ni">{{ poi_icon(p.category) }}</div>
       <div class="nt">
         <div class="nn">{{ p.name | dash }}</div>
-        <div class="nd">{{ T[poi_keys.get(p.category, "poi_" ~ p.category)] | dash(p.category) }}{% if p.distance_km is not none %} · {{ p.distance_km | distance }}{% endif %}{% if wmin is not none %} · {{ wmin | num(0) }} {{ T.min_walk }}{% endif %}</div>
+        <div class="nd">{{ T.get(poi_keys.get(p.category, ""), p.category) | dash }}{% if p.distance_km is not none %} · {{ p.distance_km | distance }}{% endif %}{% if wmin is not none %} · {{ wmin | num(0) }} {{ T.min_walk }}{% endif %}</div>
       </div>
     </div></div>
     {% endfor %}
