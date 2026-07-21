@@ -12,6 +12,24 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<script>
+  /* Follow the app's light/dark choice. Priority: ?theme= (works cross-origin
+     from the app navbar) → the app's shared localStorage key (same-origin) →
+     OS preference. Persisted so refreshes and in-page nav keep the choice.
+     Runs before first paint to avoid a flash; WeasyPrint runs no JS, so the
+     PDF is never affected. */
+  (function () {
+    try {
+      var KEY = 'estima-sk.theme';
+      var q = new URLSearchParams(location.search).get('theme');
+      if (q === 'dark' || q === 'light') localStorage.setItem(KEY, q);
+      var t = (q === 'dark' || q === 'light') ? q
+        : localStorage.getItem(KEY)
+        || (window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      if (t === 'dark') document.documentElement.classList.add('dark');
+    } catch (e) {}
+  })();
+</script>
 <title>Estima Academy — Make every valuation easier to explain</title>
 <style>
   @page {
@@ -248,6 +266,37 @@
     .guide-nav { display: block; flex: 0 0 232px; margin-right: 40px; position: sticky; top: 74px; }
     .mobile-toc { display: none; }
     .articles { flex: 1 1 0; min-width: 0; margin: 0; max-width: var(--readw); }
+  }
+
+  /* ── dark mode — screen only. Mirrors the app's `dark` class on <html>
+     (set by the head script above). WeasyPrint runs no JS and print media
+     ignores @media screen, so the downloadable PDF stays light. ─────────── */
+  @media screen {
+    html.dark {
+      --navy:#0b111c; --navy-800:#152234;
+      --ink:#eaf0f7; --body:#b7c3d3; --muted:#93a4bb; --faint:#6f8299;
+      --line:#27384a; --panel:#1a2736; --bg:#0b111c; --white:#131e2b;
+      --steel:#5b7ba6; --steel-strong:#84a4cb; --steel-050:#182636; --steel-line:#2c3e51;
+      --emerald-bg:#0e2a22; --emerald:#34d399;
+      --shadow:0 1px 2px rgba(0,0,0,.5);
+    }
+    html.dark body { background: var(--bg); color: var(--body); }
+    html.dark .site-header { background: rgba(11,17,28,.9); }
+    html.dark .btn-outline,
+    html.dark .pv,
+    html.dark .ov-card,
+    html.dark .art-link,
+    html.dark .mobile-toc,
+    html.dark .cta { background: var(--white); }
+    html.dark .btn-outline:hover,
+    html.dark .cta:hover,
+    html.dark .signin:hover,
+    html.dark .signout:hover { background: var(--panel); border-color: var(--steel-line); }
+    html.dark .guide-nav a:hover { background: var(--panel); }
+    html.dark .acct-av { background: var(--steel); }
+    html.dark .chip-fair  { color:#6ee7b7; background:#0e2a22; border-color:#166553; }
+    html.dark .chip-over  { color:#fca5a5; background:#2a1414; border-color:#7f1d1d; }
+    html.dark .chip-under { color:#93c5fd; background:#0e1c33; border-color:#1e40af; }
   }
 
   @media print {
