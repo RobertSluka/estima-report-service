@@ -100,6 +100,28 @@
       "primary_color",
       "website"
     ],
+    "BuyVsRent": [
+      "assumptions",
+      "breakeven_year",
+      "buyer_final",
+      "down_payment",
+      "horizon_years",
+      "monthly_payment",
+      "renter_final",
+      "series"
+    ],
+    "BuyVsRentAssumptions": [
+      "growth_source",
+      "inflation_pct",
+      "investment_return_pct",
+      "ltv_pct",
+      "monthly_rent",
+      "mortgage_rate_pct",
+      "property_growth_pct",
+      "property_price",
+      "rent_source",
+      "term_years"
+    ],
     "Comparable": [
       "adjusted_price_per_sqm",
       "days_on_market",
@@ -121,6 +143,7 @@
     "EvaluationPayload": [
       "benchmarks",
       "branding",
+      "buy_vs_rent",
       "comparables",
       "generated_at",
       "location_facilities",
@@ -334,6 +357,11 @@
       "renovation_score",
       "sharpness",
       "summary"
+    ],
+    "WealthPoint": [
+      "buyer",
+      "renter",
+      "year"
     ]
   }
 }

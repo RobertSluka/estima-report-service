@@ -33,7 +33,12 @@
     "source_url": "https://example.com/listing/sk-subject",
     "days_on_market": 34,
     "description": "Renovated 3-room apartment in a sought-after part of Ružinov, a short walk from Štrkovec lake. Insulated panel building with a new elevator, apartment renovated in 2019 with a walk-through loggia and fitted kitchen.",
-    "features": ["Loggia", "Fitted kitchen", "New elevator", "Cellar storage"],
+    "features": [
+      "Loggia",
+      "Fitted kitchen",
+      "New elevator",
+      "Cellar storage"
+    ],
     "images": []
   },
   "pricing": {
@@ -46,7 +51,11 @@
     "estimated_price_per_sqm": 3819,
     "confidence": 0.81,
     "methodology": "Comparable listings adjusted for condition, floor, and building type.",
-    "recommended_price_range": { "low": 262000, "mid": 274000, "high": 286000 },
+    "recommended_price_range": {
+      "low": 262000,
+      "mid": 274000,
+      "high": 286000
+    },
     "local_median_price": 271000,
     "local_median_price_per_sqm": 3650,
     "sample_size": 5,
@@ -126,15 +135,42 @@
     "average_price_per_sqm": 3845.0,
     "yoy_change": 10.3,
     "series": [
-      { "period": "1Q 2024", "value": 3087.3 },
-      { "period": "2Q 2024", "value": 3127.0 },
-      { "period": "3Q 2024", "value": 3228.7 },
-      { "period": "4Q 2024", "value": 3316.4 },
-      { "period": "1Q 2025", "value": 3486.1 },
-      { "period": "2Q 2025", "value": 3548.7 },
-      { "period": "3Q 2025", "value": 3627.7 },
-      { "period": "4Q 2025", "value": 3730.7 },
-      { "period": "1Q 2026", "value": 3845.0 }
+      {
+        "period": "1Q 2024",
+        "value": 3087.3
+      },
+      {
+        "period": "2Q 2024",
+        "value": 3127.0
+      },
+      {
+        "period": "3Q 2024",
+        "value": 3228.7
+      },
+      {
+        "period": "4Q 2024",
+        "value": 3316.4
+      },
+      {
+        "period": "1Q 2025",
+        "value": 3486.1
+      },
+      {
+        "period": "2Q 2025",
+        "value": 3548.7
+      },
+      {
+        "period": "3Q 2025",
+        "value": 3627.7
+      },
+      {
+        "period": "4Q 2025",
+        "value": 3730.7
+      },
+      {
+        "period": "1Q 2026",
+        "value": 3845.0
+      }
     ],
     "distribution": {
       "scope": "3-room flats, Ružinov",
@@ -168,5 +204,182 @@
   "options": {
     "template": "default",
     "language": "en"
+  },
+  "buy_vs_rent": {
+    "horizon_years": 30,
+    "assumptions": {
+      "property_price": 268000.0,
+      "monthly_rent": 1001.0,
+      "rent_source": "Active rent-listing median, Bratislava",
+      "mortgage_rate_pct": 4.0,
+      "ltv_pct": 80.0,
+      "term_years": 30,
+      "inflation_pct": 2.5,
+      "investment_return_pct": 5.0,
+      "property_growth_pct": 6.9,
+      "growth_source": "NBS regional price series, Bratislava Region, 2002–2025 average"
+    },
+    "down_payment": 53600,
+    "monthly_payment": 1024,
+    "series": [
+      {
+        "year": 0,
+        "buyer": 53600,
+        "renter": 53600
+      },
+      {
+        "year": 1,
+        "buyer": 75868,
+        "renter": 56419
+      },
+      {
+        "year": 2,
+        "buyer": 99738,
+        "renter": 59239
+      },
+      {
+        "year": 3,
+        "buyer": 125459,
+        "renter": 62201
+      },
+      {
+        "year": 4,
+        "buyer": 153156,
+        "renter": 65312
+      },
+      {
+        "year": 5,
+        "buyer": 182962,
+        "renter": 68577
+      },
+      {
+        "year": 6,
+        "buyer": 215019,
+        "renter": 72006
+      },
+      {
+        "year": 7,
+        "buyer": 249478,
+        "renter": 75606
+      },
+      {
+        "year": 8,
+        "buyer": 286500,
+        "renter": 79387
+      },
+      {
+        "year": 9,
+        "buyer": 326257,
+        "renter": 83356
+      },
+      {
+        "year": 10,
+        "buyer": 368931,
+        "renter": 87524
+      },
+      {
+        "year": 11,
+        "buyer": 414717,
+        "renter": 91900
+      },
+      {
+        "year": 12,
+        "buyer": 463822,
+        "renter": 96495
+      },
+      {
+        "year": 13,
+        "buyer": 516468,
+        "renter": 101320
+      },
+      {
+        "year": 14,
+        "buyer": 572890,
+        "renter": 106386
+      },
+      {
+        "year": 15,
+        "buyer": 633340,
+        "renter": 111705
+      },
+      {
+        "year": 16,
+        "buyer": 698083,
+        "renter": 117290
+      },
+      {
+        "year": 17,
+        "buyer": 767406,
+        "renter": 123155
+      },
+      {
+        "year": 18,
+        "buyer": 841611,
+        "renter": 129312
+      },
+      {
+        "year": 19,
+        "buyer": 921023,
+        "renter": 135778
+      },
+      {
+        "year": 20,
+        "buyer": 1005986,
+        "renter": 142567
+      },
+      {
+        "year": 21,
+        "buyer": 1096867,
+        "renter": 149695
+      },
+      {
+        "year": 22,
+        "buyer": 1194058,
+        "renter": 157180
+      },
+      {
+        "year": 23,
+        "buyer": 1297976,
+        "renter": 165039
+      },
+      {
+        "year": 24,
+        "buyer": 1409065,
+        "renter": 173291
+      },
+      {
+        "year": 25,
+        "buyer": 1527799,
+        "renter": 181955
+      },
+      {
+        "year": 26,
+        "buyer": 1654683,
+        "renter": 191053
+      },
+      {
+        "year": 27,
+        "buyer": 1790255,
+        "renter": 200606
+      },
+      {
+        "year": 28,
+        "buyer": 1935089,
+        "renter": 210636
+      },
+      {
+        "year": 29,
+        "buyer": 2089796,
+        "renter": 221168
+      },
+      {
+        "year": 30,
+        "buyer": 2255026,
+        "renter": 232226
+      }
+    ],
+    "buyer_final": 2255026,
+    "renter_final": 232226,
+    "breakeven_year": 1
   }
 }

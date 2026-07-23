@@ -555,6 +555,91 @@ def index_svg(series, width: int = 640, height: int = 150):
     return Markup("".join(parts))
 
 
+def wealth_svg(series, buyer_label: str, renter_label: str, width: int = 640, height: int = 180):
+    """Two-line buy-vs-rent wealth chart (buyer vs renter net wealth by year).
+
+    Accepts points with ``year``/``buyer``/``renter`` (attributes or dict
+    keys). Same constraints as ``index_svg``: attribute-styled SVG (WeasyPrint
+    ignores CSS in inline SVG), empty markup below 3 usable points.
+    """
+    from markupsafe import Markup, escape
+
+    pts: list = []
+    for p in series or []:
+        get = p.get if isinstance(p, dict) else lambda k, _p=p: getattr(_p, k, None)
+        year, buyer, renter = get("year"), get("buyer"), get("renter")
+        if year is None or buyer is None or renter is None:
+            continue
+        pts.append((int(year), float(buyer), float(renter)))
+    if len(pts) < 3:
+        return Markup("")
+
+    W, H = width, height
+    PAD_L, PAD_R, PAD_T, PAD_B = 8, 8, 30, 22
+    BUYER, RENTER, GRID, MUTED = "#0e9f6e", "#123a5e", "#dbe4ec", "#6b7f90"
+
+    vals = [v for _, b, r in pts for v in (b, r)]
+    lo, hi = min(vals), max(vals)
+    span = (hi - lo) or max(abs(hi), 1.0)
+    lo -= span * 0.08
+    hi += span * 0.08
+    span = hi - lo
+
+    def x(i: int) -> float:
+        return PAD_L + i * (W - PAD_L - PAD_R) / (len(pts) - 1)
+
+    def y(v: float) -> float:
+        return PAD_T + (hi - v) * (H - PAD_T - PAD_B) / span
+
+    def fmt(v: float) -> str:
+        return f"{v:,.0f}".replace(",", _NNBSP)
+
+    buyer_poly = " ".join(f"{x(i):.1f},{y(b):.1f}" for i, (_, b, _r) in enumerate(pts))
+    renter_poly = " ".join(f"{x(i):.1f},{y(r):.1f}" for i, (_, _b, r) in enumerate(pts))
+
+    parts = [
+        f'<svg width="{W}" height="{H}" viewBox="0 0 {W} {H}" '
+        f'xmlns="http://www.w3.org/2000/svg">'
+    ]
+    for frac in (0.0, 0.5, 1.0):
+        gy = PAD_T + frac * (H - PAD_T - PAD_B)
+        parts.append(
+            f'<line x1="{PAD_L}" y1="{gy:.1f}" x2="{W - PAD_R}" y2="{gy:.1f}" '
+            f'stroke="{GRID}" stroke-width="1"/>'
+        )
+    for poly, color in ((renter_poly, RENTER), (buyer_poly, BUYER)):
+        parts.append(
+            f'<polyline points="{poly}" fill="none" stroke="{color}" '
+            f'stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>'
+        )
+    # Legend row (top-left), end-value labels, and year ticks.
+    lx = float(PAD_L)
+    for label, color in ((buyer_label, BUYER), (renter_label, RENTER)):
+        parts.append(f'<rect x="{lx:.1f}" y="8" width="8" height="8" rx="1.5" fill="{color}"/>')
+        parts.append(
+            f'<text x="{lx + 12:.1f}" y="15.5" text-anchor="start" '
+            f'font-family="Helvetica, Arial, sans-serif" font-size="9" fill="{MUTED}">'
+            f"{escape(label)}</text>"
+        )
+        lx += 12 + 6.2 * len(label) + 18
+    last = pts[-1]
+    for v, color in ((last[1], BUYER), (last[2], RENTER)):
+        parts.append(
+            f'<text x="{x(len(pts) - 1):.1f}" y="{y(v) - 5:.1f}" text-anchor="end" '
+            f'font-family="Helvetica, Arial, sans-serif" font-size="9" font-weight="bold" '
+            f'fill="{color}">{fmt(v)}</text>'
+        )
+    for i in (0, len(pts) // 2, len(pts) - 1):
+        anchor = "start" if i == 0 else ("end" if i == len(pts) - 1 else "middle")
+        parts.append(
+            f'<text x="{x(i):.1f}" y="{H - 7}" text-anchor="{anchor}" '
+            f'font-family="Helvetica, Arial, sans-serif" font-size="8.5" fill="{MUTED}">'
+            f"{pts[i][0]}</text>"
+        )
+    parts.append("</svg>")
+    return Markup("".join(parts))
+
+
 def build_filters(language: str = "en") -> dict:
     """Jinja2 filter set with label filters bound to ``language``.
 
@@ -590,6 +675,7 @@ def build_filters(language: str = "en") -> dict:
         "verdict_key": verdict_key,
         "embed_image": embed_image,
         "index_svg": index_svg,
+        "wealth_svg": wealth_svg,
     }
 
 

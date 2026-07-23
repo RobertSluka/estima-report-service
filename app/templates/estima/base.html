@@ -485,6 +485,36 @@
   </div>
   {% endif %}
 
+  {# Buy-vs-rent wealth projection — rendered only when the upstream payload
+     supplies the precomputed block (sale listings with a rent estimate). #}
+  {% if buy_vs_rent and buy_vs_rent.series | length >= 3 %}
+  {% set bvr = buy_vs_rent %}{% set ba = bvr.assumptions %}
+  <div class="avoid-break" style="margin-top:6pt; border:1px solid var(--line); border-radius:6pt; padding:6pt 10pt">
+    <div style="font-size:9pt; font-weight:600; color:var(--brand)">
+      {{ T.bvr_title }}
+      <span class="muted" style="font-weight:400">— {{ T.bvr_subtitle }}</span>
+    </div>
+    <div class="muted" style="font-size:8pt; margin-top:3pt">
+      {{ T.bvr_price }}: <strong>{{ ba.property_price | amount(cur) }}</strong>
+      · {{ T.bvr_rent }}: <strong>{{ ba.monthly_rent | amount(cur) }}</strong>
+      · {{ T.bvr_mortgage }}: {{ ba.mortgage_rate_pct | num(1) }} % / {{ ba.ltv_pct | num(0) }} % LTV / {{ ba.term_years | num(0) }} {{ T.bvr_years }}
+      · {{ T.bvr_growth }}: {{ ba.property_growth_pct | num(1) }} %
+      · {{ T.bvr_invest }}: {{ ba.investment_return_pct | num(1) }} %
+    </div>
+    <div style="margin-top:4pt">{{ bvr.series | wealth_svg(T.bvr_buyer, T.bvr_renter) }}</div>
+    <div style="font-size:8.5pt; margin-top:3pt">
+      {% if bvr.buyer_final is not none and bvr.renter_final is not none %}
+      <strong>{% if bvr.buyer_final >= bvr.renter_final %}{{ T.bvr_verdict_buy }}{% else %}{{ T.bvr_verdict_rent }}{% endif %}</strong>
+      ({{ T.bvr_buyer }}: {{ bvr.buyer_final | amount(cur) }} · {{ T.bvr_renter }}: {{ bvr.renter_final | amount(cur) }}
+      {{ T.bvr_after }} {{ bvr.horizon_years | num(0) }} {{ T.bvr_years_loc }})
+      {% endif %}
+    </div>
+    <div class="muted" style="font-size:7.5pt; margin-top:2pt">
+      {{ T.bvr_note }} {{ ba.rent_source | dash }}; {{ ba.growth_source | dash }}.
+    </div>
+  </div>
+  {% endif %}
+
   <h3 style="font-size:10pt; color:var(--brand); margin-top:10pt; margin-bottom:4pt">{{ T.comparables }}</h3>
   {% if comparables %}
   {# No avoid-break: WeasyPrint would push the whole table to a near-empty

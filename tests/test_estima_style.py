@@ -169,3 +169,28 @@ def test_index_svg_needs_three_points():
          {"period": "3Q", "value": 120.0}]
     ))
     assert svg.startswith("<svg") and "polyline" in svg
+
+
+def test_estima_sk_renders_buy_vs_rent_subsection():
+    html = _render(SAMPLE_SK, "sk")
+
+    assert "Kúpa vs. nájom a investovanie" in html
+    # Assumptions line carries the upstream numbers and sources.
+    assert "268 000 EUR" in html  # NNBSP grouping from the amount filter
+    assert "NBS regional price series, Bratislava Region" in html
+    # Two-line wealth chart with the legend labels.
+    assert "Nájom + investície" in html
+    assert 'fill="#0e9f6e"' in html  # buyer line color only wealth_svg emits
+    assert "Kúpa vychádza lepšie" in html
+
+
+def test_estima_skips_buy_vs_rent_without_block():
+    from app.models import EvaluationPayload
+    from app.services.renderer import render_html
+
+    payload = json.loads(SAMPLE_SK.read_text(encoding="utf-8"))
+    payload.pop("buy_vs_rent", None)
+    payload["options"] = {"template": "estima", "language": "sk"}
+    html = render_html(EvaluationPayload.model_validate(payload))
+
+    assert "Kúpa vs. nájom a investovanie" not in html

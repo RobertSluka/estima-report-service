@@ -199,6 +199,39 @@ class RentInvestment(_Model):
 
 
 # --------------------------------------------------------------------------- #
+# Buy-vs-rent wealth projection (computed upstream; rendered as-is)
+# --------------------------------------------------------------------------- #
+class WealthPoint(_Model):
+    year: Optional[int] = None
+    buyer: Optional[float] = None
+    renter: Optional[float] = None
+
+
+class BuyVsRentAssumptions(_Model):
+    property_price: Optional[float] = None
+    monthly_rent: Optional[float] = None
+    rent_source: Optional[str] = None
+    mortgage_rate_pct: Optional[float] = None
+    ltv_pct: Optional[float] = None
+    term_years: Optional[int] = None
+    inflation_pct: Optional[float] = None
+    investment_return_pct: Optional[float] = None
+    property_growth_pct: Optional[float] = None
+    growth_source: Optional[str] = None
+
+
+class BuyVsRent(_Model):
+    horizon_years: Optional[int] = None
+    assumptions: BuyVsRentAssumptions = Field(default_factory=BuyVsRentAssumptions)
+    down_payment: Optional[float] = None
+    monthly_payment: Optional[float] = None
+    series: List[WealthPoint] = Field(default_factory=list)
+    buyer_final: Optional[float] = None
+    renter_final: Optional[float] = None
+    breakeven_year: Optional[int] = None
+
+
+# --------------------------------------------------------------------------- #
 # Location & nearby facilities
 # --------------------------------------------------------------------------- #
 class FacilityCount(_Model):
@@ -329,6 +362,7 @@ class EvaluationPayload(_Model):
     benchmarks: List[MarketBenchmark] = Field(default_factory=list)
     market_statistics: Optional[MarketStatistics] = None
     rent_investment: Optional[RentInvestment] = None
+    buy_vs_rent: Optional[BuyVsRent] = None
     location_facilities: LocationFacilities = Field(default_factory=LocationFacilities)
     vision_analysis: VisionAnalysis = Field(default_factory=VisionAnalysis)
     risk: Optional[RiskDueDiligence] = None

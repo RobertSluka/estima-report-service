@@ -77,9 +77,11 @@ The full schema is defined in [`app/models.py`](app/models.py) and a complete
 working example lives in
 [`samples/sample_evaluation.json`](samples/sample_evaluation.json). Top-level
 keys: `property`, `pricing`, `valuation`, `comparables`, `location`,
-`image_analysis`, `summary`, optional `branding`, and `options`
-(`template` / `language`). The schema is permissive — unknown fields are ignored,
-and missing fields degrade gracefully in the template.
+`image_analysis`, `summary`, optional `branding`, optional `buy_vs_rent`
+(a precomputed buy-vs-rent net-wealth projection rendered as a chart in the
+estima style's market section), and `options` (`template` / `language`). The
+schema is permissive — unknown fields are ignored, and missing fields degrade
+gracefully in the template.
 
 ## Run with Docker (recommended)
 
