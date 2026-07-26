@@ -15,8 +15,8 @@
 <script>
   /* Follow the app's light/dark choice. Priority: ?theme= (works cross-origin
      from the app navbar) → the app's shared localStorage key (same-origin) →
-     dark-first default. Mirrors the app, which is dark unless you've explicitly
-     chosen light (it ignores the OS preference), so the two never diverge when
+     light default. Mirrors the app, which is light unless you've explicitly
+     chosen dark (it ignores the OS preference), so the two never diverge when
      no choice has been made yet. Runs before first paint to avoid a flash;
      WeasyPrint runs no JS, so the PDF is never affected. */
   (function () {
@@ -25,7 +25,7 @@
       var q = new URLSearchParams(location.search).get('theme');
       if (q === 'dark' || q === 'light') localStorage.setItem(KEY, q);
       var t = (q === 'dark' || q === 'light') ? q
-        : (localStorage.getItem(KEY) === 'light' ? 'light' : 'dark');
+        : (localStorage.getItem(KEY) === 'dark' ? 'dark' : 'light');
       if (t === 'dark') document.documentElement.classList.add('dark');
     } catch (e) {}
   })();
