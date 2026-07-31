@@ -174,6 +174,13 @@
     "HTTPValidationError": [
       "detail"
     ],
+    "ImageMetric": [
+      "brightness",
+      "note",
+      "photo_quality",
+      "sharpness",
+      "url"
+    ],
     "LocationFacilities": [
       "available",
       "facilities",
@@ -349,6 +356,7 @@
       "brightness",
       "detected_features",
       "gallery_size",
+      "image_metrics",
       "images",
       "observations",
       "overall_condition_score",

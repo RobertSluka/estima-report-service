@@ -257,6 +257,20 @@ class LocationFacilities(_Model):
 # --------------------------------------------------------------------------- #
 # Vision / photo-quality analysis
 # --------------------------------------------------------------------------- #
+class ImageMetric(_Model):
+    """Per-photo technical metrics (0–100), matched to ``property.images``.
+
+    Matching is by ``url`` when present, else by list position. Like the
+    gallery-level scores these measure the photograph, never the property.
+    """
+
+    url: Optional[str] = None
+    photo_quality: Optional[float] = None
+    brightness: Optional[float] = None
+    sharpness: Optional[float] = None
+    note: Optional[str] = None
+
+
 class VisionAnalysis(_Model):
     """Photo-quality metrics for the listing gallery.
 
@@ -274,6 +288,7 @@ class VisionAnalysis(_Model):
     gallery_size: Optional[int] = None
     observations: List[str] = Field(default_factory=list)  # measurable, human-readable
     images: List[str] = Field(default_factory=list)
+    image_metrics: List[ImageMetric] = Field(default_factory=list)
 
     # DEPRECATED — semantic claims local analysis cannot support; ignored by
     # the templates, kept only so historic payloads still validate.

@@ -75,7 +75,11 @@ The `default` template renders:
 
 The full schema is defined in [`app/models.py`](app/models.py) and a complete
 working example lives in
-[`samples/sample_evaluation.json`](samples/sample_evaluation.json). Top-level
+[`samples/sample_evaluation.json`](samples/sample_evaluation.json).
+[`samples/sample_kosice_odborarska.json`](samples/sample_kosice_odborarska.json)
+is the model example for the `estima` style: a real Košice listing with 13
+photos and per-photo quality metrics (`vision_analysis.image_metrics`) that
+drive the large photos-with-results pages of section 03. Top-level
 keys: `property`, `pricing`, `valuation`, `comparables`, `location`,
 `image_analysis`, `summary`, optional `branding`, optional `buy_vs_rent`
 (a precomputed buy-vs-rent net-wealth projection rendered as a chart in the

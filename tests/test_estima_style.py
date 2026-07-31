@@ -9,6 +9,7 @@ import pytest
 ROOT = Path(__file__).resolve().parent.parent
 SAMPLE_SK = ROOT / "samples" / "sample_evaluation_sk.json"
 SAMPLE_FULL = ROOT / "samples" / "sample_evaluation.json"
+SAMPLE_KOSICE = ROOT / "samples" / "sample_kosice_odborarska.json"
 
 
 @pytest.fixture(autouse=True)
@@ -95,6 +96,77 @@ def test_estima_makes_no_semantic_vision_claims():
         "Condition-based price adjustment",
     ):
         assert forbidden not in html
+
+
+def test_estima_photo_pages_with_per_image_metrics():
+    from app.models import EvaluationPayload
+    from app.services.renderer import render_html
+
+    img_a = "data:image/png;base64,AAAA"
+    img_b = "data:image/png;base64,BBBB"
+    payload = {
+        "options": {"template": "estima", "language": "en"},
+        "property": {"images": [img_a, img_b]},
+        "vision_analysis": {
+            "available": True,
+            "photo_quality": 71, "brightness": 53, "sharpness": 67,
+            "gallery_size": 2,
+            "image_metrics": [
+                {"url": img_a, "photo_quality": 70, "brightness": 51, "sharpness": 64},
+                {"url": img_b, "photo_quality": 74, "brightness": 50, "sharpness": 61},
+            ],
+        },
+    }
+    html = render_html(EvaluationPayload.model_validate(payload))
+
+    # One large card per listing photo, each with its own metrics bar.
+    assert html.count('class="photo-card"') == 2
+    assert "Photo 1 / 2" in html and "Photo 2 / 2" in html
+    assert "70/100" in html and "74/100" in html
+    # The gallery-level result closes the section, after the photo cards.
+    assert "Overall photo-quality result" in html
+    assert html.rindex('class="photo-card"') < html.index("Overall photo-quality result")
+    # The old end-of-report thumbnail gallery is gone.
+    assert 'class="gallery"' not in html
+    assert "Property Photos" not in html
+
+
+def test_estima_photos_render_without_vision_block():
+    from app.models import EvaluationPayload
+    from app.services.renderer import render_html
+
+    payload = {
+        "options": {"template": "estima", "language": "en"},
+        "property": {"images": ["data:image/png;base64,AAAA"]},
+    }
+    html = render_html(EvaluationPayload.model_validate(payload))
+
+    assert html.count('class="photo-card"') == 1
+    # No per-photo metrics bar and no misleading "no analysis" fallback.
+    assert "Overall photo-quality result" not in html
+    assert "No photo analysis is available" not in html
+
+
+def test_kosice_model_sample_renders(monkeypatch):
+    """The Košice–Odborárska model example drives the full photo section."""
+    from app.models import EvaluationPayload
+    from app.services import formatting
+    from app.services.renderer import render_html
+
+    # Keep the test offline: the sample's 13 photos are remote bazos URLs.
+    monkeypatch.setattr(
+        formatting, "embed_image", lambda url: "data:image/png;base64,STUB"
+    )
+
+    payload = json.loads(SAMPLE_KOSICE.read_text(encoding="utf-8"))
+    html = render_html(EvaluationPayload.model_validate(payload))
+
+    assert "Predaj veľký 2 izbový byt" in html
+    assert 'verdict-pill v-undervalued' in html  # 195k asking vs 210k estimate
+    assert html.count('class="photo-card"') == 13
+    assert "Fotografia 1 / 13" in html
+    assert "Celkové hodnotenie fotografií" in html
+    assert "NBS – ceny rezidenčných nehnuteľností" in html
 
 
 def test_estima_thin_payload_shows_fallbacks():

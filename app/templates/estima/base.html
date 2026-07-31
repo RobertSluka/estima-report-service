@@ -245,17 +245,38 @@
   .score-badge .n small { font-size: 8pt; color: var(--muted); font-weight: 600; }
   .score-badge .l { font-size: 7.5pt; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); margin-top: 2pt; }
 
-  /* Photo strip: inline-block, not flex — WeasyPrint's flex gap is unreliable. */
-  .photo-strip { margin: 8pt 0 2pt; font-size: 0; }
-  .photo-strip img {
-    display: inline-block;
-    width: 32.3%;
-    height: 100pt;
+  /* Photo pages: large photos, two per A4 page, each with its own result
+     bar. Sized so two cards (image + caption + margin) always fit inside
+     the 259mm content height without splitting a card across pages. */
+  .photo-card { page-break-inside: avoid; margin-bottom: 10pt; }
+  .photo-card img {
+    display: block;
+    width: 100%;
+    height: 100mm;
     object-fit: cover;
-    border-radius: 6px;
-    margin-right: 1.5%;
+    border-radius: 8px;
+    border: 1px solid var(--line);
   }
-  .photo-strip img:last-child { margin-right: 0; }
+  .photo-card-caption {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 4pt 2pt 0;
+    font-size: 8.5pt;
+    color: var(--ink-soft);
+  }
+  .photo-card-num {
+    font-weight: 700;
+    color: var(--brand);
+    white-space: nowrap;
+    margin-right: 8pt;
+  }
+  .photo-card-metrics strong { color: var(--ink); }
+  .overall-head {
+    font-size: 10pt;
+    color: var(--brand);
+    margin: 4pt 0 4pt;
+  }
 
   /* Location facilities */
   .map-box {
@@ -326,18 +347,6 @@
   .disclaimer {
     margin-top: 20pt; padding-top: 8pt; border-top: 1px solid var(--line);
     font-size: 7.5pt; color: var(--muted); line-height: 1.4;
-  }
-
-  /* Photo gallery appendix: compact thumbnails, three per row
-     (inline-block — WeasyPrint flex/grid gaps are unreliable). */
-  .gallery { font-size: 0; margin-right: -8pt; }
-  .gallery-cell {
-    display: inline-block; vertical-align: top;
-    width: 33.3%; padding-right: 8pt; margin-bottom: 8pt;
-  }
-  .gallery-cell img {
-    width: 100%; height: 42mm; object-fit: cover;
-    border-radius: 6px; border: 1px solid var(--line);
   }
 </style>
 </head>
@@ -552,21 +561,51 @@
 
 {# ======================== 03 LISTING PHOTO QUALITY ===================== #}
 {# Measurable photo statistics only — never a claim about the property's
-   condition, and never a price adjustment. #}
+   condition, and never a price adjustment. Listing photos are shown large
+   (two per page), each with its per-photo metrics when the payload provides
+   them; the gallery-level result closes the section. #}
+{% set photo_images = (property.images or vision_analysis.images) %}
 <section class="section page-break">
   <div class="section-head"><span class="section-num">03</span><h2 class="section-title">{{ T.sec_vision }}</h2></div>
 
-  {% if vision_analysis.available %}
-  <div class="score-row">
-    <div class="score-badge"><div class="n">{{ vision_analysis.photo_quality | num(0) }}<small>/100</small></div><div class="l">{{ T.photo_quality }}</div></div>
-    <div class="score-badge"><div class="n">{{ vision_analysis.brightness | num(0) }}<small>/100</small></div><div class="l">{{ T.brightness }}</div></div>
-    <div class="score-badge"><div class="n">{{ vision_analysis.sharpness | num(0) }}<small>/100</small></div><div class="l">{{ T.sharpness }}</div></div>
-    <div class="score-badge"><div class="n">{{ vision_analysis.gallery_size | num(0) }}</div><div class="l">{{ T.gallery_photos }}</div></div>
+  {% if photo_images %}
+  {% set photo_metrics = vision_analysis.image_metrics or [] %}
+  {% set shown_images = photo_images[:14] %}
+  {% for img in shown_images %}
+  {# Per-photo metrics: match by url first, fall back to list position. #}
+  {% set ns = namespace(m=None) %}
+  {% for cand in photo_metrics %}{% if cand.url and cand.url == img %}{% set ns.m = cand %}{% endif %}{% endfor %}
+  {% if ns.m is none and photo_metrics | length > loop.index0 %}{% set ns.m = photo_metrics[loop.index0] %}{% endif %}
+  <div class="photo-card">
+    <img src="{{ img | embed_image }}" alt="">
+    <div class="photo-card-caption">
+      <span class="photo-card-num">{{ T.photo_label }} {{ loop.index }} / {{ shown_images | length }}</span>
+      {% if ns.m %}
+      <span class="photo-card-metrics">
+        {{ T.photo_quality }}: <strong>{{ ns.m.photo_quality | num(0) }}/100</strong>
+        · {{ T.brightness }}: <strong>{{ ns.m.brightness | num(0) }}/100</strong>
+        · {{ T.sharpness }}: <strong>{{ ns.m.sharpness | num(0) }}/100</strong>
+        {% if ns.m.note %} · {{ ns.m.note }}{% endif %}
+      </span>
+      {% endif %}
+    </div>
   </div>
+  {% endfor %}
+  <p class="muted" style="font-size:7.5pt; margin:0 0 6pt">{{ T.photos_note }}</p>
+  {% endif %}
 
-  {# The analysed photos are not repeated here — they live in the photo
-     gallery appendix at the end of the report. #}
-  <div class="callout">{{ vision_analysis.summary | dash(T.fb_vision_summary) }}</div>
+  {% if vision_analysis.available %}
+  <div class="avoid-break" style="margin-top:6pt">
+    {% if photo_images %}<h3 class="overall-head">{{ T.overall_result }}</h3>{% endif %}
+    <div class="score-row">
+      <div class="score-badge"><div class="n">{{ vision_analysis.photo_quality | num(0) }}<small>/100</small></div><div class="l">{{ T.photo_quality }}</div></div>
+      <div class="score-badge"><div class="n">{{ vision_analysis.brightness | num(0) }}<small>/100</small></div><div class="l">{{ T.brightness }}</div></div>
+      <div class="score-badge"><div class="n">{{ vision_analysis.sharpness | num(0) }}<small>/100</small></div><div class="l">{{ T.sharpness }}</div></div>
+      <div class="score-badge"><div class="n">{{ vision_analysis.gallery_size | num(0) }}</div><div class="l">{{ T.gallery_photos }}</div></div>
+    </div>
+
+    <div class="callout">{{ vision_analysis.summary | dash(T.fb_vision_summary) }}</div>
+  </div>
 
   {% if vision_analysis.observations %}
   <p class="soft" style="font-weight:600; margin-top:8pt">{{ T.observations }}</p>
@@ -577,7 +616,7 @@
 
   <p class="muted" style="font-size:7.5pt; margin-top:8pt">{{ T.vision_footnote }}</p>
 
-  {% else %}
+  {% elif not photo_images %}
   <div class="fallback">{{ T.fb_no_vision }}</div>
   {% endif %}
 </section>
@@ -689,22 +728,6 @@
 
   <div class="disclaimer">{{ T.disclaimer }}</div>
 </section>
-
-{# ========================= 06 PHOTO GALLERY ============================ #}
-{# All listing photos beyond the cover hero, printed separately at the end
-   as compact thumbnails so they never crowd the analysis pages. #}
-{% set gallery_images = (property.images or vision_analysis.images) %}
-{% if gallery_images and gallery_images | length > 1 %}
-<section class="section page-break">
-  <div class="section-head"><span class="section-num">06</span><h2 class="section-title">{{ T.sec_photos }}</h2></div>
-  <div class="gallery">
-    {% for img in gallery_images[1:13] %}
-    <div class="gallery-cell"><img src="{{ img | embed_image }}" alt=""></div>
-    {% endfor %}
-  </div>
-  <p class="muted" style="font-size:7.5pt; margin-top:4pt">{{ T.photos_note }}</p>
-</section>
-{% endif %}
 
 </body>
 </html>
