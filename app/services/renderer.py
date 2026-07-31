@@ -83,6 +83,7 @@ def render_html(payload: EvaluationPayload) -> str:
         "buy_vs_rent": payload.buy_vs_rent,
         "location_facilities": payload.location_facilities,
         "vision_analysis": payload.vision_analysis,
+        "condition_assessment": payload.condition_assessment,
         "risk": payload.risk,
         "summary": payload.summary,
         "methodology": payload.methodology,

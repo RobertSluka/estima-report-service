@@ -245,33 +245,53 @@
   .score-badge .n small { font-size: 8pt; color: var(--muted); font-weight: 600; }
   .score-badge .l { font-size: 7.5pt; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); margin-top: 2pt; }
 
-  /* Photo pages: large photos, two per A4 page, each with its own result
-     bar. Sized so two cards (image + caption + margin) always fit inside
-     the 259mm content height without splitting a card across pages. */
-  .photo-card { page-break-inside: avoid; margin-bottom: 10pt; }
+  /* Photo pages: large photos with a result bar, two per A4 page (three in
+     the compact variant used for big galleries). Card heights are sized so
+     full cards always fit inside the 259mm content height without
+     splitting; page-break-inside keeps image and caption together. */
+  .photo-card {
+    page-break-inside: avoid;
+    margin-bottom: 10pt;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    overflow: hidden;
+    background: #fff;
+  }
   .photo-card img {
     display: block;
     width: 100%;
-    height: 100mm;
+    height: 92mm;
     object-fit: cover;
-    border-radius: 8px;
-    border: 1px solid var(--line);
   }
-  .photo-card-caption {
+  .photo-card.compact img { height: 60mm; }
+  .photo-card-caption { padding: 5pt 12pt 6pt; }
+  .photo-card-head {
     display: flex;
     justify-content: space-between;
     align-items: baseline;
-    padding: 4pt 2pt 0;
-    font-size: 8.5pt;
-    color: var(--ink-soft);
   }
   .photo-card-num {
+    font-size: 8.5pt;
     font-weight: 700;
     color: var(--brand);
     white-space: nowrap;
     margin-right: 8pt;
   }
-  .photo-card-metrics strong { color: var(--ink); }
+  .photo-chips { font-size: 0; text-align: right; }
+  .chip {
+    display: inline-block;
+    font-size: 7.5pt;
+    line-height: 1.4;
+    border-radius: 10px;
+    padding: 1pt 7pt;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    color: var(--ink-soft);
+    margin-left: 4pt;
+    white-space: nowrap;
+  }
+  .chip strong { color: var(--brand); }
+  .photo-card-note { font-size: 8.5pt; color: var(--ink-soft); margin-top: 2pt; }
   .overall-head {
     font-size: 10pt;
     color: var(--brand);
@@ -570,28 +590,61 @@
 
   {% if photo_images %}
   {% set photo_metrics = vision_analysis.image_metrics or [] %}
-  {% set shown_images = photo_images[:14] %}
+  {% set shown_images = photo_images[:15] %}
+  {# Big galleries switch to the compact card (three per page) so the photo
+     part stays a reasonable share of the report; small ones get two. #}
+  {% set compact = shown_images | length > 9 %}
   {% for img in shown_images %}
   {# Per-photo metrics: match by url first, fall back to list position. #}
   {% set ns = namespace(m=None) %}
   {% for cand in photo_metrics %}{% if cand.url and cand.url == img %}{% set ns.m = cand %}{% endif %}{% endfor %}
   {% if ns.m is none and photo_metrics | length > loop.index0 %}{% set ns.m = photo_metrics[loop.index0] %}{% endif %}
-  <div class="photo-card">
+  <div class="photo-card{% if compact %} compact{% endif %}">
     <img src="{{ img | embed_image }}" alt="">
     <div class="photo-card-caption">
-      <span class="photo-card-num">{{ T.photo_label }} {{ loop.index }} / {{ shown_images | length }}</span>
-      {% if ns.m %}
-      <span class="photo-card-metrics">
-        {{ T.photo_quality }}: <strong>{{ ns.m.photo_quality | num(0) }}/100</strong>
-        · {{ T.brightness }}: <strong>{{ ns.m.brightness | num(0) }}/100</strong>
-        · {{ T.sharpness }}: <strong>{{ ns.m.sharpness | num(0) }}/100</strong>
-        {% if ns.m.note %} · {{ ns.m.note }}{% endif %}
-      </span>
-      {% endif %}
+      <div class="photo-card-head">
+        <span class="photo-card-num">{{ T.photo_label }} {{ loop.index }} / {{ shown_images | length }}</span>
+        {% if ns.m %}
+        <span class="photo-chips">
+          <span class="chip">{{ T.photo_quality }} <strong>{{ ns.m.photo_quality | num(0) }}</strong>/100</span>
+          <span class="chip">{{ T.brightness }} <strong>{{ ns.m.brightness | num(0) }}</strong>/100</span>
+          <span class="chip">{{ T.sharpness }} <strong>{{ ns.m.sharpness | num(0) }}</strong>/100</span>
+        </span>
+        {% endif %}
+      </div>
+      {% if ns.m and ns.m.note %}<div class="photo-card-note">{{ ns.m.note }}</div>{% endif %}
     </div>
   </div>
   {% endfor %}
   <p class="muted" style="font-size:7.5pt; margin:0 0 6pt">{{ T.photos_note }}</p>
+  {% endif %}
+
+  {# Indicative condition assessment — rendered only when the payload carries
+     one (human- or model-authored upstream). This is payload data, never a
+     claim derived from the local photo-quality metrics above. #}
+  {% if condition_assessment and condition_assessment.available and condition_assessment.items %}
+  {% set ca = condition_assessment %}
+  <div class="avoid-break" style="margin-top:6pt">
+    <h3 class="overall-head">{{ T.condition_title }}</h3>
+    <table class="data-table">
+      <thead>
+        <tr><th style="width:22%">{{ T.cond_element }}</th><th style="width:24%">{{ T.cond_state }}</th><th>{{ T.cond_note }}</th></tr>
+      </thead>
+      <tbody>
+        {% for it in ca.items %}
+        <tr>
+          <td style="font-weight:600">{{ it.element | dash }}</td>
+          <td>{{ it.state | dash }}</td>
+          <td>{{ it.note | dash }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% if ca.summary %}<div class="callout">{{ ca.summary }}</div>{% endif %}
+    <p class="muted" style="font-size:7.5pt; margin-top:3pt">
+      {{ T.condition_footnote }}{% if ca.source %} {{ T.cond_source }}: {{ ca.source }}.{% endif %}
+    </p>
+  </div>
   {% endif %}
 
   {% if vision_analysis.available %}

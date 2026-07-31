@@ -119,10 +119,12 @@ def test_estima_photo_pages_with_per_image_metrics():
     }
     html = render_html(EvaluationPayload.model_validate(payload))
 
-    # One large card per listing photo, each with its own metrics bar.
+    # One large card per listing photo, each with its own metric chips;
+    # small galleries stay two-per-page (no compact class).
     assert html.count('class="photo-card"') == 2
+    assert 'photo-card compact' not in html
     assert "Photo 1 / 2" in html and "Photo 2 / 2" in html
-    assert "70/100" in html and "74/100" in html
+    assert "<strong>70</strong>/100" in html and "<strong>74</strong>/100" in html
     # The gallery-level result closes the section, after the photo cards.
     assert "Overall photo-quality result" in html
     assert html.rindex('class="photo-card"') < html.index("Overall photo-quality result")
@@ -163,10 +165,39 @@ def test_kosice_model_sample_renders(monkeypatch):
 
     assert "Predaj veľký 2 izbový byt" in html
     assert 'verdict-pill v-undervalued' in html  # 195k asking vs 210k estimate
-    assert html.count('class="photo-card"') == 13
+    # 13 photos -> compact cards, three per page.
+    assert html.count('class="photo-card compact"') == 13
     assert "Fotografia 1 / 13" in html
     assert "Celkové hodnotenie fotografií" in html
     assert "NBS – ceny rezidenčných nehnuteľností" in html
+    # Payload-supplied condition assessment with its provenance footnote.
+    assert "Orientačné posúdenie stavu (z fotografií inzerátu)" in html
+    assert "Podlahy" in html and "Kúpeľňa a WC" in html
+    assert "nejde o technickú obhliadku" in html
+
+
+def test_condition_assessment_only_renders_when_supplied():
+    from app.models import EvaluationPayload
+    from app.services.renderer import render_html
+
+    base = {"options": {"template": "estima", "language": "en"}}
+    html = render_html(EvaluationPayload.model_validate(base))
+    assert "Indicative condition assessment" not in html
+
+    base["condition_assessment"] = {
+        "available": True,
+        "source": "Agent visual review",
+        "items": [
+            {"element": "Floors", "state": "New", "note": "Laminate throughout."},
+            {"element": "Walls", "state": "Renovated", "note": "Freshly painted."},
+        ],
+        "summary": "Fully renovated interior.",
+    }
+    html = render_html(EvaluationPayload.model_validate(base))
+    assert "Indicative condition assessment" in html
+    assert "Floors" in html and "Freshly painted." in html
+    assert "not a technical inspection" in html
+    assert "Agent visual review" in html
 
 
 def test_estima_thin_payload_shows_fallbacks():

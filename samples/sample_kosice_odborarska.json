@@ -252,86 +252,100 @@
     "observations": [
       "Fotografie sú prevažne ostré; žiadna snímka nie je rozmazaná.",
       "Jas galérie je priemerný — niektoré interiérové zábery sú tmavšie.",
-      "Rozlíšenie fotografií (~1,1 Mpx) je nižšie, na prezentáciu však postačuje."
+      "Rozlíšenie fotografií (~1,1 Mpx) je nižšie, na prezentáciu však postačuje.",
+      "Zábery zariadených miestností pôsobia ako vizualizácia (virtuálny home staging) — skutočné vybavenie overte na obhliadke."
     ],
     "image_metrics": [
       {
         "url": "https://www.bazos.sk/img/1/291/193231291.jpg",
         "photo_quality": 70,
         "brightness": 51,
-        "sharpness": 64
+        "sharpness": 64,
+        "note": "Obývacia izba — zariadenie na zábere je pravdepodobne vizualizácia (home staging)."
       },
       {
         "url": "https://www.bazos.sk/img/2/291/193231291.jpg",
         "photo_quality": 70,
         "brightness": 49,
-        "sharpness": 61
+        "sharpness": 61,
+        "note": "Spálňa — zariadenie na zábere je pravdepodobne vizualizácia (home staging)."
       },
       {
         "url": "https://www.bazos.sk/img/3/291/193231291.jpg",
         "photo_quality": 74,
         "brightness": 50,
-        "sharpness": 70
+        "sharpness": 70,
+        "note": "Kuchyňa s novou linkou a spotrebičmi — pravdepodobne vizualizácia; miestnosť má pripravené rozvody."
       },
       {
         "url": "https://www.bazos.sk/img/4/291/193231291.jpg",
         "photo_quality": 65,
         "brightness": 56,
-        "sharpness": 54
+        "sharpness": 54,
+        "note": "Obývacia izba v skutočnom stave — nová laminátová podlaha, čerstvá výmaľba, plastové okná."
       },
       {
         "url": "https://www.bazos.sk/img/5/291/193231291.jpg",
         "photo_quality": 65,
         "brightness": 54,
-        "sharpness": 53
+        "sharpness": 53,
+        "note": "Izba v skutočnom stave — nová podlaha a výmaľba."
       },
       {
         "url": "https://www.bazos.sk/img/6/291/193231291.jpg",
         "photo_quality": 67,
         "brightness": 62,
-        "sharpness": 60
+        "sharpness": 60,
+        "note": "Menšia miestnosť s vodovodnou prípravou (práčka / kuchynský kút)."
       },
       {
         "url": "https://www.bazos.sk/img/7/291/193231291.jpg",
         "photo_quality": 68,
         "brightness": 60,
-        "sharpness": 61
+        "sharpness": 61,
+        "note": "Kuchynský priestor pred montážou linky — rozvody a radiátor osadené."
       },
       {
         "url": "https://www.bazos.sk/img/8/291/193231291.jpg",
         "photo_quality": 72,
         "brightness": 55,
-        "sharpness": 79
+        "sharpness": 79,
+        "note": "Kúpeľňa — nový sprchovací kút, umývadlová skrinka a obklad; nad zrkadlom nezapojený vývod svietidla."
       },
       {
         "url": "https://www.bazos.sk/img/9/291/193231291.jpg",
         "photo_quality": 71,
         "brightness": 57,
-        "sharpness": 79
+        "sharpness": 79,
+        "note": "Samostatné WC — závesná misa, nový obklad a dlažba."
       },
       {
         "url": "https://www.bazos.sk/img/10/291/193231291.jpg",
         "photo_quality": 64,
         "brightness": 56,
-        "sharpness": 52
+        "sharpness": 52,
+        "note": "Okolie — nábrežie Mlynského náhonu pár krokov od domu."
       },
       {
         "url": "https://www.bazos.sk/img/11/291/193231291.jpg",
         "photo_quality": 83,
         "brightness": 44,
-        "sharpness": 91
+        "sharpness": 91,
+        "note": "Okolie — nábrežie Mlynského náhonu (ďalší záber)."
       },
       {
         "url": "https://www.bazos.sk/img/12/291/193231291.jpg",
         "photo_quality": 84,
         "brightness": 41,
-        "sharpness": 92
+        "sharpness": 92,
+        "note": "Vnútroblok so vzrastlou zeleňou."
       },
       {
         "url": "https://www.bazos.sk/img/13/291/193231291.jpg",
         "photo_quality": 66,
         "brightness": 59,
-        "sharpness": 57
+        "sharpness": 57,
+        "note": "Chodba a vstup — nové bezpečnostné dvere; ostenia dverí kúpeľne a WC zatiaľ bez dokončenia."
       }
     ]
   },
@@ -360,5 +374,47 @@
   "options": {
     "template": "estima",
     "language": "sk"
+  },
+  "condition_assessment": {
+    "available": true,
+    "source": "Orientačné vyhodnotenie z fotografií inzerátu (Estima)",
+    "items": [
+      {
+        "element": "Podlahy",
+        "state": "Nové",
+        "note": "Laminátové dielce v izbách, kuchyni aj na chodbe; dlažba v kúpeľni a WC."
+      },
+      {
+        "element": "Steny a stropy",
+        "state": "Po rekonštrukcii",
+        "note": "Hladké, čerstvo vymaľované povrchy; nové stropné LED svietidlá."
+      },
+      {
+        "element": "Kuchyňa",
+        "state": "Nejednoznačné z fotografií",
+        "note": "Zábery linky pôsobia ako vizualizácia; miestnosť má pripravené rozvody vody a elektriny."
+      },
+      {
+        "element": "Kúpeľňa a WC",
+        "state": "Po rekonštrukcii",
+        "note": "Nový sprchovací kút, umývadlo a závesné WC; ostenia dverí zatiaľ nedokončené."
+      },
+      {
+        "element": "Okná",
+        "state": "Plastové, zachovalé",
+        "note": "S vnútornými žalúziami; bez viditeľných poškodení."
+      },
+      {
+        "element": "Vykurovanie",
+        "state": "Radiátory pod oknami",
+        "note": "Panelové radiátory; v jednej izbe starší článkový radiátor s novým náterom."
+      },
+      {
+        "element": "Vstupné dvere",
+        "state": "Nové bezpečnostné",
+        "note": "Osadené vrátane novej zárubne."
+      }
+    ],
+    "summary": "Byt je po komplexnej rekonštrukcii (podlahy, povrchy stien, kúpeľňa, WC, vstupné dvere). Časť zariadenia na fotografiách je pravdepodobne len vizualizácia a na chodbe sú viditeľné drobné nedokončené detaily — na obhliadke overte skutočné vybavenie kuchyne a dokončenosť."
   }
 }

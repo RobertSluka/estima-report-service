@@ -140,11 +140,23 @@
       "source",
       "source_url"
     ],
+    "ConditionAssessment": [
+      "available",
+      "items",
+      "source",
+      "summary"
+    ],
+    "ConditionItem": [
+      "element",
+      "note",
+      "state"
+    ],
     "EvaluationPayload": [
       "benchmarks",
       "branding",
       "buy_vs_rent",
       "comparables",
+      "condition_assessment",
       "generated_at",
       "location_facilities",
       "market_statistics",

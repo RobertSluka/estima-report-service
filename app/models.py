@@ -299,6 +299,32 @@ class VisionAnalysis(_Model):
 
 
 # --------------------------------------------------------------------------- #
+# Indicative condition assessment (payload-supplied)
+# --------------------------------------------------------------------------- #
+class ConditionItem(_Model):
+    """One assessed element of the property (floors, walls, kitchen, …)."""
+
+    element: Optional[str] = None
+    state: Optional[str] = None
+    note: Optional[str] = None
+
+
+class ConditionAssessment(_Model):
+    """Indicative element-by-element condition assessment.
+
+    Authored UPSTREAM (an agent, or a capable vision model) and rendered
+    as-is with an explicit "from listing photos, verify in person" footnote.
+    Deliberately separate from :class:`VisionAnalysis`, whose local pixel
+    metrics cannot honestly judge condition and never populate this block.
+    """
+
+    available: bool = False
+    source: Optional[str] = None
+    items: List[ConditionItem] = Field(default_factory=list)
+    summary: Optional[str] = None
+
+
+# --------------------------------------------------------------------------- #
 # Risk & due diligence
 # --------------------------------------------------------------------------- #
 class RiskDueDiligence(_Model):
@@ -380,6 +406,7 @@ class EvaluationPayload(_Model):
     buy_vs_rent: Optional[BuyVsRent] = None
     location_facilities: LocationFacilities = Field(default_factory=LocationFacilities)
     vision_analysis: VisionAnalysis = Field(default_factory=VisionAnalysis)
+    condition_assessment: Optional[ConditionAssessment] = None
     risk: Optional[RiskDueDiligence] = None
     summary: ReportSummary = Field(default_factory=ReportSummary)
     methodology: Optional[Methodology] = None
