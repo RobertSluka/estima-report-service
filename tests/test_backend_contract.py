@@ -40,7 +40,9 @@ ALIGNED_FIELDS = {
         "price_difference_vs_subject", "similarity_score", "source_url",
         "is_subject", "is_median",
     ],
-    ("MarketBenchmark", "MarketBenchmark"): ["name", "value_per_sqm"],
+    ("MarketBenchmark", "MarketBenchmark"): [
+        "name", "value_per_sqm", "scope", "period",
+    ],
     ("VisionAnalysis", "VisionAnalysis"): [
         "available", "gallery_size", "observations", "summary",
     ],

@@ -200,6 +200,55 @@ def test_condition_assessment_only_renders_when_supplied():
     assert "Agent visual review" in html
 
 
+def test_benchmark_scope_and_period_are_rendered():
+    """A district index must show the district it covers, never bare."""
+    from app.models import EvaluationPayload
+    from app.services.renderer import render_html
+
+    payload = {
+        "options": {"template": "estima", "language": "cs"},
+        "currency": "CZK",
+        "benchmarks": [
+            {
+                "name": "Estima local listing median",
+                "benchmark_type": "listing_asking",
+                "value_per_sqm": 184209,
+                "source": "Estima listing index",
+            },
+            {
+                "name": "Deloitte Real Index",
+                "benchmark_type": "realized_sale",
+                "value_per_sqm": 137900,
+                "scope": "Praha 6",
+                "period": "Q3 2024",
+            },
+        ],
+    }
+    html = render_html(EvaluationPayload.model_validate(payload))
+
+    assert "Praha 6 · Q3 2024" in html
+    # Callers that pack scope+period into `source` still get it rendered.
+    assert "Estima listing index" in html
+
+
+def test_listing_photos_appear_only_in_the_photo_quality_section():
+    from app.models import EvaluationPayload
+    from app.services.renderer import render_html
+
+    img = "data:image/png;base64,AAAA"
+    payload = {
+        "options": {"template": "estima", "language": "en"},
+        "property": {"title": "Cover title", "images": [img]},
+    }
+    html = render_html(EvaluationPayload.model_validate(payload))
+
+    # The cover is typographic — the only photo in the document is the
+    # section-03 card, which carries its own per-photo result.
+    assert "cover-img" not in html
+    assert html.count(img) == 1
+    assert html.index(img) > html.index("Listing Photo Quality")
+
+
 def test_estima_thin_payload_shows_fallbacks():
     from app.models import EvaluationPayload
     from app.services.renderer import render_html

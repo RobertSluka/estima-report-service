@@ -131,6 +131,11 @@ class MarketBenchmark(_Model):
     benchmark_type: Optional[str] = None  # listing_asking | realized_sale | newbuild_asking | rent_monthly
     value_per_sqm: Optional[float] = None
     source: Optional[str] = None
+    # Geographic scope and period the index covers — rendered so a macro
+    # reference is never mistaken for a figure about this property. Callers
+    # that pack both into `source` still render (fallback in the template).
+    scope: Optional[str] = None  # e.g. "Praha 6" or the city fallback
+    period: Optional[str] = None  # display form, e.g. "Q3 2024"
 
 
 # --------------------------------------------------------------------------- #

@@ -72,7 +72,9 @@
       "name": "Deloitte Real Index",
       "benchmark_type": "realized_sale",
       "value_per_sqm": 105000,
-      "source": "Deloitte"
+      "source": "Deloitte",
+      "scope": "Praha 4",
+      "period": "Q3 2024"
     }
   ],
   "vision_analysis": {

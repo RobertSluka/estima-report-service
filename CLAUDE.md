@@ -52,6 +52,10 @@ No database. Artifacts are written to `reports/<report_id>/`
   document: shared `base.html` + per-language `report.html` string dicts
   (sk, cs, en). The estima.sk deployment runs with `DEFAULT_TEMPLATE=estima`.
   Keep wording aligned with the backends' `i18n.py` when strings change.
+  Listing photos appear **only** in section 03 (one large card per photo with
+  its own metrics, gallery-level result last) — the cover is typographic on
+  purpose. Each `benchmarks[]` entry renders its own line with `scope`/`period`
+  (falling back to `source`) so a district index is never read as nationwide.
 - `samples/sample_evaluation.json` — canonical working payload example
 - `samples/sample_kosice_odborarska.json` — model example for the estima
   style: real Košice/Odborárska listing (estima-sk id 416), 13 bazos photos +

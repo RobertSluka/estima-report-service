@@ -129,16 +129,15 @@
   .brand-tag { font-size: 8.5pt; letter-spacing: 3px; text-transform: uppercase; color: #b9d4e4; margin-top: 2pt; }
   .cover-kicker { font-size: 9pt; letter-spacing: 2px; text-transform: uppercase; color: #9ec7dd; }
 
-  .cover-img-wrap {
-    margin: 16pt 0;
-    border-radius: 10px;
-    overflow: hidden;
-    height: 60mm;
-    border: 1px solid rgba(255,255,255,.18);
+  /* No cover photo by design: listing photos belong to section 03, where each
+     one carries its own measured result. The cover stays typographic — the
+     spacer sits above the title so the block anchors to the lower third
+     instead of floating in the middle of an empty page. */
+  .cover-rule {
+    width: 54pt; height: 3pt; background: var(--accent);
+    border-radius: 2px; margin-bottom: 14pt;
   }
-  .cover-img { width: 100%; height: 100%; object-fit: cover; }
-
-  .cover-title { font-size: 26pt; line-height: 1.15; margin-top: 6pt; }
+  .cover-title { font-size: 26pt; line-height: 1.15; }
   .cover-locality { font-size: 12pt; color: #cfe3ee; margin-top: 6pt; }
   .cover-spacer { flex: 1; }
 
@@ -388,14 +387,11 @@
     </div>
   </div>
 
-  <div class="cover-img-wrap">
-    <img class="cover-img" src="{{ (property.images[0] if property.images else None) | embed_image }}" alt="">
-  </div>
+  <div class="cover-spacer"></div>
 
+  <div class="cover-rule"></div>
   <h1 class="cover-title">{{ property.title | dash(T.fb_untitled) }}</h1>
   <div class="cover-locality">{{ property.locality | dash(property.city | dash(T.fb_no_locality)) }}{% if property.property_type %} · {{ property.property_type }}{% endif %}{% if property.layout %} · {{ property.layout }}{% endif %}</div>
-
-  <div class="cover-spacer"></div>
 
   <div class="badge-strip">
     <div class="badge-card">
@@ -490,12 +486,19 @@
   <div class="callout">{{ valuation.why_this_estimate | join(" ") }}</div>
   {% endif %}
 
+  {# One line per benchmark so each keeps its own scope/period visible: a
+     district index (e.g. "Praha 6") must never read as a nationwide figure.
+     Callers that pack period+scope into `source` fall back to that string. #}
   {% if benchmarks %}
   <div class="callout avoid-break">
     <strong>{{ T.benchmark_title }}:</strong>
     {% for b in benchmarks %}
+    {% set b_detail = ([b.scope, b.period] | select | join(" · ")) or (b.source | default("", true)) %}
+    <div style="margin-top:2pt">
       {{ b.name | dash }} ({{ b.benchmark_type | benchmark_type_label }}):
-      <strong>{{ b.value_per_sqm | num(0, " " ~ cur ~ "/m²") }}</strong>{% if not loop.last %} · {% endif %}
+      <strong>{{ b.value_per_sqm | num(0, " " ~ cur ~ "/m²") }}</strong>
+      {% if b_detail %}<span class="muted">— {{ b_detail }}</span>{% endif %}
+    </div>
     {% endfor %}
     <div class="muted" style="font-size:7.5pt; margin-top:2pt">{{ T.benchmark_note }}</div>
   </div>
