@@ -327,6 +327,10 @@ class ConditionAssessment(_Model):
     source: Optional[str] = None
     items: List[ConditionItem] = Field(default_factory=list)
     summary: Optional[str] = None
+    # Headline renovation/condition score for buyers (0–100 + short label),
+    # authored upstream like the rest of this block — never computed locally.
+    overall_score: Optional[float] = None
+    overall_label: Optional[str] = None
 
 
 # --------------------------------------------------------------------------- #

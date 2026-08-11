@@ -229,21 +229,6 @@
   .pos { color: var(--good); }
   .neg { color: var(--bad); }
 
-  /* Score badges / bars */
-  .score-row { display: flex; margin: 4pt 0 2pt; }
-  .score-badge {
-    flex: 1;
-    border: 1px solid var(--line);
-    border-radius: 8px;
-    padding: 9pt 11pt;
-    text-align: center;
-    background: #fff;
-  }
-  .score-badge + .score-badge { margin-left: 10pt; }
-  .score-badge .n { font-size: 17pt; font-weight: 800; color: var(--brand); }
-  .score-badge .n small { font-size: 8pt; color: var(--muted); font-weight: 600; }
-  .score-badge .l { font-size: 7.5pt; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); margin-top: 2pt; }
-
   /* Photo pages: large photos with a result bar, two per A4 page (three in
      the compact variant used for big galleries). Card heights are sized so
      full cards always fit inside the 259mm content height without
@@ -290,12 +275,53 @@
     white-space: nowrap;
   }
   .chip strong { color: var(--brand); }
-  .photo-card-note { font-size: 8.5pt; color: var(--ink-soft); margin-top: 2pt; }
   .overall-head {
     font-size: 10pt;
     color: var(--brand);
     margin: 4pt 0 4pt;
   }
+
+  /* Renovation/condition hero — the buyer-facing headline score of section 03.
+     Flex without gap (WeasyPrint 62.3 drops flex gap); margins instead. */
+  .reno-hero {
+    display: flex;
+    align-items: center;
+    border: 1px solid var(--line);
+    border-left: 3pt solid var(--brand);
+    border-radius: 10px;
+    background: #fff;
+    padding: 10pt 14pt;
+    margin-bottom: 8pt;
+    page-break-inside: avoid;
+  }
+  .reno-score { white-space: nowrap; margin-right: 14pt; }
+  .reno-score .n { font-size: 26pt; font-weight: 800; color: var(--brand); }
+  .reno-score .d { font-size: 10pt; font-weight: 600; color: var(--muted); }
+  .reno-info { flex: 1; }
+  .reno-kicker {
+    font-size: 7.5pt; letter-spacing: 1px; text-transform: uppercase;
+    color: var(--muted);
+  }
+  .reno-state { font-size: 11pt; font-weight: 700; color: var(--ink); margin: 1pt 0 4pt; }
+
+  /* Slim metric meters — label left, bar + value right. */
+  .meter-row { margin-bottom: 5pt; }
+  .meter-label {
+    display: inline-block; width: 34%; vertical-align: middle;
+    font-size: 8pt; letter-spacing: 0.5px; text-transform: uppercase;
+    color: var(--muted);
+  }
+  .meter-track {
+    display: inline-block; width: 48%; vertical-align: middle;
+    height: 4pt; border-radius: 2pt; background: var(--panel);
+    border: 0.5pt solid var(--line);
+  }
+  .meter-fill { height: 4pt; border-radius: 2pt; background: var(--brand); }
+  .meter-value {
+    display: inline-block; width: 14%; vertical-align: middle; text-align: right;
+    font-size: 9pt; font-weight: 700; color: var(--brand);
+  }
+  .meter-value small { font-size: 7pt; color: var(--muted); font-weight: 600; }
 
   /* Location facilities */
   .map-box {
@@ -615,7 +641,6 @@
         </span>
         {% endif %}
       </div>
-      {% if ns.m and ns.m.note %}<div class="photo-card-note">{{ ns.m.note }}</div>{% endif %}
     </div>
   </div>
   {% endfor %}
@@ -629,6 +654,18 @@
   {% set ca = condition_assessment %}
   <div class="avoid-break" style="margin-top:6pt">
     <h3 class="overall-head">{{ T.condition_title }}</h3>
+    {# Buyer-facing headline: upstream-authored renovation score, same
+       provenance as the table below — never derived from local metrics. #}
+    {% if ca.overall_score is not none %}
+    <div class="reno-hero">
+      <div class="reno-score"><span class="n">{{ ca.overall_score | num(0) }}</span><span class="d">/100</span></div>
+      <div class="reno-info">
+        <div class="reno-kicker">{{ T.cond_score }}</div>
+        {% if ca.overall_label %}<div class="reno-state">{{ ca.overall_label }}</div>{% endif %}
+        <div class="meter-track" style="width:100%"><div class="meter-fill" style="width:{{ [ca.overall_score, 100] | min | num(0) }}%"></div></div>
+      </div>
+    </div>
+    {% endif %}
     <table class="data-table">
       <thead>
         <tr><th style="width:22%">{{ T.cond_element }}</th><th style="width:24%">{{ T.cond_state }}</th><th>{{ T.cond_note }}</th></tr>
@@ -652,12 +689,18 @@
 
   {% if vision_analysis.available %}
   <div class="avoid-break" style="margin-top:6pt">
-    {% if photo_images %}<h3 class="overall-head">{{ T.overall_result }}</h3>{% endif %}
-    <div class="score-row">
-      <div class="score-badge"><div class="n">{{ vision_analysis.photo_quality | num(0) }}<small>/100</small></div><div class="l">{{ T.photo_quality }}</div></div>
-      <div class="score-badge"><div class="n">{{ vision_analysis.brightness | num(0) }}<small>/100</small></div><div class="l">{{ T.brightness }}</div></div>
-      <div class="score-badge"><div class="n">{{ vision_analysis.sharpness | num(0) }}<small>/100</small></div><div class="l">{{ T.sharpness }}</div></div>
-      <div class="score-badge"><div class="n">{{ vision_analysis.gallery_size | num(0) }}</div><div class="l">{{ T.gallery_photos }}</div></div>
+    {% if photo_images %}<h3 class="overall-head">{{ T.overall_result }}{% if vision_analysis.gallery_size %} ({{ vision_analysis.gallery_size | num(0) }}){% endif %}</h3>{% endif %}
+    {# Slim technical meters — deliberately secondary to the condition hero. #}
+    <div style="margin: 2pt 0 6pt">
+      {% for value, label in [
+        (vision_analysis.photo_quality, T.photo_quality),
+        (vision_analysis.brightness, T.brightness),
+        (vision_analysis.sharpness, T.sharpness),
+      ] %}
+      <div class="meter-row">
+        <span class="meter-label">{{ label }}</span><span class="meter-track"><span class="meter-fill" style="display:block; width:{{ [value or 0, 100] | min | num(0) }}%"></span></span><span class="meter-value">{{ value | num(0) }}<small>/100</small></span>
+      </div>
+      {% endfor %}
     </div>
 
     <div class="callout">{{ vision_analysis.summary | dash(T.fb_vision_summary) }}</div>

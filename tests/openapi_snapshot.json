@@ -143,6 +143,8 @@
     "ConditionAssessment": [
       "available",
       "items",
+      "overall_label",
+      "overall_score",
       "source",
       "summary"
     ],
