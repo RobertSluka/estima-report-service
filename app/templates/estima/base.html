@@ -635,9 +635,11 @@
         <span class="photo-card-num">{{ T.photo_label }} {{ loop.index }} / {{ shown_images | length }}</span>
         {% if ns.m %}
         <span class="photo-chips">
-          <span class="chip">{{ T.photo_quality }} <strong>{{ ns.m.photo_quality | num(0) }}</strong>/100</span>
-          <span class="chip">{{ T.brightness }} <strong>{{ ns.m.brightness | num(0) }}</strong>/100</span>
-          <span class="chip">{{ T.sharpness }} <strong>{{ ns.m.sharpness | num(0) }}</strong>/100</span>
+          {# A chip only renders when its metric exists — note-only payloads
+             (no measured numbers) get a clean caption, not dash chips. #}
+          {% if ns.m.photo_quality is not none %}<span class="chip">{{ T.photo_quality }} <strong>{{ ns.m.photo_quality | num(0) }}</strong>/100</span>{% endif %}
+          {% if ns.m.brightness is not none %}<span class="chip">{{ T.brightness }} <strong>{{ ns.m.brightness | num(0) }}</strong>/100</span>{% endif %}
+          {% if ns.m.sharpness is not none %}<span class="chip">{{ T.sharpness }} <strong>{{ ns.m.sharpness | num(0) }}</strong>/100</span>{% endif %}
         </span>
         {% endif %}
       </div>
