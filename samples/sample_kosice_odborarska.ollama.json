@@ -261,91 +261,91 @@
         "photo_quality": 70,
         "brightness": 51,
         "sharpness": 64,
-        "note": "Obývacia izba – priestranný byt s moderným nábytkom a svetlými farbami; vizualizácia/home staging."
+        "note": "Obývacia izba — priestranný a svetlý interiér s moderným nábytkom a výhľadom do zelene."
       },
       {
         "url": "https://www.bazos.sk/img/2/291/193231291.jpg",
         "photo_quality": 70,
         "brightness": 49,
         "sharpness": 61,
-        "note": "Spálňa — priestranná spálňa s manželskou posteľou a moderným zariadením (pravdepodobne virtuálny home staging)."
+        "note": "Spálňa — priestranná izba s manželskou posteľou, oknami a minimalistickým zariadením."
       },
       {
         "url": "https://www.bazos.sk/img/3/291/193231291.jpg",
         "photo_quality": 74,
         "brightness": 50,
         "sharpness": 70,
-        "note": "Kuchyňa — Moderná kuchynská linka a spotrebiče, byt pôsobí novo zriadený/virtuálny home staging."
+        "note": "Kuchyňa — moderná kuchynská linka so vstavanými spotrebičmi a drevenými detailmi, v dobrom stave."
       },
       {
         "url": "https://www.bazos.sk/img/4/291/193231291.jpg",
         "photo_quality": 65,
         "brightness": 56,
         "sharpness": 54,
-        "note": "Obývacia izba/záber z interiéru — prázdna miestnosť s laminátovou podlahou a oknami, pôsobí ako virtuálny home staging."
+        "note": "Obývacia izba/záber z priestoru — prázdna izba s laminátovou podlahou a oknom s výhľadom na mesto."
       },
       {
         "url": "https://www.bazos.sk/img/5/291/193231291.jpg",
         "photo_quality": 65,
         "brightness": 54,
         "sharpness": 53,
-        "note": "Obývacia izba/záber z priestoru — prázdna izba s drevenou podlahou a oknami, pôsobí ako virtuálny home staging."
+        "note": "Obývacia izba/záber — priestranná izba s drevenou podlahou a oknami, steny vo svetlej farbe."
       },
       {
         "url": "https://www.bazos.sk/img/6/291/193231291.jpg",
         "photo_quality": 67,
         "brightness": 62,
         "sharpness": 60,
-        "note": "Obývacia izba/záber — Prázdna izba s laminátovou podlahou a bielymi stenami, vidno elektrické zásuvky a radiátor."
+        "note": "Obývacia izba/záber z rohu — prázdna miestnosť s laminátovou podlahou a bielymi stenami, vidno elektrické zásuvky a radiátor."
       },
       {
         "url": "https://www.bazos.sk/img/7/291/193231291.jpg",
         "photo_quality": 68,
         "brightness": 60,
         "sharpness": 61,
-        "note": "Obývacia izba/záber z rohu — prázdna miestnosť s laminátovou podlahou a bielymi stenami, radiátor pod oknom."
+        "note": "Obývacia izba/záber – Prázdna izba s laminátovou podlahou a bielymi stenami, radiátor pod oknom."
       },
       {
         "url": "https://www.bazos.sk/img/8/291/193231291.jpg",
         "photo_quality": 72,
         "brightness": 55,
         "sharpness": 79,
-        "note": "Kúpeľňa — moderná kúpeľňa so sprchovacím kútom a umývadlom, pravdepodobne virtuálny home staging."
+        "note": "Kúpeľňa — moderná kúpeľňová zostava so sprchovým kútom a umývadlom, obklady vo svetlých tónoch."
       },
       {
         "url": "https://www.bazos.sk/img/9/291/193231291.jpg",
         "photo_quality": 71,
         "brightness": 57,
         "sharpness": 79,
-        "note": "Kúpeľňa — záber sprchového kúta s dverami a obkladom, pôsobí moderne a udržiavaný."
+        "note": "Kúpeľňa — sprchovací kút so sklenenými dverami a obkladom, vo veľmi dobrom stave."
       },
       {
         "url": "https://www.bazos.sk/img/10/291/193231291.jpg",
         "photo_quality": 64,
         "brightness": 56,
         "sharpness": 52,
-        "note": "Kúpeľňa — záber na WC s moderným obkladom a dlažbou, pravdepodobne virtuálny home staging."
+        "note": "Kúpeľňa — záber na toaletu s umývadlom a obkladom stien a podlahy, stav udržiavaný."
       },
       {
         "url": "https://www.bazos.sk/img/11/291/193231291.jpg",
         "photo_quality": 83,
         "brightness": 44,
         "sharpness": 91,
-        "note": "Exteriér — Pohľad na rieku a brehy s vegetáciou. Ide o záber z okolia lokality bytu v Košiciach."
+        "note": "Exteriér — Pohľad na rieku a brehovú vegetáciu s previsnutými stromami; krajina v dobrom stave."
       },
       {
         "url": "https://www.bazos.sk/img/12/291/193231291.jpg",
         "photo_quality": 84,
         "brightness": 41,
         "sharpness": 92,
-        "note": "Exteriér — Pohľad na park s trávnikom a stromami, pravdepodobne v blízkosti bytového domu."
+        "note": "Exteriér — Pohľad do záhrady s trávnikom a stromami, slnečný deň."
       },
       {
         "url": "https://www.bazos.sk/img/13/291/193231291.jpg",
         "photo_quality": 66,
         "brightness": 59,
         "sharpness": 57,
-        "note": "Chodba — priestranná chodba s dvomi vchodmi do izieb a kúpeľne, byt pôsobí novo zrekonštruovane."
+        "note": "Vstupná chodba — priestranná chodba s dvomi vchodmi do izieb a kúpeľne, vo výbornom stave."
       }
     ]
   },
@@ -381,54 +381,52 @@
     "items": [
       {
         "element": "Podlahy",
-        "state": "Čiastočne po rekonštrukcii/Nejednoznačné",
-        "note": "V obývacej izbe sú viditeľné laminátové a drevené podlahy, v kúpeľni dlažba. Nie je jasné, či sú vo všetkých miestnostiach rovnaké."
+        "state": "Kombinácia laminátu a dreva",
+        "note": "V obývacej izbe je viditeľná laminátová aj drevená podlaha, v kúpeľni obklad."
       },
       {
         "element": "Steny a stropy",
-        "state": "Po rekonštrukcii/Nejednoznačné",
-        "note": "Na fotografiách vidno biele steny, v kúpeľni moderný obklad. Nie je jasné, či sú všetky steny takto upravené."
+        "state": "Po rekonštrukcii/udržiavané",
+        "note": "Steny sú vo svetlých farbách, bez viditeľných poškodení alebo známok starších opráv."
       },
       {
         "element": "Kuchyňa",
-        "state": "Po rekonštrukcii/Virtuálna vizualizácia",
-        "note": "Moderná kuchynská linka a spotrebiče, avšak fotografie pôsobia ako virtuálny home staging."
+        "state": "Po rekonštrukcii",
+        "note": "Moderná kuchynská linka so vstavanými spotrebičmi a drevenými detailmi, v dobrom stave."
       },
       {
         "element": "Kúpeľňa a WC",
-        "state": "Po rekonštrukcii/Virtuálna vizualizácia",
-        "note": "Moderná kúpeľňa so sprchovacím kútom, moderné obloženie WC. Niektoré zábery pôsobia ako virtuálny home staging."
+        "state": "Po rekonštrukcii/udržiavané",
+        "note": "Moderná kúpeľňová zostava so sprchovým kútom, obklady vo svetlých tónoch, udržiavaný stav."
       },
       {
         "element": "Okná",
-        "state": "Nejednoznačné z fotografií",
-        "note": "Na fotografiách sú viditeľné okná, ale nie je možné posúdiť ich stav (materiál, vek)."
+        "state": "Nové/udržiavané",
+        "note": "Na fotografiách sú viditeľné okná s výhľadom do zelene a na mesto, v dobrom stave."
       },
       {
         "element": "Vykurovanie",
-        "state": "Pôvodné/Udržiavané",
-        "note": "Viditeľné radiátory v obývacej izbe."
+        "state": "Radiátory",
+        "note": "Viditeľné radiátory v obývacej izbe, stav nejednoznačný z fotografií."
       },
       {
         "element": "Vstupné dvere",
-        "state": "Nejednoznačné z fotografií",
-        "note": "Na fotografiách nie sú vstupné dvere viditeľné."
+        "state": "Nové/udržiavané",
+        "note": "Priestorná chodba s dvomi vchodmi do izieb a kúpeľne, vo výbornom stave."
       }
     ],
-    "summary": "Byt pôsobí moderne a priestranne, avšak väčšina interiérových záberov vyzerá ako virtuálny home staging. Kúpeľňa a kuchyňa sú po rekonštrukcii, zvyšok bytu je v nejednoznačnom stave. Odporúčame overiť skutočný stav na osobnej obhliadke.",
-    "overall_score": 65,
+    "summary": "Byt pôsobí svetlo a priestranne. Vykazuje známky nedávnej rekonštrukcie, najmä v kuchyni a kúpeľni. Celkový stav je udržiavaný a moderný.",
+    "overall_score": 75,
     "overall_label": "Čiastočne renovovaný",
     "score_positives": [
       "Moderná kuchynská linka",
-      "Rekonštruovaná kúpeľňa",
-      "Svetlé a priestranné izby",
-      "Udržiavaný vzhľad"
+      "Renovovaná kúpeľňa",
+      "Svetlé interiéry",
+      "Udržiavaný stav"
     ],
     "score_negatives": [
-      "Väčšina záberov je vizualizácia",
-      "Nejasný stav podláh a stien",
-      "Chýbajú informácie o oknách",
-      "Stav vykurovania neznámy"
+      "Rôzne typy podláh",
+      "Stav vykurovania nejasný"
     ]
   }
 }

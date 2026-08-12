@@ -59,6 +59,9 @@ No database. Artifacts are written to `reports/<report_id>/`
   Each `benchmarks[]` entry renders its own line with `scope`/`period`
   (falling back to `source`) so a district index is never read as nationwide.
 - `samples/sample_evaluation.json` — canonical working payload example
+- `samples/sample_kosice_tahanovce.json` — the current estima.sk showcase
+  (estima-sk id 360, Košice/Ťahanovce, 12 real bazos photos, full Ollama
+  enrichment incl. score drivers); captured from a live build_payload run
 - `samples/sample_kosice_odborarska.json` — model example for the estima
   style: real Košice/Odborárska listing (estima-sk id 416), 13 bazos photos +
   per-photo `vision_analysis.image_metrics`; drives the photo pages of
