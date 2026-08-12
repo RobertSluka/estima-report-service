@@ -99,8 +99,13 @@ CONDITION_SCHEMA = {
         "summary": {"type": "string"},
         "overall_score": {"type": "integer", "minimum": 0, "maximum": 100},
         "overall_label": {"type": "string"},
+        "score_positives": {"type": "array", "items": {"type": "string"}},
+        "score_negatives": {"type": "array", "items": {"type": "string"}},
     },
-    "required": ["items", "summary", "overall_score", "overall_label"],
+    "required": [
+        "items", "summary", "overall_score", "overall_label",
+        "score_positives", "score_negatives",
+    ],
 }
 
 # Per-language prompt/string packs. The language must match the report the
@@ -134,6 +139,10 @@ LANGS: dict[str, dict[str, Any]] = {
             "udržiavaný stav, 0 = v dezolátnom stave) — hodnotí stav nehnuteľnosti, "
             "nie kvalitu fotografií. A `overall_label`: krátky slovný stav "
             "(napr. 'Po kompletnej rekonštrukcii', 'Čiastočne renovovaný', 'Pôvodný stav'). "
+            "K skóre pridaj zdôvodnenie: `score_positives` — 2 až 4 krátke body (max. 8 slov), "
+            "čo skóre zvyšuje, a `score_negatives` — 2 až 4 krátke body, čo ho znižuje "
+            "alebo znejasňuje (vrátane neistoty z vizualizácií). Každý bod musí vychádzať "
+            "z poznámok k fotografiám, nie z domnienok. "
             "Iba viditeľné skutočnosti — žiadne ceny ani odhady hodnoty.\n\n"
             "Poznámky k fotografiám:\n{notes}"
         ),
@@ -176,6 +185,10 @@ LANGS: dict[str, dict[str, Any]] = {
             "udržovaný stav, 0 = v dezolátním stavu) — hodnotí stav nemovitosti, "
             "ne kvalitu fotografií. A `overall_label`: krátký slovní stav "
             "(např. 'Po kompletní rekonstrukci', 'Částečně renovovaný', 'Původní stav'). "
+            "Ke skóre přidej zdůvodnění: `score_positives` — 2 až 4 krátké body (max. 8 slov), "
+            "co skóre zvyšuje, a `score_negatives` — 2 až 4 krátké body, co ho snižuje "
+            "nebo znejasňuje (včetně nejistoty z vizualizací). Každý bod musí vycházet "
+            "z poznámek k fotografiím, ne z domněnek. "
             "Jen viditelné skutečnosti — žádné ceny ani odhady hodnoty.\n\n"
             "Poznámky k fotografiím:\n{notes}"
         ),
@@ -277,6 +290,12 @@ def main() -> int:
         default="sk",
         help="language of notes/assessment — must match the target report (default: sk)",
     )
+    parser.add_argument(
+        "--condition-only",
+        action="store_true",
+        help="skip per-photo evaluation; rebuild the condition assessment "
+        "from the notes already present in the payload (one model call)",
+    )
     args = parser.parse_args()
     L = LANGS[args.lang]
 
@@ -288,27 +307,37 @@ def main() -> int:
         return 1
 
     notes: list[str] = []
-    for i, entry in enumerate(metrics, start=1):
-        url = entry.get("url")
-        if not url:
-            continue
-        print(f"[{i}/{len(metrics)}] {url}")
-        try:
-            image = fetch_image_b64(url)
-        except Exception as exc:  # noqa: BLE001 — photo hosts rot; skip and continue
-            print(f"    fetch failed, keeping existing note: {exc}")
-            continue
-        result = ollama_chat(
-            args.ollama_url,
-            args.model,
-            L["note_prompt"].format(context=context),
-            NOTE_SCHEMA,
-            images=[image],
-        )
-        note = result["note"].strip()
-        entry["note"] = note
-        notes.append(f"{L['photo_word']} {i}: {note}")
-        print(f"    {note}")
+    if args.condition_only:
+        notes = [
+            f"{L['photo_word']} {i}: {entry['note']}"
+            for i, entry in enumerate(metrics, start=1)
+            if entry.get("note")
+        ]
+        if not notes:
+            print("--condition-only needs existing per-photo notes in the payload")
+            return 1
+    else:
+        for i, entry in enumerate(metrics, start=1):
+            url = entry.get("url")
+            if not url:
+                continue
+            print(f"[{i}/{len(metrics)}] {url}")
+            try:
+                image = fetch_image_b64(url)
+            except Exception as exc:  # noqa: BLE001 — photo hosts rot; skip and continue
+                print(f"    fetch failed, keeping existing note: {exc}")
+                continue
+            result = ollama_chat(
+                args.ollama_url,
+                args.model,
+                L["note_prompt"].format(context=context),
+                NOTE_SCHEMA,
+                images=[image],
+            )
+            note = result["note"].strip()
+            entry["note"] = note
+            notes.append(f"{L['photo_word']} {i}: {note}")
+            print(f"    {note}")
 
     if notes:
         print("assembling condition assessment …")
@@ -325,6 +354,8 @@ def main() -> int:
             "summary": cond["summary"].strip(),
             "overall_score": max(0, min(100, int(cond["overall_score"]))),
             "overall_label": cond["overall_label"].strip(),
+            "score_positives": [s.strip() for s in cond["score_positives"] if s.strip()],
+            "score_negatives": [s.strip() for s in cond["score_negatives"] if s.strip()],
         }
 
     out = args.payload if args.in_place else (

@@ -231,7 +231,7 @@ def test_benchmark_scope_and_period_are_rendered():
     assert "Estima listing index" in html
 
 
-def test_listing_photos_appear_only_in_the_photo_quality_section():
+def test_first_listing_photo_is_cover_hero_and_section_03_card():
     from app.models import EvaluationPayload
     from app.services.renderer import render_html
 
@@ -242,11 +242,68 @@ def test_listing_photos_appear_only_in_the_photo_quality_section():
     }
     html = render_html(EvaluationPayload.model_validate(payload))
 
-    # The cover is typographic — the only photo in the document is the
-    # section-03 card, which carries its own per-photo result.
-    assert "cover-img" not in html
-    assert html.count(img) == 1
-    assert html.index(img) > html.index("Listing Photo Quality")
+    # The first photo appears twice by design: once as the cover hero
+    # (presentation) and once as its section-03 card with per-photo results.
+    assert '<img class="cover-img"' in html
+    assert html.count(img) == 2
+    assert html.index(img) < html.index("Listing Photo Quality")
+
+
+def test_cover_falls_back_to_typographic_without_photos():
+    from app.models import EvaluationPayload
+    from app.services.renderer import render_html
+
+    payload = {
+        "options": {"template": "estima", "language": "en"},
+        "property": {"title": "Cover title"},
+    }
+    html = render_html(EvaluationPayload.model_validate(payload))
+
+    assert '<img class="cover-img"' not in html
+    assert "cover-rule" in html
+
+
+def test_condition_score_drivers_render_when_supplied():
+    from app.models import EvaluationPayload
+    from app.services.renderer import render_html
+
+    payload = {
+        "options": {"template": "estima", "language": "en"},
+        "property": {"title": "T"},
+        "condition_assessment": {
+            "available": True,
+            "items": [{"element": "Kitchen", "state": "Renovated", "note": "n"}],
+            "overall_score": 65,
+            "overall_label": "Partly renovated",
+            "score_positives": ["Modern kitchen unit"],
+            "score_negatives": ["Most shots are visualizations"],
+        },
+    }
+    html = render_html(EvaluationPayload.model_validate(payload))
+
+    assert "Raises the score" in html
+    assert "Modern kitchen unit" in html
+    assert "Lowers the score" in html
+    assert "Most shots are visualizations" in html
+
+
+def test_condition_hero_omits_driver_rows_without_data():
+    from app.models import EvaluationPayload
+    from app.services.renderer import render_html
+
+    payload = {
+        "options": {"template": "estima", "language": "en"},
+        "property": {"title": "T"},
+        "condition_assessment": {
+            "available": True,
+            "items": [{"element": "Kitchen", "state": "Renovated", "note": "n"}],
+            "overall_score": 65,
+        },
+    }
+    html = render_html(EvaluationPayload.model_validate(payload))
+
+    assert "Raises the score" not in html
+    assert "Lowers the score" not in html
 
 
 def test_estima_thin_payload_shows_fallbacks():

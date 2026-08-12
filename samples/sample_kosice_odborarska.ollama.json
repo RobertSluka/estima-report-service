@@ -381,42 +381,54 @@
     "items": [
       {
         "element": "Podlahy",
-        "state": "Čiastočne po rekonštrukcii/Pôvodné",
-        "note": "Na fotografiách sú viditeľné laminátové aj drevené podlahy, čo naznačuje možnú kombináciu alebo čiastočnú výmenu."
+        "state": "Čiastočne po rekonštrukcii/Nejednoznačné",
+        "note": "V obývacej izbe sú viditeľné laminátové a drevené podlahy, v kúpeľni dlažba. Nie je jasné, či sú vo všetkých miestnostiach rovnaké."
       },
       {
         "element": "Steny a stropy",
-        "state": "Po rekonštrukcii/Udržiavané",
-        "note": "Na fotografiách sú viditeľné biele steny, ktoré pôsobia novo namaľované alebo udržiavané."
+        "state": "Po rekonštrukcii/Nejednoznačné",
+        "note": "Na fotografiách vidno biele steny, v kúpeľni moderný obklad. Nie je jasné, či sú všetky steny takto upravené."
       },
       {
         "element": "Kuchyňa",
-        "state": "Po rekonštrukcii (pravdepodobne)",
-        "note": "Fotografie naznačujú modernú kuchynskú linku a spotrebiče, avšak je potrebné overiť skutočný stav na obhliadke, keďže ide pravdepodobne o vizualizáciu."
+        "state": "Po rekonštrukcii/Virtuálna vizualizácia",
+        "note": "Moderná kuchynská linka a spotrebiče, avšak fotografie pôsobia ako virtuálny home staging."
       },
       {
         "element": "Kúpeľňa a WC",
-        "state": "Po rekonštrukcii (pravdepodobne)",
-        "note": "Kúpeľňa pôsobí moderne s novým obkladom a sprchovacím kútom, avšak je potrebné overiť skutočný stav na obhliadke, keďže ide pravdepodobne o vizualizáciu."
+        "state": "Po rekonštrukcii/Virtuálna vizualizácia",
+        "note": "Moderná kúpeľňa so sprchovacím kútom, moderné obloženie WC. Niektoré zábery pôsobia ako virtuálny home staging."
       },
       {
         "element": "Okná",
         "state": "Nejednoznačné z fotografií",
-        "note": "Na fotografiách sú viditeľné okná, ale nie je možné posúdiť ich stav (materiál, vek) bez bližšej obhliadky."
+        "note": "Na fotografiách sú viditeľné okná, ale nie je možné posúdiť ich stav (materiál, vek)."
       },
       {
         "element": "Vykurovanie",
         "state": "Pôvodné/Udržiavané",
-        "note": "Na fotografiách sú viditeľné radiátory, ktoré pôsobia funkčne, ale nie je možné posúdiť ich vek alebo účinnosť."
+        "note": "Viditeľné radiátory v obývacej izbe."
       },
       {
         "element": "Vstupné dvere",
         "state": "Nejednoznačné z fotografií",
-        "note": "Na fotografiách vstupné dvere nie sú viditeľné."
+        "note": "Na fotografiách nie sú vstupné dvere viditeľné."
       }
     ],
-    "summary": "Byt pôsobí svetlo a priestranne, s moderným zariadením. Vzhľadom na množstvo vizualizácií/home stagingu je však potrebné overiť skutočný stav nehnuteľnosti pri osobnej obhliadke. Kúpeľňa a kuchyňa vyzerajú po rekonštrukcii, no treba to potvrdiť.",
+    "summary": "Byt pôsobí moderne a priestranne, avšak väčšina interiérových záberov vyzerá ako virtuálny home staging. Kúpeľňa a kuchyňa sú po rekonštrukcii, zvyšok bytu je v nejednoznačnom stave. Odporúčame overiť skutočný stav na osobnej obhliadke.",
     "overall_score": 65,
-    "overall_label": "Čiastočne renovovaný"
+    "overall_label": "Čiastočne renovovaný",
+    "score_positives": [
+      "Moderná kuchynská linka",
+      "Rekonštruovaná kúpeľňa",
+      "Svetlé a priestranné izby",
+      "Udržiavaný vzhľad"
+    ],
+    "score_negatives": [
+      "Väčšina záberov je vizualizácia",
+      "Nejasný stav podláh a stien",
+      "Chýbajú informácie o oknách",
+      "Stav vykurovania neznámy"
+    ]
   }
 }

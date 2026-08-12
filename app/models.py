@@ -331,6 +331,10 @@ class ConditionAssessment(_Model):
     # authored upstream like the rest of this block — never computed locally.
     overall_score: Optional[float] = None
     overall_label: Optional[str] = None
+    # Why the score is what it is — short, photo-grounded fragments authored
+    # upstream together with the score (what raises it / what lowers it).
+    score_positives: List[str] = Field(default_factory=list)
+    score_negatives: List[str] = Field(default_factory=list)
 
 
 # --------------------------------------------------------------------------- #
