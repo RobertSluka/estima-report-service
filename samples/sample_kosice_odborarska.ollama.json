@@ -382,12 +382,12 @@
       {
         "element": "Podlahy",
         "state": "Kombinácia laminátu a dreva",
-        "note": "V obývacej izbe je viditeľná laminátová aj drevená podlaha, v kúpeľni obklad."
+        "note": "V obývacej izbe sa vyskytuje ako laminátová, tak aj drevená podlaha. V kúpeľni je viditeľný obklad."
       },
       {
         "element": "Steny a stropy",
-        "state": "Po rekonštrukcii/udržiavané",
-        "note": "Steny sú vo svetlých farbách, bez viditeľných poškodení alebo známok starších opráv."
+        "state": "Po rekonštrukcii/Udržiavané",
+        "note": "Steny sú vo svetlých farbách, v kúpeľni s obkladom. Stropy pôsobia udržiavane."
       },
       {
         "element": "Kuchyňa",
@@ -396,37 +396,39 @@
       },
       {
         "element": "Kúpeľňa a WC",
-        "state": "Po rekonštrukcii/udržiavané",
-        "note": "Moderná kúpeľňová zostava so sprchovým kútom, obklady vo svetlých tónoch, udržiavaný stav."
+        "state": "Po rekonštrukcii/Udržiavané",
+        "note": "Moderná kúpeľňová zostava so sprchovým kútom, umývadlom a obkladmi vo svetlých tónoch. Toaleta udržiavaná."
       },
       {
         "element": "Okná",
-        "state": "Nové/udržiavané",
-        "note": "Na fotografiách sú viditeľné okná s výhľadom do zelene a na mesto, v dobrom stave."
+        "state": "Nové/Udržiavané",
+        "note": "V každej miestnosti sú viditeľné okná s výhľadom do zelene alebo na mesto, pôsobia v dobrom stave."
       },
       {
         "element": "Vykurovanie",
         "state": "Radiátory",
-        "note": "Viditeľné radiátory v obývacej izbe, stav nejednoznačný z fotografií."
+        "note": "Vo viacerých miestnostiach sú viditeľné radiátory pod oknami."
       },
       {
         "element": "Vstupné dvere",
-        "state": "Nové/udržiavané",
-        "note": "Priestorná chodba s dvomi vchodmi do izieb a kúpeľne, vo výbornom stave."
+        "state": "Nejednoznačné z fotografií",
+        "note": "Fotografie nezobrazujú vstupné dvere, preto nie je možné posúdiť ich stav."
       }
     ],
-    "summary": "Byt pôsobí svetlo a priestranne. Vykazuje známky nedávnej rekonštrukcie, najmä v kuchyni a kúpeľni. Celkový stav je udržiavaný a moderný.",
-    "overall_score": 75,
-    "overall_label": "Čiastočne renovovaný",
+    "summary": "Byt pôsobí svetlo a priestranne. Kúpeľňa a kuchyňa prešli rekonštrukciou, obývacia izba má rôzne typy podláh a steny sú vo svetlých farbách. Je pravdepodobné, že niektoré zábery zobrazujú virtuálny home staging.",
+    "overall_score": 70,
+    "overall_label": "Čiastočne zrekonštruovaný",
     "score_positives": [
-      "Moderná kuchynská linka",
-      "Renovovaná kúpeľňa",
+      "Moderná kuchyňa a kúpeľňa",
       "Svetlé interiéry",
-      "Udržiavaný stav"
+      "Udržiavaný stav",
+      "Výhľad do zelene/mesta"
     ],
     "score_negatives": [
-      "Rôzne typy podláh",
-      "Stav vykurovania nejasný"
+      "Rôzne typy podláh v obývacej izbe",
+      "Neistota ohľadom home stagingu",
+      "Nedostatočné informácie o vstupných dverách",
+      "Chýbajúce detaily o vykurovaní"
     ]
   }
 }
