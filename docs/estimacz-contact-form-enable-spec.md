@@ -1,6 +1,13 @@
 # Spec: make the estimacz.cz contact form deliver mail
 
-**Handover doc** for `estima-frontend/byteval` (this repo cannot modify it).
+> **Status 2026-08-12: Part 1 (honeypot) and Part 3 (.env.example) APPLIED** in
+> `estima-frontend/byteval` commit `0857a32` (on local `main`, **not pushed**).
+> **Part 2 — supplying `RESEND_API_KEY` on the VPS — is still open and is the
+> blocker: until it is done, estimacz.cz still answers 503 and delivers no
+> mail.** Verified by typecheck, `next build`, and driving the built app at
+> 127.0.0.1:3015 with a deliberately invalid dummy key.
+
+**Handover doc** for `estima-frontend/byteval`.
 Companion to [`estima-sk-contact-form-honeypot-fix.md`](estima-sk-contact-form-honeypot-fix.md).
 Diagnosed 2026-08-12. Goal: /contact on estimacz.cz delivers to
 `estimafirm@gmail.com`, the way estima.sk's send path already does.

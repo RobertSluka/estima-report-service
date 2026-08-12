@@ -78,10 +78,25 @@ class _ValidatedRedirectHandler(urllib.request.HTTPRedirectHandler):
 
 _photo_opener = urllib.request.build_opener(_ValidatedRedirectHandler)
 
+# Structured per-photo extraction. The scoring stage never sees the photos,
+# only what this schema captures — a bare prose note drops exactly the
+# element-level evidence (radiators, door jambs, water hookups) that the
+# condition table and renovation score need, so extraction must be itemized.
+_ELEMENT_KEYS = ("floors", "walls", "windows", "heating", "doors")
 NOTE_SCHEMA = {
     "type": "object",
-    "properties": {"note": {"type": "string"}},
-    "required": ["note"],
+    "properties": {
+        "room": {"type": "string"},
+        "elements": {
+            "type": "object",
+            "properties": {k: {"type": ["string", "null"]} for k in _ELEMENT_KEYS},
+            "required": list(_ELEMENT_KEYS),
+        },
+        "features": {"type": "array", "items": {"type": "string"}, "maxItems": 3},
+        "staging_signs": {"type": ["string", "null"]},
+        "note": {"type": "string"},
+    },
+    "required": ["room", "elements", "features", "staging_signs", "note"],
 }
 
 CONDITION_SCHEMA = {
@@ -117,23 +132,37 @@ CONDITION_SCHEMA = {
 LANGS: dict[str, dict[str, Any]] = {
     "sk": {
         "note_prompt": (
-            "Si asistent realitnej kancelárie. Na fotografii je záber z inzerátu.\n"
+            "Si asistent realitnej kancelárie a analyzuješ fotografiu z inzerátu.\n"
             "{context}"
-            "Napíš JEDNU krátku vecnú poznámku po slovensky (max. 25 slov) v tvare: "
-            "typ miestnosti/záberu — čo vidno a v akom stave. "
-            "Virtuálny home staging alebo vizualizáciu uveď IBA pri jasných známkach "
-            "počítačového renderu (nereálne tiene či odlesky, dokonale hladké textúry, "
-            "nábytok nesediaci s perspektívou alebo mierkou miestnosti) — moderné alebo "
-            "vkusné zariadenie samo osebe nie je staging. Pri pochybnostiach staging nespomínaj. "
-            "Kontext inzerátu využi na presnejšie pomenovanie miestnosti, ale opisuj len to, "
-            "čo je na fotografii skutočne viditeľné. "
-            "Žiadne hodnotenie ceny, žiadne odhady."
+            "Vráť JSON po slovensky:\n"
+            "- `room`: typ miestnosti/záberu. Rešpektuj dispozíciu z kontextu — "
+            "kuchynský kút bez linky spoznáš podľa prívodu vody a zásuviek v pracovnej "
+            "výške; chodbu podľa vstupných dverí alebo viacerých dverných otvorov.\n"
+            "- `elements`: stav LEN toho, čo na fotografii jasne vidno, inak null: "
+            "`floors` (typ a stav podlahy), `walls` (povrch, nedokončené miesta), "
+            "`windows` (materiál/typ), `heating` (typ radiátora — nový panelový vs. "
+            "staré rebrové teleso), `doors` (interiérové/vstupné; chýbajúce dvere a "
+            "surové zárubne VŽDY uveď).\n"
+            "- `features`: 0–3 detaily užitočné pre kupujúceho (bezpečnostné dvere, "
+            "prívod vody, nová elektroinštalácia/istič, klimatizácia a pod.).\n"
+            "- `staging_signs`: konkrétne znaky počítačového renderu (nereálne tiene, "
+            "dokonale hladké textúry, nábytok nesediaci s perspektívou), inak null — "
+            "moderné zariadenie samo osebe nie je staging.\n"
+            "- `note`: JEDNA vecná veta (max. 30 slov) zložená z vyššie uvedeného: "
+            "miestnosť — čo vidno a v akom stave. ZAKÁZANÉ sú subjektívne prívlastky "
+            "(priestranný, vkusný, pekný, útulný, moderný bez opory) a akékoľvek "
+            "hodnotenie ceny."
         ),
         "condition_prompt": (
-            "Si asistent realitnej kancelárie. Nižšie sú poznámky k jednotlivým fotografiám "
-            "z inzerátu jednej nehnuteľnosti. Zostav orientačné vyhodnotenie stavu "
-            "nehnuteľnosti po slovensky.\n"
+            "Si asistent realitnej kancelárie. Nižšie sú štruktúrované pozorovania "
+            "z jednotlivých fotografií inzerátu jednej nehnuteľnosti (miestnosť, stav "
+            "prvkov, detaily). Zostav orientačné vyhodnotenie stavu nehnuteľnosti "
+            "po slovensky.\n"
             "{context}\n"
+            "Počet obytných izieb je daný dispozíciou z kontextu — ak sa rovnaký typ "
+            "miestnosti opakuje vo viacerých záberoch, sú to tie isté miestnosti "
+            "z rôznych uhlov, nie ďalšie izby. Stav prvkov (podlahy, okná, kúrenie, "
+            "dvere) odvoď prednostne z polí `elements`, nie z voľného textu.\n"
             "Vráť JSON s poľom `items` (prvky ako Podlahy, Steny a stropy, Kuchyňa, "
             "Kúpeľňa a WC, Okná, Vykurovanie, Vstupné dvere — iba tie, ku ktorým fotografie "
             "niečo hovoria) — každý s `element`, `state` (stručný stav, napr. 'Nové', "
@@ -168,23 +197,37 @@ LANGS: dict[str, dict[str, Any]] = {
     },
     "cs": {
         "note_prompt": (
-            "Jsi asistent realitní kanceláře. Na fotografii je záběr z inzerátu.\n"
+            "Jsi asistent realitní kanceláře a analyzuješ fotografii z inzerátu.\n"
             "{context}"
-            "Napiš JEDNU krátkou věcnou poznámku česky (max. 25 slov) ve tvaru: "
-            "typ místnosti/záběru — co je vidět a v jakém stavu. "
-            "Virtuální home staging nebo vizualizaci uveď POUZE při jasných známkách "
-            "počítačového renderu (nereálné stíny či odlesky, dokonale hladké textury, "
-            "nábytek nesedící s perspektivou nebo měřítkem místnosti) — moderní nebo "
-            "vkusné zařízení samo o sobě staging není. Při pochybnostech staging nezmiňuj. "
-            "Kontext inzerátu využij k přesnějšímu pojmenování místnosti, ale popisuj jen to, "
-            "co je na fotografii skutečně viditelné. "
-            "Žádné hodnocení ceny, žádné odhady."
+            "Vrať JSON česky:\n"
+            "- `room`: typ místnosti/záběru. Respektuj dispozici z kontextu — "
+            "kuchyňský kout bez linky poznáš podle přívodu vody a zásuvek v pracovní "
+            "výšce; chodbu podle vstupních dveří nebo více dveřních otvorů.\n"
+            "- `elements`: stav JEN toho, co je na fotografii jasně vidět, jinak null: "
+            "`floors` (typ a stav podlahy), `walls` (povrch, nedokončená místa), "
+            "`windows` (materiál/typ), `heating` (typ radiátoru — nový panelový vs. "
+            "staré žebrové těleso), `doors` (interiérové/vstupní; chybějící dveře a "
+            "surové zárubně VŽDY uveď).\n"
+            "- `features`: 0–3 detaily užitečné pro kupujícího (bezpečnostní dveře, "
+            "přívod vody, nová elektroinstalace/jistič, klimatizace apod.).\n"
+            "- `staging_signs`: konkrétní známky počítačového renderu (nereálné stíny, "
+            "dokonale hladké textury, nábytek nesedící s perspektivou), jinak null — "
+            "moderní zařízení samo o sobě staging není.\n"
+            "- `note`: JEDNA věcná věta (max. 30 slov) složená z výše uvedeného: "
+            "místnost — co je vidět a v jakém stavu. ZAKÁZANÁ jsou subjektivní přídavná "
+            "jména (prostorný, vkusný, pěkný, útulný, moderní bez opory) a jakékoli "
+            "hodnocení ceny."
         ),
         "condition_prompt": (
-            "Jsi asistent realitní kanceláře. Níže jsou poznámky k jednotlivým fotografiím "
-            "z inzerátu jedné nemovitosti. Sestav orientační vyhodnocení stavu "
-            "nemovitosti česky.\n"
+            "Jsi asistent realitní kanceláře. Níže jsou strukturovaná pozorování "
+            "z jednotlivých fotografií inzerátu jedné nemovitosti (místnost, stav "
+            "prvků, detaily). Sestav orientační vyhodnocení stavu nemovitosti "
+            "česky.\n"
             "{context}\n"
+            "Počet obytných pokojů je dán dispozicí z kontextu — pokud se stejný typ "
+            "místnosti opakuje na více záběrech, jde o tytéž místnosti z různých úhlů, "
+            "ne o další pokoje. Stav prvků (podlahy, okna, vytápění, dveře) odvoď "
+            "přednostně z polí `elements`, ne z volného textu.\n"
             "Vrať JSON s polem `items` (prvky jako Podlahy, Stěny a stropy, Kuchyň, "
             "Koupelna a WC, Okna, Vytápění, Vstupní dveře — jen ty, ke kterým fotografie "
             "něco říkají) — každý s `element`, `state` (stručný stav, např. 'Nové', "
@@ -279,10 +322,31 @@ def ollama_chat(
         "messages": [message],
         "stream": False,
         "format": schema,
-        "options": {"temperature": 0.2},
+        # Deterministic decoding: identical payload -> identical notes/score
+        # (0.2 gave a ±5 score drift across otherwise identical runs).
+        "options": {"temperature": 0, "seed": 7},
     }
     resp = http_json(f"{ollama_url}/api/chat", body, timeout)
     return json.loads(resp["message"]["content"])
+
+
+def evidence_line(photo_word: str, index: int, r: dict[str, Any]) -> str:
+    """One assembly-input line from a structured per-photo extraction.
+
+    Element states go to the scorer verbatim — the prose note alone would
+    re-drop the details the structured pass exists to keep.
+    """
+    parts = [f"{photo_word} {index} — {r.get('room', '?')}"]
+    for key in _ELEMENT_KEYS:
+        value = (r.get("elements") or {}).get(key)
+        if value:
+            parts.append(f"{key}: {value}")
+    if r.get("features"):
+        parts.append("detaily: " + ", ".join(r["features"]))
+    if r.get("staging_signs"):
+        parts.append(f"staging: {r['staging_signs']}")
+    parts.append(f"poznámka: {r.get('note', '')}")
+    return "; ".join(parts)
 
 
 def enrich_payload(payload_path: Path, args: argparse.Namespace, L: dict[str, Any]) -> bool:
@@ -327,8 +391,8 @@ def enrich_payload(payload_path: Path, args: argparse.Namespace, L: dict[str, An
             )
             note = result["note"].strip()
             entry["note"] = note
-            notes.append(f"{L['photo_word']} {i}: {note}")
-            print(f"    {note}")
+            notes.append(evidence_line(L["photo_word"], i, result))
+            print(f"    [{result.get('room', '?')}] {note}")
 
     if notes:
         print("assembling condition assessment …")

@@ -1,6 +1,11 @@
 # Spec: estima.sk contact form silently drops messages (honeypot false positive)
 
-**Handover doc** for `estima-sk` (this repo cannot modify it). Diagnosed
+> **Status 2026-08-12: APPLIED** in `estima-sk` commit `ce092b3` (on local
+> `main`, **not pushed**). Verified by typecheck, `next build`, and driving the
+> built app at 127.0.0.1:3013. Deploy still pending — see Deployment below.
+> Kept for the rationale and the verification checklist.
+
+**Handover doc** for `estima-sk`. Diagnosed
 2026-08-12 from estima-report-service. Goal: the /kontakt form actually
 delivers to `estimafirm@gmail.com`, and a real failure stops looking like
 success.
