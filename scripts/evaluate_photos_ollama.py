@@ -15,9 +15,12 @@ Everything produced is descriptive text for the report; no scores and nothing
 that feeds valuation. Stdlib only — no new dependencies.
 
 Usage:
-    python scripts/evaluate_photos_ollama.py samples/sample_kosice_odborarska.json
+    python scripts/evaluate_photos_ollama.py payload.json [more.json ...]
     # options: --model gemma3:27b  --ollama-url http://localhost:11434
-    #          --out PATH (default: <input>.ollama.json)  --in-place
+    #          --out PATH (single payload only; default: <input>.ollama.json)
+    #          --in-place  --lang sk|cs  --context "listing text"
+    #          --condition-only (rebuild assessment from existing notes)
+    # batch: pass several payloads (e.g. payloads/*.json) — one .ollama.json each
 """
 from __future__ import annotations
 
@@ -118,7 +121,10 @@ LANGS: dict[str, dict[str, Any]] = {
             "{context}"
             "Napíš JEDNU krátku vecnú poznámku po slovensky (max. 25 slov) v tvare: "
             "typ miestnosti/záberu — čo vidno a v akom stave. "
-            "Ak zariadenie pôsobí ako počítačová vizualizácia alebo virtuálny home staging, uveď to. "
+            "Virtuálny home staging alebo vizualizáciu uveď IBA pri jasných známkach "
+            "počítačového renderu (nereálne tiene či odlesky, dokonale hladké textúry, "
+            "nábytok nesediaci s perspektívou alebo mierkou miestnosti) — moderné alebo "
+            "vkusné zariadenie samo osebe nie je staging. Pri pochybnostiach staging nespomínaj. "
             "Kontext inzerátu využi na presnejšie pomenovanie miestnosti, ale opisuj len to, "
             "čo je na fotografii skutočne viditeľné. "
             "Žiadne hodnotenie ceny, žiadne odhady."
@@ -164,7 +170,10 @@ LANGS: dict[str, dict[str, Any]] = {
             "{context}"
             "Napiš JEDNU krátkou věcnou poznámku česky (max. 25 slov) ve tvaru: "
             "typ místnosti/záběru — co je vidět a v jakém stavu. "
-            "Pokud zařízení působí jako počítačová vizualizace nebo virtuální home staging, uveď to. "
+            "Virtuální home staging nebo vizualizaci uveď POUZE při jasných známkách "
+            "počítačového renderu (nereálné stíny či odlesky, dokonale hladké textury, "
+            "nábytek nesedící s perspektivou nebo měřítkem místnosti) — moderní nebo "
+            "vkusné zařízení samo o sobě staging není. Při pochybnostech staging nezmiňuj. "
             "Kontext inzerátu využij k přesnějšímu pojmenování místnosti, ale popisuj jen to, "
             "co je na fotografii skutečně viditelné. "
             "Žádné hodnocení ceny, žádné odhady."
@@ -272,39 +281,17 @@ def ollama_chat(
     return json.loads(resp["message"]["content"])
 
 
-def main() -> int:
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("payload", type=Path)
-    parser.add_argument("--model", default="gemma3:27b")
-    parser.add_argument("--ollama-url", default="http://localhost:11434")
-    parser.add_argument("--out", type=Path, default=None)
-    parser.add_argument("--in-place", action="store_true")
-    parser.add_argument(
-        "--context",
-        default=None,
-        help="free-text listing description to ground the notes (optional)",
-    )
-    parser.add_argument(
-        "--lang",
-        choices=sorted(LANGS),
-        default="sk",
-        help="language of notes/assessment — must match the target report (default: sk)",
-    )
-    parser.add_argument(
-        "--condition-only",
-        action="store_true",
-        help="skip per-photo evaluation; rebuild the condition assessment "
-        "from the notes already present in the payload (one model call)",
-    )
-    args = parser.parse_args()
-    L = LANGS[args.lang]
-
-    data = json.loads(args.payload.read_text(encoding="utf-8"))
-    context = listing_context(data, args.context, L)
+def enrich_payload(payload_path: Path, args: argparse.Namespace, L: dict[str, Any]) -> bool:
+    """Run the full enrichment for one payload file; returns success."""
+    data = json.loads(payload_path.read_text(encoding="utf-8"))
+    # Listing description grounds the notes; explicit --context wins, else the
+    # payload's own description (capped so the prompt stays photo-centric).
+    extra = args.context or ((data.get("property") or {}).get("description") or "")[:600]
+    context = listing_context(data, extra or None, L)
     metrics = (data.get("vision_analysis") or {}).get("image_metrics") or []
     if not metrics:
-        print("payload has no vision_analysis.image_metrics — nothing to evaluate")
-        return 1
+        print(f"{payload_path}: no vision_analysis.image_metrics — nothing to evaluate")
+        return False
 
     notes: list[str] = []
     if args.condition_only:
@@ -315,7 +302,7 @@ def main() -> int:
         ]
         if not notes:
             print("--condition-only needs existing per-photo notes in the payload")
-            return 1
+            return False
     else:
         for i, entry in enumerate(metrics, start=1):
             url = entry.get("url")
@@ -358,14 +345,58 @@ def main() -> int:
             "score_negatives": [s.strip() for s in cond["score_negatives"] if s.strip()],
         }
 
-    out = args.payload if args.in_place else (
-        args.out or args.payload.with_suffix(".ollama.json")
+    out = payload_path if args.in_place else (
+        args.out or payload_path.with_suffix(".ollama.json")
     )
     out.write_text(
         json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
     )
     print(f"written: {out}")
-    return 0
+    return True
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "payloads",
+        type=Path,
+        nargs="+",
+        help="one or more payload JSON files (batch runs write one "
+        "<input>.ollama.json each)",
+    )
+    parser.add_argument("--model", default="gemma3:27b")
+    parser.add_argument("--ollama-url", default="http://localhost:11434")
+    parser.add_argument("--out", type=Path, default=None)
+    parser.add_argument("--in-place", action="store_true")
+    parser.add_argument(
+        "--context",
+        default=None,
+        help="free-text listing description to ground the notes "
+        "(default: the payload's property.description when present)",
+    )
+    parser.add_argument(
+        "--lang",
+        choices=sorted(LANGS),
+        default="sk",
+        help="language of notes/assessment — must match the target report (default: sk)",
+    )
+    parser.add_argument(
+        "--condition-only",
+        action="store_true",
+        help="skip per-photo evaluation; rebuild the condition assessment "
+        "from the notes already present in the payload (one model call)",
+    )
+    args = parser.parse_args()
+    L = LANGS[args.lang]
+    if args.out and len(args.payloads) > 1:
+        parser.error("--out only makes sense with a single payload")
+
+    ok = True
+    for n, payload_path in enumerate(args.payloads, start=1):
+        if len(args.payloads) > 1:
+            print(f"=== [{n}/{len(args.payloads)}] {payload_path} ===")
+        ok = enrich_payload(payload_path, args, L) and ok
+    return 0 if ok else 1
 
 
 if __name__ == "__main__":

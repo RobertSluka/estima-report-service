@@ -89,7 +89,7 @@ def test_estima_makes_no_semantic_vision_claims():
     })
     html = render_html(EvaluationPayload.model_validate(payload))
 
-    assert "Listing Photo Quality" in html
+    assert "Photo-Based Assessment" in html
     for forbidden in (
         "Overall condition",
         "Vision-detected premium sauna",
@@ -246,7 +246,7 @@ def test_first_listing_photo_is_cover_hero_and_section_03_card():
     # (presentation) and once as its section-03 card with per-photo results.
     assert '<img class="cover-img"' in html
     assert html.count(img) == 2
-    assert html.index(img) < html.index("Listing Photo Quality")
+    assert html.index(img) < html.index("Photo-Based Assessment")
 
 
 def test_cover_falls_back_to_typographic_without_photos():

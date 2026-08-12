@@ -627,13 +627,62 @@
 </section>
 
 {# ======================== 03 LISTING PHOTO QUALITY ===================== #}
-{# Measurable photo statistics only — never a claim about the property's
-   condition, and never a price adjustment. Listing photos are shown large
-   (two per page), each with its per-photo metrics when the payload provides
-   them; the gallery-level result closes the section. #}
+{# Photo-based assessment: the payload-authored condition score leads as a
+   standalone card, its element-by-element assessment sits under it, and the
+   photo evidence (large cards with per-photo metrics) follows; the
+   gallery-level technical result still closes the section. Local pixel
+   metrics never author a condition claim or a price adjustment. #}
 {% set photo_images = (property.images or vision_analysis.images) %}
 <section class="section page-break">
   <div class="section-head"><span class="section-num">03</span><h2 class="section-title">{{ T.sec_vision }}</h2></div>
+
+  {% if condition_assessment and condition_assessment.available %}
+  {% set ca = condition_assessment %}
+  {# Standalone headline score in its own frame — upstream-authored, same
+     provenance as the assessment below, never derived from local metrics. #}
+  {% if ca.overall_score is not none %}
+  <div class="reno-hero avoid-break" style="margin-bottom:10pt">
+    <div class="reno-score"><span class="n">{{ ca.overall_score | num(0) }}</span><span class="d">/100</span></div>
+    <div class="reno-info">
+      <div class="reno-kicker">{{ T.cond_score }}</div>
+      {% if ca.overall_label %}<div class="reno-state">{{ ca.overall_label }}</div>{% endif %}
+      <div class="meter-track" style="width:100%"><div class="meter-fill" style="width:{{ [ca.overall_score, 100] | min | num(0) }}%"></div></div>
+      {# Payload-authored score drivers — the template never invents reasons. #}
+      {% if ca.score_positives %}
+      <div class="reno-why"><span class="rw plus">{{ T.cond_plus }}:</span> {{ ca.score_positives | join(" · ") }}</div>
+      {% endif %}
+      {% if ca.score_negatives %}
+      <div class="reno-why"><span class="rw minus">{{ T.cond_minus }}:</span> {{ ca.score_negatives | join(" · ") }}</div>
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
+
+  {# Element-by-element indicative assessment + explanation, under the score. #}
+  {% if ca.items %}
+  <div class="avoid-break" style="margin-bottom:10pt">
+    <h3 class="overall-head">{{ T.condition_title }}</h3>
+    <table class="data-table">
+      <thead>
+        <tr><th style="width:22%">{{ T.cond_element }}</th><th style="width:24%">{{ T.cond_state }}</th><th>{{ T.cond_note }}</th></tr>
+      </thead>
+      <tbody>
+        {% for it in ca.items %}
+        <tr>
+          <td style="font-weight:600">{{ it.element | dash }}</td>
+          <td>{{ it.state | dash }}</td>
+          <td>{{ it.note | dash }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% if ca.summary %}<div class="callout">{{ ca.summary }}</div>{% endif %}
+    <p class="muted" style="font-size:7.5pt; margin-top:3pt">
+      {{ T.condition_footnote }}{% if ca.source %} {{ T.cond_source }}: {{ ca.source }}.{% endif %}
+    </p>
+  </div>
+  {% endif %}
+  {% endif %}
 
   {% if photo_images %}
   {% set photo_metrics = vision_analysis.image_metrics or [] %}
@@ -665,54 +714,6 @@
   </div>
   {% endfor %}
   <p class="muted" style="font-size:7.5pt; margin:0 0 6pt">{{ T.photos_note }}</p>
-  {% endif %}
-
-  {# Indicative condition assessment — rendered only when the payload carries
-     one (human- or model-authored upstream). This is payload data, never a
-     claim derived from the local photo-quality metrics above. #}
-  {% if condition_assessment and condition_assessment.available and condition_assessment.items %}
-  {% set ca = condition_assessment %}
-  <div class="avoid-break" style="margin-top:6pt">
-    <h3 class="overall-head">{{ T.condition_title }}</h3>
-    {# Buyer-facing headline: upstream-authored renovation score, same
-       provenance as the table below — never derived from local metrics. #}
-    {% if ca.overall_score is not none %}
-    <div class="reno-hero">
-      <div class="reno-score"><span class="n">{{ ca.overall_score | num(0) }}</span><span class="d">/100</span></div>
-      <div class="reno-info">
-        <div class="reno-kicker">{{ T.cond_score }}</div>
-        {% if ca.overall_label %}<div class="reno-state">{{ ca.overall_label }}</div>{% endif %}
-        <div class="meter-track" style="width:100%"><div class="meter-fill" style="width:{{ [ca.overall_score, 100] | min | num(0) }}%"></div></div>
-        {# Payload-authored score drivers — same provenance as the score
-           itself; the template never invents reasons. #}
-        {% if ca.score_positives %}
-        <div class="reno-why"><span class="rw plus">{{ T.cond_plus }}:</span> {{ ca.score_positives | join(" · ") }}</div>
-        {% endif %}
-        {% if ca.score_negatives %}
-        <div class="reno-why"><span class="rw minus">{{ T.cond_minus }}:</span> {{ ca.score_negatives | join(" · ") }}</div>
-        {% endif %}
-      </div>
-    </div>
-    {% endif %}
-    <table class="data-table">
-      <thead>
-        <tr><th style="width:22%">{{ T.cond_element }}</th><th style="width:24%">{{ T.cond_state }}</th><th>{{ T.cond_note }}</th></tr>
-      </thead>
-      <tbody>
-        {% for it in ca.items %}
-        <tr>
-          <td style="font-weight:600">{{ it.element | dash }}</td>
-          <td>{{ it.state | dash }}</td>
-          <td>{{ it.note | dash }}</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-    {% if ca.summary %}<div class="callout">{{ ca.summary }}</div>{% endif %}
-    <p class="muted" style="font-size:7.5pt; margin-top:3pt">
-      {{ T.condition_footnote }}{% if ca.source %} {{ T.cond_source }}: {{ ca.source }}.{% endif %}
-    </p>
-  </div>
   {% endif %}
 
   {% if vision_analysis.available %}
