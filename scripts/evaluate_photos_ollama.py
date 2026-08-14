@@ -87,16 +87,38 @@ NOTE_SCHEMA = {
     "type": "object",
     "properties": {
         "room": {"type": "string"},
+        # A list, NOT an object with five nullable keys: required-but-nullable
+        # fields pressure the model into confabulating (it invented panel
+        # radiators and air conditioning in rooms that show neither). An empty
+        # list is the natural "nothing assessable here" answer.
         "elements": {
-            "type": "object",
-            "properties": {k: {"type": ["string", "null"]} for k in _ELEMENT_KEYS},
-            "required": list(_ELEMENT_KEYS),
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "element": {"type": "string", "enum": list(_ELEMENT_KEYS)},
+                    "state": {"type": "string"},
+                    # Forcing the model to localize what it claims suppresses
+                    # prior-driven confabulation ("a flat must have radiators").
+                    "evidence": {"type": "string"},
+                },
+                "required": ["element", "state", "evidence"],
+            },
         },
         "features": {"type": "array", "items": {"type": "string"}, "maxItems": 3},
         "staging_signs": {"type": ["string", "null"]},
-        "note": {"type": "string"},
     },
-    "required": ["room", "elements", "features", "staging_signs", "note"],
+    "required": ["room", "elements", "features", "staging_signs"],
+}
+
+# Prose notes are composed by the *language* model from the extraction above,
+# not by the vision model: the best-grounded vision model (qwen2.5vl) writes
+# Czech-contaminated Slovak, while gemma3:27b writes clean Slovak but
+# confabulates unseen elements. Split the jobs, keep both strengths.
+NOTES_SCHEMA = {
+    "type": "object",
+    "properties": {"notes": {"type": "array", "items": {"type": "string"}}},
+    "required": ["notes"],
 }
 
 CONDITION_SCHEMA = {
@@ -138,20 +160,36 @@ LANGS: dict[str, dict[str, Any]] = {
             "- `room`: typ miestnosti/záberu. Rešpektuj dispozíciu z kontextu — "
             "kuchynský kút bez linky spoznáš podľa prívodu vody a zásuviek v pracovnej "
             "výške; chodbu podľa vstupných dverí alebo viacerých dverných otvorov.\n"
-            "- `elements`: stav LEN toho, čo na fotografii jasne vidno, inak null: "
-            "`floors` (typ a stav podlahy), `walls` (povrch, nedokončené miesta), "
-            "`windows` (materiál/typ), `heating` (typ radiátora — nový panelový vs. "
-            "staré rebrové teleso), `doors` (interiérové/vstupné; chýbajúce dvere a "
-            "surové zárubne VŽDY uveď).\n"
-            "- `features`: 0–3 detaily užitočné pre kupujúceho (bezpečnostné dvere, "
-            "prívod vody, nová elektroinštalácia/istič, klimatizácia a pod.).\n"
+            "- `elements`: zoznam LEN tých prvkov, ktoré sú na TEJTO fotografii "
+            "priamo viditeľné. Prvok, ktorý na zábere nevidno, VYNECHAJ — "
+            "nedopĺňaj ho z domnienok ani z iných miestností; prázdny zoznam je "
+            "správna odpoveď. Možnosti: `floors` (typ a stav podlahy), `walls` "
+            "(povrch, nedokončené miesta), `windows` (materiál/typ), `heating` "
+            "(iba ak je radiátor skutočne v zábere — rozlíš nový panelový vs. staré "
+            "rebrové teleso), `doors` (chýbajúce dvere a surové zárubne VŽDY uveď). "
+            "VSTUPNÉ (bezpečnostné) dvere smieš uviesť LEN vtedy, ak je na zábere "
+            "predsieň alebo chodba so vstupom do bytu — teda dvere s bezpečnostným "
+            "kovaním, viacbodovým zámkom alebo domovým zvončekom/rozvádzačom. "
+            "Dvere medzi izbami sú vždy `interiérové dvere`. "
+            "Ku každému prvku povinne uveď `evidence` — kde presne na fotografii ho "
+            "vidno (napr. 'pod oknom vľavo', 'v pravom dolnom rohu'). Ak nevieš miesto "
+            "pomenovať, prvok do zoznamu NEDÁVAJ. Všetky hodnoty píš po slovensky.\n"
+            "- `features`: 0–3 detaily užitočné pre kupujúceho, ktoré NA TEJTO fotografii "
+            "skutočne vidno (bezpečnostné vstupné dvere, prívod vody, nový istič, "
+            "klimatizácia). Nič, čo nevidno, neuvádzaj — prázdny zoznam je v poriadku.\n"
             "- `staging_signs`: konkrétne znaky počítačového renderu (nereálne tiene, "
             "dokonale hladké textúry, nábytok nesediaci s perspektívou), inak null — "
-            "moderné zariadenie samo osebe nie je staging.\n"
-            "- `note`: JEDNA vecná veta (max. 30 slov) zložená z vyššie uvedeného: "
-            "miestnosť — čo vidno a v akom stave. ZAKÁZANÉ sú subjektívne prívlastky "
-            "(priestranný, vkusný, pekný, útulný, moderný bez opory) a akékoľvek "
-            "hodnotenie ceny."
+            "moderné zariadenie samo osebe nie je staging."
+        ),
+        "notes_prompt": (
+            "Si asistent realitnej kancelárie. Nižšie sú štruktúrované pozorovania "
+            "z fotografií jedného inzerátu. Pre KAŽDÚ fotografiu napíš jednu vecnú "
+            "vetu po slovensky (max. 30 slov) v tvare: miestnosť — čo vidno a v akom "
+            "stave. Vychádzaj VÝLUČNE z pozorovaní k danej fotografii; nič nedomýšľaj. "
+            "ZAKÁZANÉ sú subjektívne prívlastky (priestranný, vkusný, pekný, útulný) "
+            "a akékoľvek hodnotenie ceny. Vráť pole `notes` s rovnakým počtom viet, "
+            "ako je fotografií, v rovnakom poradí. Píš spisovnou slovenčinou.\n\n"
+            "Pozorovania:\n{observations}"
         ),
         "condition_prompt": (
             "Si asistent realitnej kancelárie. Nižšie sú štruktúrované pozorovania "
@@ -203,20 +241,36 @@ LANGS: dict[str, dict[str, Any]] = {
             "- `room`: typ místnosti/záběru. Respektuj dispozici z kontextu — "
             "kuchyňský kout bez linky poznáš podle přívodu vody a zásuvek v pracovní "
             "výšce; chodbu podle vstupních dveří nebo více dveřních otvorů.\n"
-            "- `elements`: stav JEN toho, co je na fotografii jasně vidět, jinak null: "
-            "`floors` (typ a stav podlahy), `walls` (povrch, nedokončená místa), "
-            "`windows` (materiál/typ), `heating` (typ radiátoru — nový panelový vs. "
-            "staré žebrové těleso), `doors` (interiérové/vstupní; chybějící dveře a "
-            "surové zárubně VŽDY uveď).\n"
-            "- `features`: 0–3 detaily užitečné pro kupujícího (bezpečnostní dveře, "
-            "přívod vody, nová elektroinstalace/jistič, klimatizace apod.).\n"
+            "- `elements`: seznam POUZE těch prvků, které jsou na TÉTO fotografii "
+            "přímo viditelné. Prvek, který na záběru není vidět, VYNECHEJ — "
+            "nedoplňuj ho z domněnek ani z jiných místností; prázdný seznam je "
+            "správná odpověď. Možnosti: `floors` (typ a stav podlahy), `walls` "
+            "(povrch, nedokončená místa), `windows` (materiál/typ), `heating` "
+            "(jen pokud je radiátor skutečně v záběru — rozliš nový panelový vs. staré "
+            "žebrové těleso), `doors` (chybějící dveře a surové zárubně VŽDY uveď). "
+            "VSTUPNÍ (bezpečnostní) dveře smíš uvést POUZE tehdy, je-li na záběru "
+            "předsíň nebo chodba se vstupem do bytu — tedy dveře s bezpečnostním "
+            "kováním, vícebodovým zámkem nebo domovním zvonkem/rozvaděčem. "
+            "Dveře mezi pokoji jsou vždy `interiérové dveře`. "
+            "Ke každému prvku povinně uveď `evidence` — kde přesně na fotografii je "
+            "vidět (např. 'pod oknem vlevo', 'v pravém dolním rohu'). Pokud místo "
+            "neumíš pojmenovat, prvek do seznamu NEDÁVEJ. Všechny hodnoty piš česky.\n"
+            "- `features`: 0–3 detaily užitečné pro kupujícího, které NA TÉTO fotografii "
+            "skutečně vidíš (bezpečnostní vstupní dveře, přívod vody, nový jistič, "
+            "klimatizace). Nic, co není vidět, neuváděj — prázdný seznam je v pořádku.\n"
             "- `staging_signs`: konkrétní známky počítačového renderu (nereálné stíny, "
             "dokonale hladké textury, nábytek nesedící s perspektivou), jinak null — "
-            "moderní zařízení samo o sobě staging není.\n"
-            "- `note`: JEDNA věcná věta (max. 30 slov) složená z výše uvedeného: "
-            "místnost — co je vidět a v jakém stavu. ZAKÁZANÁ jsou subjektivní přídavná "
-            "jména (prostorný, vkusný, pěkný, útulný, moderní bez opory) a jakékoli "
-            "hodnocení ceny."
+            "moderní zařízení samo o sobě staging není."
+        ),
+        "notes_prompt": (
+            "Jsi asistent realitní kanceláře. Níže jsou strukturovaná pozorování "
+            "z fotografií jednoho inzerátu. Pro KAŽDOU fotografii napiš jednu věcnou "
+            "větu česky (max. 30 slov) ve tvaru: místnost — co je vidět a v jakém "
+            "stavu. Vycházej VÝHRADNĚ z pozorování k dané fotografii; nic nedomýšlej. "
+            "ZAKÁZANÁ jsou subjektivní přídavná jména (prostorný, vkusný, pěkný, útulný) "
+            "a jakékoli hodnocení ceny. Vrať pole `notes` se stejným počtem vět, "
+            "jako je fotografií, ve stejném pořadí. Piš spisovnou češtinou.\n\n"
+            "Pozorování:\n{observations}"
         ),
         "condition_prompt": (
             "Jsi asistent realitní kanceláře. Níže jsou strukturovaná pozorování "
@@ -337,15 +391,15 @@ def evidence_line(photo_word: str, index: int, r: dict[str, Any]) -> str:
     re-drop the details the structured pass exists to keep.
     """
     parts = [f"{photo_word} {index} — {r.get('room', '?')}"]
-    for key in _ELEMENT_KEYS:
-        value = (r.get("elements") or {}).get(key)
-        if value:
-            parts.append(f"{key}: {value}")
+    for item in r.get("elements") or []:
+        if item.get("element") and item.get("state"):
+            parts.append(f"{item['element']}: {item['state']}")
     if r.get("features"):
         parts.append("detaily: " + ", ".join(r["features"]))
     if r.get("staging_signs"):
         parts.append(f"staging: {r['staging_signs']}")
-    parts.append(f"poznámka: {r.get('note', '')}")
+    if r.get("note"):
+        parts.append(f"poznámka: {r['note']}")
     return "; ".join(parts)
 
 
@@ -362,6 +416,7 @@ def enrich_payload(payload_path: Path, args: argparse.Namespace, L: dict[str, An
         return False
 
     notes: list[str] = []
+    extractions: list[tuple[int, dict[str, Any], dict[str, Any]]] = []
     if args.condition_only:
         notes = [
             f"{L['photo_word']} {i}: {entry['note']}"
@@ -384,15 +439,36 @@ def enrich_payload(payload_path: Path, args: argparse.Namespace, L: dict[str, An
                 continue
             result = ollama_chat(
                 args.ollama_url,
-                args.model,
+                args.vision_model,
                 L["note_prompt"].format(context=context),
                 NOTE_SCHEMA,
                 images=[image],
             )
-            note = result["note"].strip()
-            entry["note"] = note
+            extractions.append((i, entry, result))
             notes.append(evidence_line(L["photo_word"], i, result))
-            print(f"    [{result.get('room', '?')}] {note}")
+            summary = ", ".join(
+                f"{e['element']}={e['state']}" for e in result.get("elements") or []
+            )
+            print(f"    [{result.get('room', '?')}] {summary or '(nič jednoznačné)'}")
+
+        # One text-only pass composes every prose note from the extractions —
+        # the grounded vision model's own prose mixes Slovak with Czech.
+        if extractions:
+            print("composing photo notes …")
+            composed = ollama_chat(
+                args.ollama_url,
+                args.model,
+                L["notes_prompt"].format(observations="\n".join(notes)),
+                NOTES_SCHEMA,
+            )["notes"]
+            for (idx, entry, result), note in zip(extractions, composed):
+                entry["note"] = note.strip()
+                result["note"] = note.strip()
+            # Re-emit evidence lines now that they carry the composed prose.
+            notes = [
+                evidence_line(L["photo_word"], idx, result)
+                for idx, _entry, result in extractions
+            ]
 
     if notes:
         print("assembling condition assessment …")
@@ -432,7 +508,20 @@ def main() -> int:
         help="one or more payload JSON files (batch runs write one "
         "<input>.ollama.json each)",
     )
-    parser.add_argument("--model", default="gemma3:27b")
+    parser.add_argument(
+        "--model",
+        default="gemma3:27b",
+        help="language model: composes the prose notes and the condition "
+        "assessment (default: gemma3:27b — cleanest Slovak/Czech)",
+    )
+    parser.add_argument(
+        "--vision-model",
+        default="gemma3:12b",
+        help="vision model: per-photo element extraction. gemma3:12b is the "
+        "default because it omits elements it cannot see, where gemma3:27b "
+        "invents a radiator in every room; qwen2.5vl:32b grounds well too but "
+        "mixes Czech into Slovak and mislabels rooms",
+    )
     parser.add_argument("--ollama-url", default="http://localhost:11434")
     parser.add_argument("--out", type=Path, default=None)
     parser.add_argument("--in-place", action="store_true")

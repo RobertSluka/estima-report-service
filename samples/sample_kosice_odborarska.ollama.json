@@ -261,91 +261,91 @@
         "photo_quality": 70,
         "brightness": 51,
         "sharpness": 64,
-        "note": "Obývacia izba — priestranný a svetlý interiér s moderným nábytkom a výhľadom do zelene."
+        "note": "Obývacia izba — obsahuje drevenú podlahu, biele maľované steny a panelový radiátor."
       },
       {
         "url": "https://www.bazos.sk/img/2/291/193231291.jpg",
         "photo_quality": 70,
         "brightness": 49,
         "sharpness": 61,
-        "note": "Spálňa — priestranná izba s manželskou posteľou, oknami a minimalistickým zariadením."
+        "note": "Spálňa — má drevenú podlahu, biele maľované steny a rebrový radiátor s mriežkou na oknách."
       },
       {
         "url": "https://www.bazos.sk/img/3/291/193231291.jpg",
         "photo_quality": 74,
         "brightness": 50,
         "sharpness": 70,
-        "note": "Kuchyňa — moderná kuchynská linka so vstavanými spotrebičmi a drevenými detailmi, v dobrom stave."
+        "note": "Kuchynský kút — obsahuje drevenú podlahu, bielu hladkú omietku a rebrový radiátor so zásuvkami vo výške pracovnej plochy."
       },
       {
         "url": "https://www.bazos.sk/img/4/291/193231291.jpg",
         "photo_quality": 65,
         "brightness": 56,
         "sharpness": 54,
-        "note": "Obývacia izba/záber z priestoru — prázdna izba s laminátovou podlahou a oknom s výhľadom na mesto."
+        "note": "Izba — má hnedú drevenú podlahu, biele steny a panelový radiátor s mriežkou na oknách."
       },
       {
         "url": "https://www.bazos.sk/img/5/291/193231291.jpg",
         "photo_quality": 65,
         "brightness": 54,
         "sharpness": 53,
-        "note": "Obývacia izba/záber — priestranná izba s drevenou podlahou a oknami, steny vo svetlej farbe."
+        "note": "Izba — obsahuje svetlohnedú drevenú podlahu, biele maľované steny a plastové okná s dvojitým sklom."
       },
       {
         "url": "https://www.bazos.sk/img/6/291/193231291.jpg",
         "photo_quality": 67,
         "brightness": 62,
         "sharpness": 60,
-        "note": "Obývacia izba/záber z rohu — prázdna miestnosť s laminátovou podlahou a bielymi stenami, vidno elektrické zásuvky a radiátor."
+        "note": "Izba — má hnedú drevenú podlahu, bielu štukatúru na stenách a vertikálne žalúzie na oknách."
       },
       {
         "url": "https://www.bazos.sk/img/7/291/193231291.jpg",
         "photo_quality": 68,
         "brightness": 60,
         "sharpness": 61,
-        "note": "Obývacia izba/záber – Prázdna izba s laminátovou podlahou a bielymi stenami, radiátor pod oknom."
+        "note": "Izba — obsahuje tmavú drevenú podlahu, biele maľované steny a panelový radiátor."
       },
       {
         "url": "https://www.bazos.sk/img/8/291/193231291.jpg",
         "photo_quality": 72,
         "brightness": 55,
         "sharpness": 79,
-        "note": "Kúpeľňa — moderná kúpeľňová zostava so sprchovým kútom a umývadlom, obklady vo svetlých tónoch."
+        "note": "Kúpelňa — má svetlohnedú keramickú dlažbu, obkladané steny a sklenené dvere sprchy s kovovým rámom."
       },
       {
         "url": "https://www.bazos.sk/img/9/291/193231291.jpg",
         "photo_quality": 71,
         "brightness": 57,
         "sharpness": 79,
-        "note": "Kúpeľňa — sprchovací kút so sklenenými dverami a obkladom, vo veľmi dobrom stave."
+        "note": "Kúpelňa — obsahuje tmavú keramickú dlažbu, obložené steny a posuvné dvere sprchovacieho kúta s kovovým rámom."
       },
       {
         "url": "https://www.bazos.sk/img/10/291/193231291.jpg",
         "photo_quality": 64,
         "brightness": 56,
         "sharpness": 52,
-        "note": "Kúpeľňa — záber na toaletu s umývadlom a obkladom stien a podlahy, stav udržiavaný."
+        "note": "Kúpelňa — má hnedú keramickú dlažbu, kombináciu keramickej dlažby a drevenej obkladovej dosky na stenách."
       },
       {
         "url": "https://www.bazos.sk/img/11/291/193231291.jpg",
         "photo_quality": 83,
         "brightness": 44,
         "sharpness": 91,
-        "note": "Exteriér — Pohľad na rieku a brehovú vegetáciu s previsnutými stromami; krajina v dobrom stave."
+        "note": "Vonkajší priestor — obsahuje trávnik, miestami zvetraný a s machom."
       },
       {
         "url": "https://www.bazos.sk/img/12/291/193231291.jpg",
         "photo_quality": 84,
         "brightness": 41,
         "sharpness": 92,
-        "note": "Exteriér — Pohľad do záhrady s trávnikom a stromami, slnečný deň."
+        "note": "Chodba — má drevenú podlahu imitujúcu svetlohnedé drevo, biele hladké steny a interiérové dvere."
       },
       {
         "url": "https://www.bazos.sk/img/13/291/193231291.jpg",
         "photo_quality": 66,
         "brightness": 59,
         "sharpness": 57,
-        "note": "Vstupná chodba — priestranná chodba s dvomi vchodmi do izieb a kúpeľne, vo výbornom stave."
+        "note": "Chodba — obsahuje vstupné bezpečnostné dvere s kovaním, interiérové dvere a surovú zárubňu."
       }
     ]
   },
@@ -381,54 +381,54 @@
     "items": [
       {
         "element": "Podlahy",
-        "state": "Kombinácia laminátu a dreva",
-        "note": "V obývacej izbe sa vyskytuje ako laminátová, tak aj drevená podlaha. V kúpeľni je viditeľný obklad."
+        "state": "Po rekonštrukcii/Pôvodný stav",
+        "note": "V celom byte drevené podlahy v rôznych odtieňoch hnedého a svetlohnedého. V kúpeľni keramická dlažba."
       },
       {
         "element": "Steny a stropy",
-        "state": "Po rekonštrukcii/Udržiavané",
-        "note": "Steny sú vo svetlých farbách, v kúpeľni s obkladom. Stropy pôsobia udržiavane."
+        "state": "Po rekonštrukcii/Udržiavaný stav",
+        "note": "Maľované biele steny, miestami s viditeľnou štukatúrou. V kúpeľni keramický obklad v kombinácii hnedých a béžových odtieňov."
       },
       {
         "element": "Kuchyňa",
-        "state": "Po rekonštrukcii",
-        "note": "Moderná kuchynská linka so vstavanými spotrebičmi a drevenými detailmi, v dobrom stave."
+        "state": "Pôvodný stav/Udržiavaný stav",
+        "note": "Kuchynský kút s drevenou podlahou, bielou hladkou omietkou a zásuvkami vo výške pracovnej plochy."
       },
       {
         "element": "Kúpeľňa a WC",
-        "state": "Po rekonštrukcii/Udržiavané",
-        "note": "Moderná kúpeľňová zostava so sprchovým kútom, umývadlom a obkladmi vo svetlých tónoch. Toaleta udržiavaná."
+        "state": "Po rekonštrukcii/Udržiavaný stav",
+        "note": "Kúpelňa s keramickou dlažbou, obkladanými stenami a moderným vybavením (umývadlo, sprchovací kút)."
       },
       {
         "element": "Okná",
-        "state": "Nové/Udržiavané",
-        "note": "V každej miestnosti sú viditeľné okná s výhľadom do zelene alebo na mesto, pôsobia v dobrom stave."
+        "state": "Po rekonštrukcii",
+        "note": "Plastové okná s mriežkou alebo žalúziami v celom byte."
       },
       {
         "element": "Vykurovanie",
-        "state": "Radiátory",
-        "note": "Vo viacerých miestnostiach sú viditeľné radiátory pod oknami."
+        "state": "Pôvodný stav/Udržiavaný stav",
+        "note": "Panelové a rebrové radiátory v izbách a kúpeľni."
       },
       {
         "element": "Vstupné dvere",
-        "state": "Nejednoznačné z fotografií",
-        "note": "Fotografie nezobrazujú vstupné dvere, preto nie je možné posúdiť ich stav."
+        "state": "Po rekonštrukcii",
+        "note": "Bezpečnostné vstupné dvere s kovaním a domovým zvončekom/rozvádzačom."
       }
     ],
-    "summary": "Byt pôsobí svetlo a priestranne. Kúpeľňa a kuchyňa prešli rekonštrukciou, obývacia izba má rôzne typy podláh a steny sú vo svetlých farbách. Je pravdepodobné, že niektoré zábery zobrazujú virtuálny home staging.",
-    "overall_score": 70,
-    "overall_label": "Čiastočne zrekonštruovaný",
+    "summary": "Byt pôsobí celkovo udržiavaným dojmom, pričom podlahy a okná prešli rekonštrukciou. Kúpeľňa je moderná a po úprave. V niektorých miestnostiach sú viditeľné známky opotrebenia alebo štukatúra na stenách. Je potrebné overiť stav vonkajšieho priestoru.",
+    "overall_score": 65,
+    "overall_label": "Čiastočne renovovaný",
     "score_positives": [
-      "Moderná kuchyňa a kúpeľňa",
-      "Svetlé interiéry",
-      "Udržiavaný stav",
-      "Výhľad do zelene/mesta"
+      "Rekonštrukcia okien a podláh",
+      "Moderná kúpeľňa",
+      "Bezpečnostné vstupné dvere",
+      "Udržiavaný interiér"
     ],
     "score_negatives": [
-      "Rôzne typy podláh v obývacej izbe",
-      "Neistota ohľadom home stagingu",
-      "Nedostatočné informácie o vstupných dverách",
-      "Chýbajúce detaily o vykurovaní"
+      "Mierne opotrebenie podlahy",
+      "Štukatúra na stenách (môže byť subjektívne)",
+      "Neistota ohľadom vonkajšieho priestoru",
+      "Zmiešaný stav kúpeľne (rôzne dlažby)"
     ]
   }
 }

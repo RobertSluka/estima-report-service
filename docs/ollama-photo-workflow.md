@@ -1,7 +1,7 @@
 ---
 aliases: [Ollama photo eval, photo enrichment pipeline]
 tags: [estima, report-service, ollama, vision, workflow]
-updated: 2026-08-12
+updated: 2026-08-12 (v3 — split vision/language models)
 status: production-ready (local), backend wiring pending
 ---
 
@@ -24,10 +24,12 @@ long-standing no-cloud-AI rule for the Estima runtime).
 ```mermaid
 flowchart LR
     A[payload JSON\nwith photo URLs] --> B[evaluate_photos_ollama.py]
-    B -->|photo + context prompt| C[Ollama\nlocalhost:11434\ngemma3:27b]
-    C -->|note per photo| B
-    B -->|all notes, 2nd prompt| C
-    C -->|condition table + score| B
+    B -->|each photo + context| V[vision model\ngemma3:12b]
+    V -->|room + elements + evidence| B
+    B -->|all observations| G[language model\ngemma3:27b]
+    G -->|prose note per photo| B
+    B -->|observations + notes| G
+    G -->|condition table + score| B
     B --> D[payload.ollama.json]
     D --> E[report-service\nPOST /reports/generate]
     E --> F[PDF · section 03]
@@ -37,40 +39,103 @@ flowchart LR
    is downloaded (SSRF-guarded: public hosts only, redirects re-validated,
    25 MB cap), base64-encoded and sent to the model with a *listing context*
    block (title, dispozícia, m², lokalita + `property.description`
-   auto-included, capped at 600 chars). Output is schema-forced JSON → one
-   factual note per photo.
-2. **Assembly pass** — all notes go back in one prompt → condition `items`
-   (Podlahy, Kuchyňa, …), `summary`, `overall_score` 0–100, `overall_label`,
-   and the score drivers (`score_positives` / `score_negatives`).
-3. **Render** — the enriched JSON goes through report-service unchanged.
+   auto-included, capped at 600 chars). Output is a **structured extraction**
+   (schema-forced JSON): `room`, per-element states (`floors`/`walls`/
+   `windows`/`heating`/`doors`, null unless clearly visible), buyer-relevant
+   `features` and `staging_signs`. Each element carries an `evidence` string
+   locating it in the frame. **Elements are a list, not fixed nullable keys** —
+   required-but-nullable fields pressure the model into confabulating, which is
+   exactly how "panelový radiátor" appeared in rooms that have none.
+2. **Note composition** — one text-only call turns all observations into the
+   per-photo prose notes (subjective adjectives banned by prompt). Done by the
+   language model, so the grounded-but-Czech-leaking vision output never
+   reaches the report.
+3. **Assembly pass** — the full element-level evidence (not just the prose
+   notes) goes back in one prompt → condition `items`, `summary`,
+   `overall_score` 0–100, `overall_label`, and the score drivers
+   (`score_positives` / `score_negatives`). The prompt pins the room count to
+   the layout (repeat shots ≠ extra rooms) and owns the gallery-level staging
+   tell (same room empty + furnished ⇒ renders).
+4. **Render** — the enriched JSON goes through report-service unchanged.
    The service never talks to Ollama; rendering stays deterministic and
    deployable on the GPU-less VPS.
 
-## Model choice (A/B, 2026-08-12)
+## Model choice — two models, split by job
 
-13-photo Košice/Odborárska gallery, same prompts, M5 Pro 48 GB:
+The pipeline deliberately uses **two** models, because no single local model is
+good at both jobs:
 
-| | gemma3:27b (default) | gemma3:12b |
+| | extraction (per photo) | prose + assembly |
 |---|---|---|
-| Wall time (13 photos + assembly) | **4 min 50 s** | **1 min 12 s** |
-| Slovak grammar | clean | case/gender errors ("s rohovou sprchovacím kútom"), misspellings |
-| Hallucination | none observed | "masážny panel"; context leaked into notes |
-| Verdict | **production output** | drafts/smoke-tests only |
+| **default** | `gemma3:12b` (`--vision-model`) | `gemma3:27b` (`--model`) |
+| why | omits what it cannot see | clean Slovak/Czech |
 
-Both installed via `ollama pull gemma3:27b` (17 GB) / `gemma3:12b` (8.1 GB).
-Ollama unloads models after ~5 min idle → zero footprint when not in use.
+### Grounding benchmark (2026-08-12)
+
+Absence detection is the discriminator. Control set: Ťahanovce photos 2 and 7
+(**no radiator in frame**) and photo 4 (**old sectional radiator**, verified by
+cropping the original at full resolution).
+
+| model | controls passed | heating claimed across 12 photos | notes |
+|---|---|---|---|
+| gemma3:27b | 0 / 3 | **12 / 12** | canned "panelový radiátor @ pod oknom vľavo" everywhere, even with a required `evidence` field |
+| qwen2.5vl:32b | **3 / 3** | 5 / 12 | best grounding (named the sectional radiator correctly) but mixes Czech into Slovak, mislabels living rooms as bedrooms, calls every floor "parketová" |
+| **gemma3:12b** | **3 / 3** | **2 / 12** | correct room labels, caught "radiátor rebrového typu"; prose too weak to use directly → 27b composes |
+
+Ground truth matters here: those radiators are **old sectional units**, i.e. a
+renovation *cost*. The 27b-only pipeline reported "Panelové radiátory
+udržiavané" as a score **positive** — wrong type, wrong direction, on the
+public showcase listing. That single finding is why the split exists.
+
+### Timing (12-photo gallery, M5 Pro 48 GB)
+
+| config | wall time |
+|---|---|
+| 12b extract + 27b compose/assemble (**default**) | **4 min** |
+| qwen2.5vl:32b extract + 27b | 8 min |
+| 27b for everything (old) | 5 min, and ungrounded |
+
+Installed: `gemma3:27b` (17 GB), `gemma3:12b` (8.1 GB), `qwen2.5vl:32b` (21 GB).
+Ollama unloads after ~5 min idle → zero footprint when not in use.
+
+> [!warning] Known remaining weaknesses
+> - **Entrance doors**: the prompt now permits a "bezpečnostné vstupné dvere"
+>   claim only in an entry/hallway shot with real evidence (security hardware,
+>   multipoint lock, intercom/fuse box). Odborárska went 4 false claims → 0
+>   (only the true hallway, photo 13). Ťahanovce still produces 2 false claims
+>   out of 12, and they reach the score positives. Not solved, just reduced.
+> - **Radiator type** (panel vs sectional) is unreliable in *both* directions —
+>   Odborárska's genuinely new panel radiators get read as "pôvodný stav".
+>   Presence detection is now sound; type is not.
+>
+> Rule of thumb: the pipeline is trustworthy about *what is in the frame*,
+> and still shaky about *what kind of thing it is*.
 
 ## Prompt design decisions
 
+- **Structured extraction beats prose notes — but only with a grounded
+  extractor.** The scorer never sees pixels, only what the per-photo pass
+  captured, so a single 25-word note dropped exactly the buyer-relevant
+  evidence (radiator type, raw door jambs, water hookups). Itemizing recovered
+  it: on Odborárska the unfinished bathroom/hallway are now called out instead
+  of "vo výbornom stave". The catch: itemizing *also* multiplies confabulation
+  if the extractor answers about things it cannot see — hence the model split
+  and the list-shaped `elements` schema.
 - **Staging detection is two-tier.** Per-photo prompts flag virtual staging
   only on concrete render evidence (unreal shadows/reflections, perfect
   textures, perspective mismatch) — modern furniture alone is *not* staging.
   The assembly prompt adds the reliable gallery-level tell: *the same room
   appearing both empty and furnished* ⇒ staged renders. (One-tier variants
   either over-flagged real bathrooms or missed staging entirely.)
+- **Room labels are layout-constrained** — the assembly prompt pins the room
+  count to the dispozícia so eight shots of one obývačka don't become eight
+  rooms; the per-photo prompt teaches the kitchen-corner tell (water hookup +
+  counter-height outlets) for unfitted kitchens.
 - **Score rubric is anchored** (100 = complete new renovation, 50 = partly
   renovated/maintained original, 0 = derelict) and explicitly scores the
   *property*, not the photos.
+- **Deterministic decoding** (`temperature 0`, fixed seed) — 0.2 gave a ±5
+  score drift on identical input.
 - **Descriptive text only.** No prices, no value estimates — the semantic
   content is upstream-authored payload data (`condition_assessment`), never
   derived from pixel metrics; the guardrail test in `tests/test_estima_style.py`
@@ -82,13 +147,14 @@ Ollama unloads models after ~5 min idle → zero footprint when not in use.
 |---|---|
 | `payloads…` | one or more payload JSONs — batch runs write one `.ollama.json` each |
 | `--lang sk\|cs` | prompt/string pack; must match the target report language |
-| `--model` | default `gemma3:27b` |
+| `--model` | language model for prose + assessment (default `gemma3:27b`) |
+| `--vision-model` | per-photo extraction (default `gemma3:12b`) |
 | `--context "…"` | listing text override (default: payload's `property.description`) |
 | `--condition-only` | rebuild the assessment from existing notes (one model call, ~30 s) |
 | `--in-place` / `--out` | write destination (`--out` single-payload only) |
 
 Overnight batch: `python3 scripts/evaluate_photos_ollama.py exports/*.json`
-(~1–2 min per property on 27b).
+(~4 min per 12-photo property with the default pair).
 
 ## Deployment state
 

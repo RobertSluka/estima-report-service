@@ -343,51 +343,51 @@
     "image_metrics": [
       {
         "url": "https://www.bazos.sk/img/1/692/192567692.jpg",
-        "note": "Obývačka/záber z diaľky — priestranná obývacia izba s moderným nábytkom a veľkými oknami."
+        "note": "Obývacia izba — drevená parketa svetlohnedého odtieňa, biele maľované steny a plastové okná s mriežkami."
       },
       {
         "url": "https://www.bazos.sk/img/2/692/192567692.jpg",
-        "note": "Obývačka — priestranná obývačka s bielou sedačkou a tmavým nábytkom, v dobre udržiavanom stave."
+        "note": "Obývacia izba — tmavohnedé parkety, biele maľované steny a bezpečnostné vchodové dvere s domovým zvončekom."
       },
       {
         "url": "https://www.bazos.sk/img/3/692/192567692.jpg",
-        "note": "Obývacia izba — priestranná obývačka s moderným nábytkom a svetlými stenami."
+        "note": "Obývacia izba — vinylová podlaha imitujúca drevo, textúrované maľované steny a vstupné dvere s bezpečnostným kovaním."
       },
       {
         "url": "https://www.bazos.sk/img/4/692/192567692.jpg",
-        "note": "Obývačka — priestranná obývačka s pohovkou, konferenčným stolíkom a obrazmi na stene, vkusne zariadená."
+        "note": "Obývacia izba — svetlohnedá drevená podlaha, biele hladké steny s lištami a panelový radiátor."
       },
       {
         "url": "https://www.bazos.sk/img/5/692/192567692.jpg",
-        "note": "Obývačka — priestranná sedačka s vankúšmi a konferenčný stolík, moderné zariadenie."
+        "note": "Obývacia izba — sivý vinyl s geometrickým vzorom, béžové maľované steny a plastové okná so žalúziami."
       },
       {
         "url": "https://www.bazos.sk/img/6/692/192567692.jpg",
-        "note": "Obývacia izba — priestranná obývačka s pohovkou, skrinkou a oknami; byt pôsobí vkusne zariadeným dojmom."
+        "note": "Obývacia izba — drevená podlaha s geometrickým vzorom, béžové maľované steny a rebrový radiátor."
       },
       {
         "url": "https://www.bazos.sk/img/7/692/192567692.jpg",
-        "note": "Spálňa — zariadená s manželskou posteľou, komódami a televízorom; byt pôsobí v udržiavanom stave."
+        "note": "Spálňa — mierne poškodená drevená parketa, biele maľované steny a plastové okná s mriežkou."
       },
       {
         "url": "https://www.bazos.sk/img/8/692/192567692.jpg",
-        "note": "Spálňa — priestranná izba s manželskou posteľou a vstavanou skriňou, vkusne zariadená."
+        "note": "Spálňa — svetlohnedá drevená podlaha, biele hladké steny a interiérové dvere so zabudovanou skrinkou."
       },
       {
         "url": "https://www.bazos.sk/img/9/692/192567692.jpg",
-        "note": "Spálňa — zariadená posteľou, nočnými stolíkmi, TV a osvetlením. Izba pôsobí vkusne a udržiavane."
+        "note": "Spálňa — svetlohnedá drevená podlaha, biele maľované steny a plastové okná s bielymi žalúziami."
       },
       {
         "url": "https://www.bazos.sk/img/10/692/192567692.jpg",
-        "note": "Šijacia dielňa/záber — Priestor s pracovným stolom, šijacími strojmi a plánovacím stolom, vo funkčnom stave."
+        "note": "Pracovňa/ateliér — imitácia dreva na podlahe, biele maľované steny s opravami a umývadlo v pracovnej výške."
       },
       {
         "url": "https://www.bazos.sk/img/11/692/192567692.jpg",
-        "note": "Obývacia izba — Pohľad na zariadenú obývaciu izbu s pohovkou a policami, byt pôsobí vkusne zariadeným dojmom."
+        "note": "Obývacia izba — lamino svetlohnedého odtieňa, červeno-oranžová textúrovaná omietka a plastové okno s mriežkou."
       },
       {
         "url": "https://www.bazos.sk/img/12/692/192567692.jpg",
-        "note": "Obývačka/záber — Pohovka s vankúšmi, knižnica a červená stena. Priestor pôsobí upravene."
+        "note": "Obývacia izba — tmavá drevená podlaha, výrazná červená textúrovaná stena a plastové okná."
       }
     ]
   },
@@ -452,54 +452,54 @@
     "items": [
       {
         "element": "Podlahy",
-        "state": "Nejednoznačné z fotografií",
-        "note": "Na fotografiách nie je dobre vidieť stav podláh."
+        "state": "Rôznorodé",
+        "note": "V byte sa nachádzajú rôzne typy podláh – drevená parketa, vinyl, lamino a imitácia dreva. Niektoré sú v dobrom stave, iné vykazujú známky opotrebovania."
       },
       {
         "element": "Steny a stropy",
-        "state": "Po rekonštrukcii/Udržiavané",
-        "note": "Steny sú svetlé, vkusne maľované, jedna stena je červená, strop pôsobí udržiavane."
+        "state": "Po rekonštrukcii/Pôvodný stav",
+        "note": "Steny sú prevažne maľované v rôznych odtieňoch bielej, béžovej a červenej farby. Niektoré majú textúru alebo dekoratívne lišty. V pracovni/ateliéri sa nachádzajú nerovnosti a opravy."
       },
       {
         "element": "Kuchyňa",
         "state": "Nejednoznačné z fotografií",
-        "note": "Na fotografiách nie je kuchyňa zachytená."
+        "note": "Na fotografiách nie je kuchyňa jasne viditeľná, preto nemožno posúdiť jej stav."
       },
       {
         "element": "Kúpeľňa a WC",
         "state": "Nejednoznačné z fotografií",
-        "note": "Na fotografiách nie je kúpeľňa ani WC zachytené."
+        "note": "Na fotografiách nie je kúpeľňa ani WC jasne viditeľná, preto nemožno posúdiť ich stav."
       },
       {
         "element": "Okná",
-        "state": "Udržiavané",
-        "note": "Viditeľné sú veľké okná, ktoré pôsožia v dobrom stave."
+        "state": "Po rekonštrukcii",
+        "note": "V byte sú plastové okná s mriežkami a žalúziami. V celkovom stave pôsobia dobre."
       },
       {
         "element": "Vykurovanie",
-        "state": "Nejednoznačné z fotografií",
-        "note": "Na fotografiách nie je vykurovacie teleso zachytené."
+        "state": "Rôznorodé",
+        "note": "Nachádzajú sa panelové aj rebrové radiátory, čo naznačuje možnú kombináciu starších a novších systémov vykurovania."
       },
       {
         "element": "Vstupné dvere",
-        "state": "Nejednoznačné z fotografií",
-        "note": "Na fotografiách vstupné dvere nie sú viditeľné."
+        "state": "Po rekonštrukcii",
+        "note": "Bezpečnostné vchodové dvere s bezpečnostným kovaním a domovým zvončekom pôsobia dobre."
       }
     ],
-    "summary": "Byt pôsobí priestranným a vkusne zariadeným dojmom. Obývacia izba a spálňa sú udržiavané, s moderným nábytkom. Chýbajú však informácie o stave kuchyne, kúpeľne a vykurovania.",
+    "summary": "Byt sa nachádza v čiastočne zrekonštruovanom stave. V obývacej izbe je viditeľná rôznorodosť podláh a stien, čo naznačuje postupnú rekonštrukciu alebo kombináciu pôvodných prvkov s novými. Niektoré miestnosti vyžadujú osvieženie, zatiaľ čo iné sú v dobrom stave. Je potrebné overiť stav kuchyne a kúpeľne na obhliadke.",
     "overall_score": 65,
     "overall_label": "Čiastočne renovovaný",
     "score_positives": [
-      "Vkusné zariadenie obývacej izby",
-      "Udržiavaný stav spálne",
-      "Svetlé steny a moderný nábytok",
-      "Veľké okná v dobrom stave"
+      "Plastové okná – dobrý tepelný izolant",
+      "Bezpečnostné vchodové dvere",
+      "Moderné prvky v obývacej izbe",
+      "Drevené podlahy (niekde)"
     ],
     "score_negatives": [
-      "Chýbajú informácie o kuchyni a kúpeľni",
-      "Nejednoznačný stav podláh",
-      "Nedostatok detailov o vykurovaní",
-      "Absencia vstupné dvere na fotografiách"
+      "Rôznorodosť stavu podláh a stien",
+      "Opotrebovaná parketa v spálni",
+      "Opravy na stenách v pracovni/ateliéri",
+      "Neistota z virtuálneho home stagingu"
     ]
   }
 }
