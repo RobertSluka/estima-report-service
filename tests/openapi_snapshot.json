@@ -200,7 +200,12 @@
     "LocationFacilities": [
       "available",
       "facilities",
+      "map_center_lat",
+      "map_center_lon",
+      "map_height",
       "map_image_url",
+      "map_width",
+      "map_zoom",
       "nearest_pois"
     ],
     "MarketBenchmark": [
@@ -252,6 +257,8 @@
     "POI": [
       "category",
       "distance_km",
+      "latitude",
+      "longitude",
       "name",
       "walking_time_min"
     ],

@@ -250,6 +250,11 @@ class POI(_Model):
     category: Optional[str] = None
     distance_km: Optional[float] = None
     walking_time_min: Optional[float] = None
+    # Optional WGS84 position. Present only when the caller knows where the
+    # facility is; required (together with the map_* geometry below) to draw
+    # the POI's pictogram on the map image.
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
 
 
 class LocationFacilities(_Model):
@@ -257,6 +262,14 @@ class LocationFacilities(_Model):
     map_image_url: Optional[str] = None
     facilities: List[FacilityCount] = Field(default_factory=list)
     nearest_pois: List[POI] = Field(default_factory=list)
+    # Geometry of ``map_image_url``: a Web Mercator (slippy-map) raster
+    # centred on the coordinate below. Without it the image is only a
+    # picture — pictogram overlays are skipped, never mis-placed.
+    map_center_lat: Optional[float] = None
+    map_center_lon: Optional[float] = None
+    map_zoom: Optional[int] = None
+    map_width: Optional[int] = None  # image pixels
+    map_height: Optional[int] = None  # image pixels
 
 
 # --------------------------------------------------------------------------- #

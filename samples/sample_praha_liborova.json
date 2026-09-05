@@ -438,39 +438,56 @@
         "name": "Marjánka",
         "category": "transport",
         "distance_km": 0.07,
-        "walking_time_min": 1
+        "walking_time_min": 1,
+        "latitude": 50.084576,
+        "longitude": 14.375804
       },
       {
         "name": "H&H potraviny",
         "category": "grocery",
-        "distance_km": 0.03,
-        "walking_time_min": 1
+        "distance_km": 0.025,
+        "walking_time_min": 1,
+        "latitude": 50.083778,
+        "longitude": 14.376145
       },
       {
         "name": "Základní škola Marjánka",
         "category": "schools",
-        "distance_km": 0.12,
-        "walking_time_min": 1
+        "distance_km": 0.118,
+        "walking_time_min": 1,
+        "latitude": 50.084782,
+        "longitude": 14.375079
       },
       {
         "name": "Kajetánka",
         "category": "parks",
-        "distance_km": 0.48,
-        "walking_time_min": 6
+        "distance_km": 0.481,
+        "walking_time_min": 6,
+        "latitude": 50.087834,
+        "longitude": 14.373071
       },
       {
         "name": "U mystické dámy",
         "category": "restaurants",
-        "distance_km": 0.03,
-        "walking_time_min": 1
+        "distance_km": 0.032,
+        "walking_time_min": 1,
+        "latitude": 50.083751,
+        "longitude": 14.376428
       },
       {
         "name": "Psychiatrie Břevnov",
         "category": "healthcare",
-        "distance_km": 0.06,
-        "walking_time_min": 1
+        "distance_km": 0.064,
+        "walking_time_min": 1,
+        "latitude": 50.084309,
+        "longitude": 14.375435
       }
-    ]
+    ],
+    "map_center_lat": 50.084,
+    "map_center_lon": 14.3762,
+    "map_zoom": 15,
+    "map_width": 1100,
+    "map_height": 360
   },
   "summary": {
     "headline": "Závěr: přiměřená cena pro danou lokalitu.",

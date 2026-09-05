@@ -419,7 +419,62 @@
         "category": "Healthcare (1 km)",
         "count": 48
       }
-    ]
+    ],
+    "nearest_pois": [
+      {
+        "name": "Námestie osloboditeľov",
+        "category": "transport",
+        "distance_km": 0.055,
+        "latitude": 48.715908,
+        "longitude": 21.260995,
+        "walking_time_min": 1
+      },
+      {
+        "name": "Diskont u hrocha",
+        "category": "grocery",
+        "distance_km": 0.154,
+        "latitude": 48.717741,
+        "longitude": 21.261632,
+        "walking_time_min": 2
+      },
+      {
+        "name": "Diamond English",
+        "category": "schools",
+        "distance_km": 0.244,
+        "latitude": 48.71733,
+        "longitude": 21.258093,
+        "walking_time_min": 3
+      },
+      {
+        "name": "Feldov park",
+        "category": "parks",
+        "distance_km": 0.352,
+        "latitude": 48.718951,
+        "longitude": 21.263952,
+        "walking_time_min": 4
+      },
+      {
+        "name": "Slovenská reštaurácia",
+        "category": "restaurants",
+        "distance_km": 0.092,
+        "latitude": 48.71563,
+        "longitude": 21.261574,
+        "walking_time_min": 1
+      },
+      {
+        "name": "Dr. Max",
+        "category": "healthcare",
+        "distance_km": 0.045,
+        "latitude": 48.716295,
+        "longitude": 21.260512,
+        "walking_time_min": 1
+      }
+    ],
+    "map_center_lat": 48.7164,
+    "map_center_lon": 21.2611,
+    "map_zoom": 15,
+    "map_width": 1100,
+    "map_height": 360
   },
   "summary": {
     "headline": "Záver: potenciálne zaujímavé — cena pod odhadom primeranej hodnoty.",

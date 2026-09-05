@@ -11,6 +11,7 @@ and units are locale-neutral and shared.
 """
 from __future__ import annotations
 
+import math
 from typing import Optional
 
 _LABELS = {
@@ -640,6 +641,76 @@ def wealth_svg(series, buyer_label: str, renter_label: str, width: int = 640, he
     return Markup("".join(parts))
 
 
+def _tile_frac(lat: float, lon: float, zoom: int) -> tuple[float, float]:
+    """Fractional slippy-map tile coordinates (Web Mercator), as OSM defines them."""
+    n = 2**zoom
+    x = (lon + 180.0) / 360.0 * n
+    y = (1.0 - math.asinh(math.tan(math.radians(lat))) / math.pi) / 2.0 * n
+    return x, y
+
+
+_TILE_PX = 256
+# Half the pictogram pin; a facility closer than this to the frame edge would
+# be drawn half-clipped, so it is dropped instead.
+_PIN_INSET_PX = 14
+
+
+def map_markers(location, width_mm: float = 178.0) -> Optional[dict]:
+    """Project ``location.nearest_pois`` onto the static map image.
+
+    The caller must describe the image geometry (``map_center_lat/lon``,
+    ``map_zoom``, ``map_width/height``) — the same Web Mercator frame the
+    backend stitched the tiles in. Without it, or without POI coordinates,
+    None is returned and the template draws the bare map: a pictogram in the
+    wrong street is worse than no pictogram.
+
+    Marker positions are percentages of the image frame, so they hold
+    whatever the box's rendered width turns out to be. ``width_mm`` (the map
+    box's width on the page) only sizes the returned ``height_mm``, which the
+    template applies to the frame to preserve the image's aspect ratio — with
+    ``object-fit`` cropping the pins would sit over a shifted map. Facilities
+    outside the frame are omitted: a 1 km-radius category can easily fall off
+    a 360 px image.
+    """
+    if location is None:
+        return None
+    center_lat = getattr(location, "map_center_lat", None)
+    center_lon = getattr(location, "map_center_lon", None)
+    zoom = getattr(location, "map_zoom", None)
+    img_w = getattr(location, "map_width", None)
+    img_h = getattr(location, "map_height", None)
+    if None in (center_lat, center_lon, zoom, img_w, img_h) or img_w <= 0 or img_h <= 0:
+        return None
+
+    height_mm = round(width_mm * img_h / img_w, 2)
+    cx, cy = _tile_frac(float(center_lat), float(center_lon), int(zoom))
+    left = cx * _TILE_PX - img_w / 2.0
+    top = cy * _TILE_PX - img_h / 2.0
+
+    markers = []
+    for poi in getattr(location, "nearest_pois", None) or []:
+        lat = getattr(poi, "latitude", None)
+        lon = getattr(poi, "longitude", None)
+        if lat is None or lon is None:
+            continue
+        px, py = _tile_frac(float(lat), float(lon), int(zoom))
+        x = px * _TILE_PX - left
+        y = py * _TILE_PX - top
+        if not (_PIN_INSET_PX <= x <= img_w - _PIN_INSET_PX):
+            continue
+        if not (_PIN_INSET_PX <= y <= img_h - _PIN_INSET_PX):
+            continue
+        markers.append(
+            {
+                "category": getattr(poi, "category", None) or "",
+                "name": getattr(poi, "name", None) or "",
+                "left_pct": round(x / img_w * 100, 3),
+                "top_pct": round(y / img_h * 100, 3),
+            }
+        )
+    return {"height_mm": height_mm, "markers": markers}
+
+
 def build_filters(language: str = "en") -> dict:
     """Jinja2 filter set with label filters bound to ``language``.
 
@@ -676,6 +747,7 @@ def build_filters(language: str = "en") -> dict:
         "embed_image": embed_image,
         "index_svg": index_svg,
         "wealth_svg": wealth_svg,
+        "map_markers": map_markers,
     }
 
 

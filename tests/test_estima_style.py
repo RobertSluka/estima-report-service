@@ -403,3 +403,107 @@ def test_estima_skips_buy_vs_rent_without_block():
     html = render_html(EvaluationPayload.model_validate(payload))
 
     assert "Kúpa vs. nájom a investovanie" not in html
+
+
+SAMPLE_TAHANOVCE = ROOT / "samples" / "sample_kosice_tahanovce.json"
+
+
+def _location(**overrides):
+    """A LocationFacilities with a Košice-centred 1100x360 zoom-15 frame."""
+    from app.models import LocationFacilities
+
+    data = {
+        "available": True,
+        "map_image_url": "data:image/png;base64,AAAA",
+        "map_center_lat": 48.7164,
+        "map_center_lon": 21.2611,
+        "map_zoom": 15,
+        "map_width": 1100,
+        "map_height": 360,
+        "nearest_pois": [
+            {
+                "name": "Dr. Max",
+                "category": "healthcare",
+                "distance_km": 0.045,
+                "latitude": 48.716295,
+                "longitude": 21.260512,
+            }
+        ],
+    }
+    data.update(overrides)
+    return LocationFacilities.model_validate(data)
+
+
+def test_map_markers_projects_pois_onto_the_image():
+    from app.services.formatting import map_markers
+
+    overlay = map_markers(_location())
+    assert overlay is not None
+    # 1100x360 at 178mm wide keeps the image's aspect ratio (no cover crop).
+    assert overlay["height_mm"] == pytest.approx(178 * 360 / 1100, abs=0.01)
+
+    (marker,) = overlay["markers"]
+    assert marker["category"] == "healthcare"
+    # Dr. Max is ~45 m west and slightly south of the property, which sits at
+    # the image centre; zoom 15 at this latitude is ~3.15 m/px, so the pin
+    # lands just left of and just below the middle.
+    assert 48.0 < marker["left_pct"] < 50.0
+    assert 50.0 < marker["top_pct"] < 51.5
+
+
+def test_map_markers_needs_geometry_and_coordinates():
+    from app.services.formatting import map_markers
+
+    assert map_markers(None) is None
+    # No map geometry -> no overlay at all (the bare image is drawn instead).
+    assert map_markers(_location(map_zoom=None)) is None
+    assert map_markers(_location(map_width=0)) is None
+    # Geometry but no POI coordinates -> a frame with nothing on it.
+    overlay = map_markers(
+        _location(nearest_pois=[{"name": "Dr. Max", "category": "healthcare"}])
+    )
+    assert overlay["markers"] == []
+
+
+def test_map_markers_drops_facilities_outside_the_frame():
+    from app.services.formatting import map_markers
+
+    far = _location(
+        nearest_pois=[
+            {
+                "name": "Elsewhere",
+                "category": "schools",
+                # ~1 km north: outside a 360 px (±570 m) tall frame.
+                "latitude": 48.7254,
+                "longitude": 21.2611,
+            }
+        ]
+    )
+    assert map_markers(far)["markers"] == []
+
+
+def test_estima_map_renders_pictogram_pins():
+    html = _render(SAMPLE_TAHANOVCE, "sk")
+
+    assert 'class="map-box has-frame"' in html
+    assert html.count('class="map-pin"') == 6  # one per facility category
+    # The subject marker is redrawn on top so a nearby pin cannot hide it.
+    assert 'class="map-home"' in html
+
+
+def test_estima_map_without_geometry_keeps_the_plain_image():
+    """A payload that predates the map_* fields must render exactly as before."""
+    import json as _json
+
+    from app.models import EvaluationPayload
+    from app.services.renderer import render_html
+
+    payload = _json.loads(SAMPLE_TAHANOVCE.read_text(encoding="utf-8"))
+    payload["options"] = {"template": "estima", "language": "sk"}
+    for key in ("map_center_lat", "map_center_lon", "map_zoom", "map_width", "map_height"):
+        payload["location_facilities"].pop(key)
+    html = render_html(EvaluationPayload.model_validate(payload))
+
+    assert 'class="map-box has-frame"' not in html  # the class is CSS-only here
+    assert 'class="map-pin"' not in html
+    assert 'class="map-box"' in html
