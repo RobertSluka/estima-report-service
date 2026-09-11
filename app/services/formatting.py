@@ -653,6 +653,68 @@ _TILE_PX = 256
 # Half the pictogram pin; a facility closer than this to the frame edge would
 # be drawn half-clipped, so it is dropped instead.
 _PIN_INSET_PX = 14
+# Pin geometry in map pixels, for the de-collision pass below. A 4.6mm pin on
+# a 178mm-wide frame of an 1100px image is ~28px across, which at zoom 15 is
+# ~90m of ground — city-centre facilities are routinely closer than that.
+_PIN_DIAMETER_PX = 28.0
+_PIN_GAP_PX = 3.0
+# The subject marker the backend burns into the image centre (9px radius plus
+# its white ring), which pins must also clear.
+_HOME_RADIUS_PX = 13.0
+_SPREAD_ITERATIONS = 60
+
+
+def _spread(points: list[list[float]], img_w: int, img_h: int) -> None:
+    """Push overlapping pins apart in place, leaving each a callout line.
+
+    Pins are far larger than the distances between city-centre facilities, so
+    at true positions they bury each other (and the subject marker). Relaxing
+    them apart keeps every pictogram readable; the true position is kept by
+    the caller and drawn as an anchor dot, so the displacement is shown
+    rather than passed off as the facility's location.
+
+    Deterministic: fixed pair order, and coincident points are separated on an
+    index-derived angle instead of a random one.
+    """
+    min_sep = _PIN_DIAMETER_PX + _PIN_GAP_PX
+    home_sep = _HOME_RADIUS_PX + _PIN_DIAMETER_PX / 2 + _PIN_GAP_PX
+    home = (img_w / 2.0, img_h / 2.0)
+
+    for _ in range(_SPREAD_ITERATIONS):
+        moved = False
+        for i, a in enumerate(points):
+            # The subject marker is fixed: pins give way to it, never it to them.
+            dx, dy = a[0] - home[0], a[1] - home[1]
+            dist = math.hypot(dx, dy)
+            if dist < home_sep:
+                if dist < 1e-6:
+                    angle = 2 * math.pi * i / max(len(points), 1)
+                    dx, dy, dist = math.cos(angle), math.sin(angle), 1.0
+                push = home_sep - dist
+                a[0] += dx / dist * push
+                a[1] += dy / dist * push
+                moved = True
+            for j in range(i + 1, len(points)):
+                b = points[j]
+                dx, dy = b[0] - a[0], b[1] - a[1]
+                dist = math.hypot(dx, dy)
+                if dist >= min_sep:
+                    continue
+                if dist < 1e-6:
+                    angle = 2 * math.pi * i / max(len(points), 1)
+                    dx, dy, dist = math.cos(angle), math.sin(angle), 1.0
+                push = (min_sep - dist) / 2.0
+                a[0] -= dx / dist * push
+                a[1] -= dy / dist * push
+                b[0] += dx / dist * push
+                b[1] += dy / dist * push
+                moved = True
+        if not moved:
+            break
+
+    for point in points:
+        point[0] = min(max(point[0], _PIN_INSET_PX), img_w - _PIN_INSET_PX)
+        point[1] = min(max(point[1], _PIN_INSET_PX), img_h - _PIN_INSET_PX)
 
 
 def map_markers(location, width_mm: float = 178.0) -> Optional[dict]:
@@ -663,6 +725,13 @@ def map_markers(location, width_mm: float = 178.0) -> Optional[dict]:
     backend stitched the tiles in. Without it, or without POI coordinates,
     None is returned and the template draws the bare map: a pictogram in the
     wrong street is worse than no pictogram.
+
+    Pins that would bury each other (or the subject marker) are pushed apart,
+    so each marker carries both its true position (``anchor_*``) and the
+    position its pictogram is drawn at; when the two differ (``offset``) the
+    template joins them with a callout line of ``lead_length_mm`` at
+    ``lead_angle_deg``, which keeps the displacement visible instead of
+    silently relocating the facility.
 
     Marker positions are percentages of the image frame, so they hold
     whatever the box's rendered width turns out to be. ``width_mm`` (the map
@@ -688,6 +757,7 @@ def map_markers(location, width_mm: float = 178.0) -> Optional[dict]:
     top = cy * _TILE_PX - img_h / 2.0
 
     markers = []
+    anchors: list[tuple[float, float]] = []
     for poi in getattr(location, "nearest_pois", None) or []:
         lat = getattr(poi, "latitude", None)
         lon = getattr(poi, "longitude", None)
@@ -700,14 +770,28 @@ def map_markers(location, width_mm: float = 178.0) -> Optional[dict]:
             continue
         if not (_PIN_INSET_PX <= y <= img_h - _PIN_INSET_PX):
             continue
+        anchors.append((x, y))
         markers.append(
             {
                 "category": getattr(poi, "category", None) or "",
                 "name": getattr(poi, "name", None) or "",
-                "left_pct": round(x / img_w * 100, 3),
-                "top_pct": round(y / img_h * 100, 3),
+                "anchor_left_pct": round(x / img_w * 100, 3),
+                "anchor_top_pct": round(y / img_h * 100, 3),
             }
         )
+
+    positions = [[x, y] for x, y in anchors]
+    _spread(positions, img_w, img_h)
+    px_to_mm = width_mm / img_w
+    for marker, (ax, ay), (x, y) in zip(markers, anchors, positions):
+        shift = math.hypot(x - ax, y - ay)
+        marker["left_pct"] = round(x / img_w * 100, 3)
+        marker["top_pct"] = round(y / img_h * 100, 3)
+        # Below half a pin gap the pin still covers its own anchor, so a
+        # callout line would only add clutter.
+        marker["offset"] = shift > _PIN_GAP_PX
+        marker["lead_length_mm"] = round(shift * px_to_mm, 2)
+        marker["lead_angle_deg"] = round(math.degrees(math.atan2(y - ay, x - ax)), 2)
     return {"height_mm": height_mm, "markers": markers}
 
 

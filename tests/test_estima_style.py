@@ -445,10 +445,10 @@ def test_map_markers_projects_pois_onto_the_image():
     (marker,) = overlay["markers"]
     assert marker["category"] == "healthcare"
     # Dr. Max is ~45 m west and slightly south of the property, which sits at
-    # the image centre; zoom 15 at this latitude is ~3.15 m/px, so the pin
+    # the image centre; zoom 15 at this latitude is ~3.15 m/px, so the anchor
     # lands just left of and just below the middle.
-    assert 48.0 < marker["left_pct"] < 50.0
-    assert 50.0 < marker["top_pct"] < 51.5
+    assert 48.0 < marker["anchor_left_pct"] < 50.0
+    assert 50.0 < marker["anchor_top_pct"] < 51.5
 
 
 def test_map_markers_needs_geometry_and_coordinates():
@@ -507,3 +507,69 @@ def test_estima_map_without_geometry_keeps_the_plain_image():
     assert 'class="map-box has-frame"' not in html  # the class is CSS-only here
     assert 'class="map-pin"' not in html
     assert 'class="map-box"' in html
+
+
+def test_map_markers_moves_pins_off_the_subject_marker():
+    """A facility 45 m away would otherwise be drawn over the property dot."""
+    from app.services.formatting import map_markers
+
+    (marker,) = map_markers(_location())["markers"]
+
+    # The anchor keeps the true position; only the pictogram moves, and the
+    # callout line says by how much and in which direction.
+    assert marker["offset"] is True
+    assert marker["left_pct"] < marker["anchor_left_pct"]  # pushed further west
+    assert 0 < marker["lead_length_mm"] < 6
+    assert 90 < abs(marker["lead_angle_deg"]) <= 180  # points back east
+
+
+def test_map_markers_leaves_uncrowded_pins_where_they_are():
+    from app.services.formatting import map_markers
+
+    far = _location(
+        nearest_pois=[
+            {
+                "name": "Feldov park",
+                "category": "parks",
+                # ~350 m NE: clear of the subject marker and of every other pin.
+                "latitude": 48.718951,
+                "longitude": 21.263952,
+            }
+        ]
+    )
+    (marker,) = map_markers(far)["markers"]
+
+    assert marker["offset"] is False
+    assert marker["left_pct"] == marker["anchor_left_pct"]
+    assert marker["top_pct"] == marker["anchor_top_pct"]
+
+
+def test_map_markers_separates_facilities_that_share_a_spot():
+    """Two facilities at the same coordinate must not stack into one pin."""
+    from app.services.formatting import map_markers
+
+    same_spot = {"latitude": 48.719, "longitude": 21.2645}
+    overlay = map_markers(
+        _location(
+            nearest_pois=[
+                {"name": "A", "category": "grocery", **same_spot},
+                {"name": "B", "category": "restaurants", **same_spot},
+            ]
+        )
+    )
+
+    a, b = overlay["markers"]
+    assert a["anchor_left_pct"] == b["anchor_left_pct"]
+    # Drawn apart by at least a pin's width (28px of 1100 = 2.5% of the frame).
+    assert abs(a["left_pct"] - b["left_pct"]) + abs(a["top_pct"] - b["top_pct"]) > 2.0
+    assert a["offset"] and b["offset"]
+
+
+def test_estima_map_draws_callouts_for_displaced_pins():
+    html = _render(SAMPLE_TAHANOVCE, "sk")
+
+    # The Ťahanovce showcase has three facilities within ~90 m of the
+    # property, so those pins move and carry a line back to their anchor.
+    assert html.count('class="map-anchor"') == 3
+    assert html.count('class="map-lead"') == 3
+    assert "transform:rotate(" in html
