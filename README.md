@@ -87,6 +87,13 @@ estima style's market section), and `options` (`template` / `language`). The
 schema is permissive — unknown fields are ignored, and missing fields degrade
 gracefully in the template.
 
+`location_facilities` may describe the geometry of its own `map_image_url`
+(`map_center_lat`, `map_center_lon`, `map_zoom`, `map_width`, `map_height` —
+a Web Mercator raster centred on the coordinate). With it, every
+`nearest_pois` entry that carries `latitude`/`longitude` is drawn on the map
+as its category pictogram. Without it the map renders as a plain image: a
+pictogram in the wrong street is worse than no pictogram.
+
 ## Run with Docker (recommended)
 
 WeasyPrint needs native libraries; the image bundles them.

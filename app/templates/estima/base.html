@@ -346,6 +346,40 @@
      direct flex item (blanking the map). line-height centers the text fallback. */
   .map-box img { display: block; width: 100%; height: 55mm; object-fit: cover; }
 
+  /* Map with facility pictograms. The frame is sized to the image's own
+     aspect ratio (height from the map_markers filter) so the pins sit exactly
+     where the projection put them — `object-fit: cover` would crop the image
+     under a coordinate system that no longer matches it. */
+  /* No border on the framed variant: the frame's height is derived from the
+     page's 178mm content width (A4 minus the @page margins), which a border
+     would eat into and skew the pin positions against. */
+  .map-box.has-frame { height: auto; line-height: normal; border: none; }
+  .map-frame { position: relative; }
+  .map-frame img { display: block; width: 100%; height: 100%; object-fit: fill; }
+  .map-pin {
+    position: absolute; width: 4.6mm; height: 4.6mm; margin: -2.3mm 0 0 -2.3mm;
+    border-radius: 50%; background: #fff; border: .3mm solid var(--brand);
+    color: var(--brand); text-align: center;
+  }
+  .map-pin svg { width: 2.6mm; height: 2.6mm; margin-top: .7mm; }
+  /* Callout for a pin that had to move to stay readable: a dot on the real
+     position, a hairline to the pictogram. */
+  .map-anchor {
+    position: absolute; width: 1.4mm; height: 1.4mm; margin: -.7mm 0 0 -.7mm;
+    border-radius: 50%; background: var(--brand); border: .2mm solid #fff;
+  }
+  .map-lead {
+    position: absolute; height: .35mm; margin-top: -.175mm;
+    background: var(--brand); transform-origin: left center;
+  }
+  /* Repeat of the marker the map image already carries, drawn last so a
+     facility pin a few metres away cannot hide the subject property. */
+  .map-home {
+    position: absolute; left: 50%; top: 50%;
+    width: 3.9mm; height: 3.9mm; margin: -1.95mm 0 0 -1.95mm;
+    border-radius: 50%; background: var(--bad); border: .5mm solid #fff;
+  }
+
   .poi-grid { font-size: 0; margin-right: -10pt; }
   .poi {
     display: inline-block; vertical-align: top;
@@ -770,8 +804,30 @@
 <section class="section page-break">
   <div class="section-head"><span class="section-num">04</span><h2 class="section-title">{{ T.sec_location }}</h2></div>
   {% if location_facilities.available %}
-  <div class="map-box">
-    {% if location_facilities.map_image_url %}
+  {# Pin overlay only when the payload describes the image's map geometry;
+     otherwise the plain (cover-cropped) image, exactly as before. #}
+  {% set map_overlay = location_facilities | map_markers %}
+  <div class="map-box{% if location_facilities.map_image_url and map_overlay %} has-frame{% endif %}">
+    {% if location_facilities.map_image_url and map_overlay %}
+      <div class="map-frame" style="height:{{ map_overlay.height_mm }}mm">
+        <img src="{{ location_facilities.map_image_url | embed_image }}" alt="Map">
+        {# Callouts first, so every pictogram sits above every hairline. #}
+        {% for m in map_overlay.markers if m.offset %}
+        <span class="map-lead" style="left:{{ m.anchor_left_pct }}%; top:{{ m.anchor_top_pct }}%; width:{{ m.lead_length_mm }}mm; transform:rotate({{ m.lead_angle_deg }}deg)"></span>
+        <span class="map-anchor" style="left:{{ m.anchor_left_pct }}%; top:{{ m.anchor_top_pct }}%"></span>
+        {% endfor %}
+        {% for m in map_overlay.markers %}
+        <span class="map-pin" style="left:{{ m.left_pct }}%; top:{{ m.top_pct }}%">{{ poi_icon(m.category) }}</span>
+        {% endfor %}
+        {# Only when the frame is genuinely centred on this property (the
+           backend rounds the coordinate to 4 decimals for its tile cache). #}
+        {% if property.latitude is not none and property.longitude is not none
+           and (property.latitude | round(4)) == location_facilities.map_center_lat
+           and (property.longitude | round(4)) == location_facilities.map_center_lon %}
+        <span class="map-home"></span>
+        {% endif %}
+      </div>
+    {% elif location_facilities.map_image_url %}
       <img src="{{ location_facilities.map_image_url | embed_image }}" alt="Map">
     {% elif property.latitude and property.longitude %}
       {{ T.map_preview }} · {{ property.latitude | num(4) }}, {{ property.longitude | num(4) }}

@@ -58,6 +58,10 @@ No database. Artifacts are written to `reports/<report_id>/`
   condition assessment with score drivers).
   Each `benchmarks[]` entry renders its own line with `scope`/`period`
   (falling back to `source`) so a district index is never read as nationwide.
+  Section 04 overlays category pictograms on the static map when the payload
+  describes the image's map geometry (`location_facilities.map_*`) and the
+  POIs carry coordinates — projection lives in `formatting.map_markers`,
+  never in the template.
 - `samples/sample_evaluation.json` — canonical working payload example
 - `samples/sample_praha_liborova.json` — the estimacz.cz showcase (estima-cz
   id 3998, Praha/Břevnov, 15 live bezrealitky photos incl. 2 exteriors, full
