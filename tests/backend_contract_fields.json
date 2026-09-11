@@ -28,6 +28,11 @@
     "available",
     "explanation",
     "location_score",
+    "map_center_lat",
+    "map_center_lon",
+    "map_height",
+    "map_width",
+    "map_zoom",
     "nearby_grocery_count_1km",
     "nearby_grocery_count_500m",
     "nearby_healthcare_count_1km",
@@ -62,6 +67,8 @@
   "NearestFacility": [
     "category",
     "distance_m",
+    "lat",
+    "lon",
     "name"
   ],
   "Property": [
